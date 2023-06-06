@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="PowBasics" Version="0.0.11" />
+	  <PackageReference Include="PowMaybeErr" Version="0.0.10" />
+	  <PackageReference Include="PowTrees" Version="0.0.19" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Flex\LayStratsInternal\" />
+	</ItemGroup>
+
+</Project>

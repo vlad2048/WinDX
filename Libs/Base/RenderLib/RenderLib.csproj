@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="PowBasics" Version="0.0.11" />
+		<PackageReference Include="PowBasics.Geom" Version="0.0.11" />
+		<PackageReference Include="PowRxVar" Version="0.0.25" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Renderers\Utils\DirectX\Exts\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\SysWinLib\SysWinLib.csproj" />
+	</ItemGroup>
+
+</Project>

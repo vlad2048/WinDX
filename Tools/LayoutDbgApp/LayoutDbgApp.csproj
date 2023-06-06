@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Remove="Editors\DimEditor.cs~RF345cd469.TMP" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="PowRxVar.Maybe" Version="0.0.25" />
+	  <PackageReference Include="PowWinForms" Version="0.0.14" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Libs\Base\RenderLib\RenderLib.csproj" />
+	  <ProjectReference Include="..\..\Libs\Base\SysWinLib\SysWinLib.csproj" />
+	  <ProjectReference Include="..\..\Libs\Gui\LayoutSystem\LayoutSystem.csproj" />
+	</ItemGroup>
+
+</Project>

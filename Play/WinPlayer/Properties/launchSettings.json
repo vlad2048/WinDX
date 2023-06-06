@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WinPlayer": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

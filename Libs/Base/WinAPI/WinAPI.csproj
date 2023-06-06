@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="PowBasics.Geom" Version="0.0.11" />
+	  <PackageReference Include="PowRxVar" Version="0.0.25" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LayoutDbgApp": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
