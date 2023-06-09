@@ -5,7 +5,7 @@ using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Renderers.Utils.DirectX;
 using RenderLib.Structs;
-using SysWinLib;
+using SysWinInterfaces;
 using Vortice.DCommon;
 using WinAPI.Utils.Exts;
 

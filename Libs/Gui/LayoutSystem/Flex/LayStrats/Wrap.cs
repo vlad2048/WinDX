@@ -1,7 +1,6 @@
 ﻿using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
-using static LayoutSystem.Flex.Structs.DirMakers;
 using static LayoutSystem.Flex.LayStrats.WrapUtils;
 
 namespace LayoutSystem.Flex.LayStrats;
@@ -31,7 +30,7 @@ public class WrapStrat : IStrat
 	public LayNfo Lay(
 		Node node,
 		FreeSz freeSz,
-		DimVec[] kidDims
+		FDimVec[] kidDims
 	)
 	{
 		/* Wrap node assumptions (strictly stronger than common assumptions)
@@ -60,7 +59,7 @@ public class WrapStrat : IStrat
 		var rowYRowHeights = rowYs.Zip(rowHeights, (y, rowHeight) => (y, rowHeight));
 
 		return new LayNfo(
-			MkSz(MainDir, mainLng, elseLng),
+			GeomMaker.MkSzDir(MainDir, mainLng, elseLng),
 			rowYRowHeights.Zip(kidXsByRow, (yRowHeight, xs) => (yRowHeight, xs))
 				.SelectMany(t => t.xs.Select(x => new
 				{
@@ -70,65 +69,17 @@ public class WrapStrat : IStrat
 				}))
 				.Zip(kidSizes, (nfo, sz) => (nfo, sz))
 				.Map(t => new R(
-					MkPt(MainDir, t.nfo.x, t.nfo.y),
+					GeomMaker.MkPtDir(MainDir, t.nfo.x, t.nfo.y),
 					t.sz
 				))
 		);
 	}
-
-
-	/*public FreeSz GetFreeSizeForKid(
-		Node node,
-		int kidIdx,
-		FreeSz freeSz,
-		Sz[] previousKidSizes
-	)
-	{
-		if (freeSz.IsInfinite(MainDir) || !freeSz.IsInfinite(ElseDir)) throw new ArgumentException("Invalid FreeSz, this should have been picked up by TreeOpsUtils.WrapRules()");
-		return FreeSz.MkDir(MainDir, freeSz.Dir(MainDir), int.MaxValue);
-	}
-
-	public LayNfo Lay(
-		FreeSz freeSz,
-		DimOptVec dim,
-		DimVec[] kidDims
-	)
-	{
-		var mainDim = dim.Dir(MainDir) ?? throw new ArgumentException("A Wrap node cannot be Fit along its main direction");
-		var mainLng = ResolveDim(mainDim, freeSz.Dir(MainDir));
-		var kidsSzs = kidDims.Map(e => new Sz(e.X.Min, e.Y.Min).CapDir(MainDir, mainLng));
-		var rows = WrapKids(kidsSzs, MainDir, mainLng);
-		var elseLng = rows.Sum(row => row.Max(kid => kid.Dir(ElseDir)));
-
-		var rowHeights = rows.Map(row => row.Max(kid => kid.Dir(ElseDir)));
-		var rowYs = rowHeights.ScanL((a, b) => a + b, 0);
-		var kidWidthsByRow = rows.Map(row => row.Map(kid => kid.Dir(MainDir)));
-		var kidXsByRow = kidWidthsByRow.Map(kidWidths => kidWidths.ScanL((a, b) => a + b, 0));
-
-		var rowYRowHeights = rowYs.Zip(rowHeights, (y, rowHeight) => (y, rowHeight));
-
-		return new LayNfo(
-			MkSz(MainDir, mainLng, elseLng),
-			rowYRowHeights.Zip(kidXsByRow, (yRowHeight, xs) => (yRowHeight, xs))
-				.SelectMany(t => t.xs.Select(x => new
-				{
-					x,
-					t.yRowHeight.y,
-					t.yRowHeight.rowHeight
-				}))
-				.Zip(kidsSzs, (nfo, sz) => (nfo, sz))
-				.Map(t => new R(
-					MkPt(MainDir, t.nfo.x, t.nfo.y),
-					t.sz
-				))
-		);
-	}*/
 }
 
 
 file static class WrapUtils
 {
-	public static int ResolveDim(Dim dim, int free) => free.Cap(dim.Min, dim.Max);
+	public static int ResolveDim(FDim dim, int free) => free.Cap(dim.Min, dim.Max);
 
 	public static Sz[][] WrapKids(Sz[] kids, Dir mainDir, int mainLng)
 	{

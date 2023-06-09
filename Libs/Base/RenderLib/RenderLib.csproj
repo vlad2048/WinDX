@@ -8,15 +8,19 @@
 	<ItemGroup>
 		<PackageReference Include="PowBasics" Version="0.0.11" />
 		<PackageReference Include="PowBasics.Geom" Version="0.0.11" />
-		<PackageReference Include="PowRxVar" Version="0.0.25" />
+		<PackageReference Include="PowRxVar" Version="0.0.26" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Renderers\Utils\DirectX\Exts\" />
+		<PackageReference Include="Vortice.D3DCompiler" Version="3.2.0" />
+		<PackageReference Include="Vortice.Direct2D1" Version="3.2.0" />
+		<PackageReference Include="Vortice.Direct3D11" Version="3.2.0" />
+		<PackageReference Include="Vortice.DirectComposition" Version="3.2.0" />
+		<PackageReference Include="Vortice.UIAnimation" Version="3.2.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\SysWinLib\SysWinLib.csproj" />
+		<ProjectReference Include="..\SysWinInterfaces\SysWinInterfaces.csproj" />
 	</ItemGroup>
 
 </Project>

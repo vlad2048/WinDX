@@ -1,11 +1,10 @@
-﻿using System.Reactive;
-using PowRxVar;
+﻿using PowRxVar;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using PowBasics.Geom;
-using SysWinLib.Structs;
+using SysWinInterfaces;
 using SysWinLib.Utils;
 using WinAPI.User32;
 using WinAPI.Windows;
@@ -16,7 +15,7 @@ namespace SysWinLib;
 /// <summary>
 /// Low level Win32 window wrapper
 /// </summary>
-public class SysWin : ISysWinRenderingSupport, IDisposable
+public class SysWin : ISysWinUserEventsSupport, ISysWinRenderingSupport, IDisposable
 {
 	// static
 	private static bool isFirst = true;
@@ -24,8 +23,6 @@ public class SysWin : ISysWinRenderingSupport, IDisposable
 	// IDisposable
 	private bool isDisposed;
 	public Disp D { get; } = new();
-	//public IObservable<Unit> WhenDisposed => D.WhenDisposed;
-	//public bool IsDisposed => D.IsDisposed;
 	public void Dispose()
 	{
 		if (!hasDestroyBeenSent)
@@ -45,8 +42,6 @@ public class SysWin : ISysWinRenderingSupport, IDisposable
 	}
 
 	// private
-	private readonly string winClass;
-	private readonly CreateWindowParams createWindowParams;
 	private readonly SysWinOpt opt;
 	private readonly bool isMainWindow;
 	private readonly ISubject<IPacket> whenMsg;
@@ -61,13 +56,9 @@ public class SysWin : ISysWinRenderingSupport, IDisposable
 	public IRoVar<Pt> ScreenPt { get; }
 
 	public SysWin(
-		string winClass,
-		CreateWindowParams createWindowParams,
-		Action<SysWinOpt>? optFun
+		Action<SysWinOpt>? optFun = null
 	)
 	{
-		this.winClass = winClass;
-		this.createWindowParams = createWindowParams;
 		opt = SysWinOpt.Make(optFun);
 		isMainWindow = isFirst;
 		isFirst = false;
@@ -107,16 +98,16 @@ public class SysWin : ISysWinRenderingSupport, IDisposable
 		try
 		{
 			User32Methods.CreateWindowEx(
-				createWindowParams.ExStyles,
-				winClass,
-				createWindowParams.Name,
-				createWindowParams.Styles,
-				createWindowParams.X,
-				createWindowParams.Y,
-				createWindowParams.Width,
-				createWindowParams.Height,
-				createWindowParams.Parent,
-				createWindowParams.Menu,
+				opt.CreateWindowParams.ExStyles,
+				opt.WinClass,
+				opt.CreateWindowParams.Name,
+				opt.CreateWindowParams.Styles,
+				opt.CreateWindowParams.X,
+				opt.CreateWindowParams.Y,
+				opt.CreateWindowParams.Width,
+				opt.CreateWindowParams.Height,
+				opt.CreateWindowParams.Parent,
+				opt.CreateWindowParams.Menu,
 				RegisterClassUtils.InstanceHandle,
 				GCHandle.ToIntPtr(gcHandle)
 			);
@@ -187,7 +178,7 @@ public class SysWin : ISysWinRenderingSupport, IDisposable
 	{
 		if (msg.Id != WM.NCDESTROY) return false;
 		hasDestroyBeenSent = true;
-		if (isMainWindow && opt.CouldBeMainWindow)
+		if (isMainWindow && App.IsWinDXAppRunning)
 		{
 			User32Methods.PostQuitMessage(0);
 		}

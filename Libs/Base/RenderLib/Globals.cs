@@ -1,4 +1,4 @@
-﻿global using static SysWinLib.Utils.LogUtils;
+﻿//global using static SysWinLib.Utils.LogUtils;
 global using D3D = Vortice.Direct3D;
 global using DXGI = Vortice.DXGI;
 global using D3D11 = Vortice.Direct3D11;

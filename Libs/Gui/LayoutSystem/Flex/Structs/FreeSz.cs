@@ -23,11 +23,7 @@ public readonly record struct FreeSz
 
 	public override string ToString()
 	{
-		static string Fmt(int v) => v switch
-		{
-			int.MaxValue => "inf",
-			_ => $"{v}"
-		};
+		static string Fmt(int v) => v == Inf ? "inf" : $"{v}";
 		return $"{Fmt(x)} x {Fmt(y)}";
 	}
 
@@ -37,19 +33,11 @@ public readonly record struct FreeSz
 		Dr.Vert => y == Inf,
 	};
 
-	public int Dir(Dr dir) => dir switch
-	{
-		Dr.Horz => X,
-		Dr.Vert => Y,
-	};
-
 	public int DirWithInfinites(Dr dir) => dir switch
 	{
 		Dr.Horz => x,
 		Dr.Vert => y,
 	};
-
-	public static FreeSz FromSz(Sz sz) => new(sz.Width, sz.Height);
 
 	public FreeSz ChangeComponent(Dr dir, int v) => dir switch
 	{
@@ -57,7 +45,7 @@ public readonly record struct FreeSz
 		Dr.Vert => new(x, v),
 	};
 
-	public DimOptVec GetDims() => new(
+	public DimVec GetDims() => new(
 		IsInfinite(Dr.Horz) ? D.Fit : D.Fix(X),
 		IsInfinite(Dr.Vert) ? D.Fit : D.Fix(Y)
 	);
@@ -73,18 +61,13 @@ public readonly record struct FreeSz
 		Math.Min(y, dad.y)
 	);
 
-	public static FreeSz MakeForKid(DimOptVec dim, R r)
-	{
-		int Mk(Dr dir) => dim.Dir(dir).IsFit() switch
+	public static FreeSz MakeForKid(DimVec dim, R r) => FreeSzMaker.DirFun(
+		dir => dim.Dir(dir).IsFit() switch
 		{
 			truer => int.MaxValue,
 			false => r.Dir(dir)
-		};
-		return new FreeSz(
-			Mk(Dr.Horz),
-			Mk(Dr.Vert)
-		);
-	}
+		}
+	);
 }
 
 

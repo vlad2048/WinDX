@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0-windows</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Libs\Base\SysWinLib\SysWinLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Gui\UserEvents\UserEvents.csproj" />
+	</ItemGroup>
+
+</Project>

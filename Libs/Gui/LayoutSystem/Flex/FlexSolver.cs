@@ -74,7 +74,7 @@ public static class FlexSolver
 		return layNfo;
 	}
 
-	private static DimVec ResolveKid(Node kid, FreeSz dadFreeSz)
+	private static FDimVec ResolveKid(Node kid, FreeSz dadFreeSz)
 	{
 		var kidDim = kid.V.Dim;
 		if (kidDim.IsResolvable) return kidDim.ResolveEnsure();
@@ -93,28 +93,27 @@ public static class FlexSolver
 	///   - dim.FIT then provide an unbounded space for the layout to deduce its size
 	///   - dim.FIL
 	/// </summary>
-	private static FreeSz ComputeFreeSizeForKid(DimOptVec kidDim, FreeSz dadFreeSz)
-	{
-		int Mk(Dir dir) => kidDim.Dir(dir).Typ() switch
-		{
-			DType.Fit => int.MaxValue,
-			DType.Fil => dadFreeSz.DirWithInfinites(dir),
-			_ => kidDim.Dir(dir)!.Value.Max
-		};
-		return new FreeSz(Mk(Dir.Horz), Mk(Dir.Vert));
-	}
+	private static FreeSz ComputeFreeSizeForKid(DimVec kidDim, FreeSz dadFreeSz) =>
+		FreeSzMaker.DirFun(
+			dir => kidDim.Dir(dir).Typ() switch
+			{
+				DimType.Fit => int.MaxValue,
+				DimType.Fil => dadFreeSz.DirWithInfinites(dir),
+				_ => kidDim.Dir(dir)!.Value.Max
+			}
+		);
+
 
 	/// <summary>
 	/// Keep the original dimensions if they were resolved,
 	/// but for the unresolved ones, use the sizes calculated by calling the Layout
 	/// </summary>
-	private static DimVec UseLayoutResultToResolveFitDimensions(DimOptVec kidDim, Sz layoutSz)
-	{
-		Dim Mk(Dir dir) => kidDim.Dir(dir).HasValue switch
-		{
-			truer => kidDim.Dir(dir)!.Value,
-			false => D.Fix(layoutSz.Dir(dir))
-		};
-		return new DimVec(Mk(Dir.Horz), Mk(Dir.Vert));
-	}
+	private static FDimVec UseLayoutResultToResolveFitDimensions(DimVec kidDim, Sz layoutSz) =>
+		FDimVecMaker.DirFun(
+			dir => kidDim.Dir(dir).HasValue switch
+			{
+				truer => kidDim.Dir(dir)!.Value,
+				false => D.Fix(layoutSz.Dir(dir))
+			}
+		);
 }

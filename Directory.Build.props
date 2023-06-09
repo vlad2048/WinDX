@@ -21,6 +21,7 @@
 
 	<PropertyGroup>
 		<NoWarn>CS1591</NoWarn>
+		<NoWarn>CS8524</NoWarn>
 	</PropertyGroup>
 
 </Project>

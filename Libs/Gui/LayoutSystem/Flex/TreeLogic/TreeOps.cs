@@ -63,7 +63,7 @@ file static class TreeOpsUtils
 			LayoutWarning.MakeWithDirs(fixX, fixY, "You cannot have a Fil inside a Fit"),
 			n with
 			{
-				Dim = new DimOptVec(
+				Dim = new DimVec(
 					fixX ? D.Fix(FALLBACK_LENGTH) : n.Dim.X,
 					fixY ? D.Fix(FALLBACK_LENGTH) : n.Dim.Y
 				)
@@ -76,14 +76,16 @@ file static class TreeOpsUtils
 	{
 		var n = node.V;
 		if (n.Strat is not WrapStrat { MainDir: var mainDir }) return null;
-		var fixX = n.Dim.Dir(mainDir).Typ() != DType.Fil;
-		var fixY = n.Dim.Dir(mainDir.Neg()).Typ() != DType.Fit;
+// @formatter:off
+		var fixX = n.Dim.Dir(mainDir      ).Typ() != DimType.Fil;
+		var fixY = n.Dim.Dir(mainDir.Neg()).Typ() != DimType.Fit;
+// @formatter:on
 		if (!fixX && !fixY) return null;
-		var isParentFitInMainDir = node.Parent?.V.Dim.Dir(mainDir).Typ() == DType.Fit;
+		var isParentFitInMainDir = node.Parent?.V.Dim.Dir(mainDir).Typ() == DimType.Fit;
 		var fixedNode = isParentFitInMainDir switch
 		{
-			false => n with { Dim = DirMakers.MkDimOptVec(mainDir, D.Fil, null) },
-			truer => n with { Dim = DirMakers.MkDimOptVec(mainDir, D.Fix(FALLBACK_LENGTH), null) },
+			false => n with { Dim = DimVecMaker.MkDir(mainDir, D.Fil, null) },
+			truer => n with { Dim = DimVecMaker.MkDir(mainDir, D.Fix(FALLBACK_LENGTH), null) },
 		};
 		return new Fix(
 			LayoutWarning.MakeWithDirs(fixX, fixY, "A Wrap node needs to be Fil on its MainDir and Fit on its ElseDir"),
@@ -96,8 +98,8 @@ file static class TreeOpsUtils
 	{
 		if (node.Parent?.V.Strat is not WrapStrat) return null;
 		var n = node.V;
-		var fixX = n.Dim.X.Typ() == DType.Fil;
-		var fixY = n.Dim.Y.Typ() == DType.Fil;
+		var fixX = n.Dim.X.Typ() == DimType.Fil;
+		var fixY = n.Dim.Y.Typ() == DimType.Fil;
 		if (!fixX && !fixY) return null;
 		return new Fix(
 			LayoutWarning.MakeWithDirs(fixX, fixY, "A Wrap node kid cannot have a Fil in any direction"),

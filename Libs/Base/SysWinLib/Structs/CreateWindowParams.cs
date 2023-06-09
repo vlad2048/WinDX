@@ -11,7 +11,7 @@ public class CreateWindowParams
 	public string Name { get; init; } = string.Empty;
 	public IntPtr Parent { get; init; }
 	public IntPtr Menu { get; init; }
-	public WindowStyles Styles { get; init; }
+	public WindowStyles Styles { get; init; } = WindowStyles.WS_VISIBLE;
 	public WindowExStyles ExStyles { get; init; }
 	public uint ControlStyles { get; init; }
 }

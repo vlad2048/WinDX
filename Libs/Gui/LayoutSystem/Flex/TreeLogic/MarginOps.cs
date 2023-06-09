@@ -7,40 +7,34 @@ namespace LayoutSystem.Flex.TreeLogic;
 
 static class MarginOps
 {
-	public static Node AddMargins(this Node root)
-	{
-		DimOpt MkDir(DimOptVec nodeDims, Dir dir) => nodeDims.Dir(dir).IsFil() switch
-		{
-			false => D.Fit,
-			truer => D.Fil
-		};
-
-		Node Rec(Node node) => (node.V.Marg != Mg.Zero) switch
+	public static Node AddMargins(this Node root) =>
+		(root.V.Marg != Mg.Zero) switch
 		{
 			truer =>
 				Nod.Make(
 					new FlexNode(
-						new DimOptVec(
-							MkDir(node.V.Dim, Dir.Horz),
-							MkDir(node.V.Dim, Dir.Vert)
+						DimVecMaker.DirFun(
+							dir => root.V.Dim.Dir(dir).IsFil() switch
+							{
+								false => D.Fit,
+								truer => D.Fil
+							}
 						),
-						node.V.Marg,
+						root.V.Marg,
 						new MarginStrat()
 					),
 					Nod.Make(
-						node.V,
-						node.Children.Select(Rec)
+						root.V,
+						root.Children.Select(AddMargins)
 					)
 				),
 			false =>
 				Nod.Make(
-					node.V,
-					node.Children.Select(Rec)
+					root.V,
+					root.Children.Select(AddMargins)
 				)
 		};
 
-		return Rec(root);
-	}
 
 	public static Node RemoveMargins(this Node root)
 	{

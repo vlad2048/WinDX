@@ -11,7 +11,6 @@ using RenderLib;
 using RenderLib.Renderers;
 using RenderLib.Structs;
 using SysWinLib;
-using SysWinLib.Defaults;
 using SysWinLib.Structs;
 using WinAPI.User32;
 using WinAPI.Utils.Exts;
@@ -84,7 +83,7 @@ static partial class Setup
 	private static void HookWinSizeBothWaysAndPersistPos(IRoVar<Maybe<Layout>> layout, UserPrefs userPrefs, Action<FreeSz> winSzMutator, SysWin win)
 	{
 		win.ClientR
-			.Subscribe(r => { winSzMutator(FreeSz.FromSz(r.Size)); }).D(win.D);
+			.Subscribe(r => { winSzMutator(FreeSzMaker.FromSz(r.Size)); }).D(win.D);
 
 		win.ScreenPt
 			.Throttle(TimeSpan.FromSeconds(1))
@@ -99,8 +98,22 @@ static partial class Setup
 	}
 
 
-	private static SysWin MakeWindow(Sz sz, UserPrefs userPrefs) =>
-		new(
+	private static SysWin MakeWindow(Sz sz, UserPrefs userPrefs) => new(opt =>
+	{
+		opt.CreateWindowParams = new CreateWindowParams
+		{
+			Name = "Main Win",
+			Styles = WindowStyles.WS_OVERLAPPEDWINDOW | WindowStyles.WS_VISIBLE,
+			X = userPrefs.ExternalWindosPosX,
+			Y = userPrefs.ExternalWindosPosY,
+			Width = sz.Width,
+			Height = sz.Height,
+			ControlStyles = (uint)ControlStyles.OptimizedDoubleBuffer
+		};
+	});
+
+
+		/*new(
 			WinClasses.MainWindow,
 			new CreateWindowParams
 			{
@@ -115,9 +128,8 @@ static partial class Setup
 			opt =>
 			{
 				opt.NCAreaCustom = true;
-				opt.CouldBeMainWindow = false;
 			}
-		);
+		);*/
 
 
 	private static void PaintWindow(SysWin win,

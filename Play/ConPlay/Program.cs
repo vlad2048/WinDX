@@ -1,7 +1,7 @@
 ﻿global using static LayoutSystem.Flex.Strats;
 global using static LayoutSystem.Utils.TreeBuilder;
 global using Node = TNod<LayoutSystem.Flex.FlexNode>;
-global using DimOpt = System.Nullable<LayoutSystem.Flex.Structs.Dim>;
+global using Vec = LayoutSystem.Flex.Structs.DimVecMaker;
 using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.JsonUtils;

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Base\SysWinLib\SysWinLib.csproj" />
+		<ProjectReference Include="..\LayoutSystem\LayoutSystem.csproj" />
+	</ItemGroup>
+
+</Project>

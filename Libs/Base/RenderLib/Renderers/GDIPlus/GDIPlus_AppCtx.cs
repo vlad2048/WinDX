@@ -2,7 +2,7 @@
 using PowRxVar;
 using RenderLib.Renderers.GDIPlus.Utils;
 using RenderLib.Structs;
-using SysWinLib;
+using SysWinInterfaces;
 using WinAPI.Utils.Exts;
 
 namespace RenderLib.Renderers.GDIPlus;

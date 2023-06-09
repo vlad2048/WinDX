@@ -1,9 +1,9 @@
-﻿using PowBasics.Geom;
-using PowRxVar;
-using System.Reactive;
+﻿using PowRxVar;
 using System.Reactive.Linq;
+using System.Reactive;
+using PowBasics.Geom;
 
-namespace SysWinLib;
+namespace SysWinInterfaces;
 
 
 /// <summary>

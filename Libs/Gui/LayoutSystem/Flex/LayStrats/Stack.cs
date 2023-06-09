@@ -1,8 +1,7 @@
 ﻿using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
-using static LayoutSystem.Flex.Structs.DimExtractors;
-using static LayoutSystem.Flex.Structs.DirMakers;
+using System.Linq;
 using static LayoutSystem.Flex.LayStrats.StackUtils;
 // ReSharper disable AccessToModifiedClosure
 
@@ -40,7 +39,7 @@ public class StackStrat : IStrat
 	public LayNfo Lay(
 		Node node,
 		FreeSz freeSz,
-		DimVec[] kidDims
+		FDimVec[] kidDims
 	)
 	{
 		/* Stack node assumptions
@@ -54,7 +53,7 @@ public class StackStrat : IStrat
 		 */
 		var dim = node.V.Dim;
 
-		var sz = MkSz(MainDir,
+		var sz = GeomMaker.MkSzDir(MainDir,
 			dim.Dir(MainDir).IsFit() switch
 			{
 				truer => kidDims.Sum(e => e.Dir(MainDir).Max),
@@ -66,6 +65,9 @@ public class StackStrat : IStrat
 				false => dim.Dir(ElseDir)!.Value.Max
 			}
 		).CapWith(freeSz);
+
+		static FDim GetX(FDimVec vec) => vec.X;
+		static FDim GetY(FDimVec vec) => vec.Y;
 
 		var (xDims, yDims) = (
 			kidDims.Map(GetX),
@@ -84,8 +86,8 @@ public class StackStrat : IStrat
 			mainSpns
 				.Zip(elseSpns, (mainSpn, elseSpn) => (mainSpn, elseSpn))
 				.Map(t => new R(
-					MkPt(MainDir, t.mainSpn.p, t.elseSpn.p),
-					MkSz(MainDir, t.mainSpn.l, t.elseSpn.l)
+					GeomMaker.MkPtDir(MainDir, t.mainSpn.p, t.elseSpn.p),
+					GeomMaker.MkSzDir(MainDir, t.mainSpn.l, t.elseSpn.l)
 				))
 		);
 	}
@@ -100,7 +102,7 @@ file static class StackUtils
 	/// <param name="space">Free space available</param>
 	/// <param name="kids">Kids resolved DimRs</param>
 	/// <returns>Sizes of the kids along the stacking direction</returns>
-	public static int[] LayoutMain(int space, Dim[] kids)
+	public static int[] LayoutMain(int space, FDim[] kids)
 	{
 		var lngs = kids.Map(e => e.Min);
 	
@@ -147,7 +149,7 @@ file static class StackUtils
 	/// <param name="dims">Kids resolved DimRs</param>
 	/// <param name="align">Alignment</param>
 	/// <returns></returns>
-	public static (int p, int l)[] LayoutElse(int free, Dim[] dims, Align align)
+	public static (int p, int l)[] LayoutElse(int free, FDim[] dims, Align align)
 	{
 		var lngs = dims.Map(e => e.Max.Cap(0, free));
 		var lngMax = lngs.MaxT();

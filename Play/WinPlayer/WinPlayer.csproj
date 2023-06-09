@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -6,8 +6,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Libs\Base\RenderLib\RenderLib.csproj" />
-	  <ProjectReference Include="..\..\Libs\Base\SysWinLib\SysWinLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Base\RenderLib\RenderLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Base\SysWinLib\SysWinLib.csproj" />
 	</ItemGroup>
 
 </Project>

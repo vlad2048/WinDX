@@ -10,7 +10,7 @@ public class MarginStrat : IStratInternal
 	public LayNfo Lay(
 		Node node,
 		FreeSz freeSz,
-		DimVec[] kidDims
+		FDimVec[] kidDims
 	)
 	{
 		if (kidDims.Length > 1) throw new ArgumentException("Margin nodes should have exactly 1 kid");
@@ -19,16 +19,17 @@ public class MarginStrat : IStratInternal
 		var kidDim = kidDims[0];
 		var marg = node.V.Marg;
 
-		int MkDir(Dir dir) => freeSz.IsInfinite(dir) switch
-		{
-			false => freeSz.Dir(dir),
-			true => kidDim.Dir(dir).Max + marg.Dir(dir)
-		};
-	
-		var sz = new Sz(MkDir(Dir.Horz), MkDir(Dir.Vert));
+		var sz = GeomMaker.SzDirFun(
+			dir => freeSz.IsInfinite(dir) switch
+			{
+				false => freeSz.Dir(dir),
+				truer => kidDim.Dir(dir).Max + marg.Dir(dir)
+			}
+		);
+
 		var kidR = (sz.Width > marg.Dir(Dir.Horz) && sz.Height > marg.Dir(Dir.Vert)) switch
 		{
-			true => new R(
+			truer => new R(
 				marg.Left,
 				marg.Top,
 				sz.Width - marg.Dir(Dir.Horz),

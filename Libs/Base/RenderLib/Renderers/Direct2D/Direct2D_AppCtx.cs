@@ -4,10 +4,10 @@ using System.Reactive.Linq;
 using PowRxVar;
 using PowBasics.Geom;
 using RenderLib.Structs;
-using SysWinLib;
 using WinAPI.User32;
 using WinAPI.Utils.Exts;
 using RenderLib.Renderers.Utils.DirectX;
+using SysWinInterfaces;
 
 namespace RenderLib.Renderers.Direct2D;
 

@@ -22,9 +22,9 @@ static class Program
 		//var smallestSz = new Sz(136, 39);
 
 
-		var win = new SysWin(
-			WinClasses.MainWindow,
-			new CreateWindowParams
+		var win = new SysWin(opt =>
+		{
+			opt.CreateWindowParams = new CreateWindowParams
 			{
 				Name = "Main Win",
 				Styles = WindowStyles.WS_OVERLAPPEDWINDOW | WindowStyles.WS_VISIBLE,
@@ -32,28 +32,24 @@ static class Program
 				Y = 250,
 				Width = 256,
 				Height = 256,
-			},
-			opt => opt.NCAreaCustom = true
-		);
+			};
+		});
 
 		//win.WhenInit().Subscribe(_ => L("INIT"));
 		//win.ClientR.Subscribe(r => L($"{r}"));
 
 		var renderer = RendererGetter.Get(RendererType.Direct2D);
 		var renderWinCtx = renderer.GetWinCtx(win);
-		
-		win.WhenMsg.WhenPAINT().Subscribe(e =>
-		{
+
+		win.WhenMsg.WhenPAINT().Subscribe(e => {
 			using var gfx = renderWinCtx.GetGfx();
-			for (var i = 0; i < 6; i++)
-			{
+			for (var i = 0; i < 6; i++) {
 				var p0 = new Pt(5, 3 + i * 10);
 				var p1 = new Pt(15, 3 + i * 10);
 				gfx.DrawLine(p0, p1, new PenDef(Color.White, i + 1));
 			}
 
-			for (var i = 0; i < 6; i++)
-			{
+			for (var i = 0; i < 6; i++) {
 				var p0 = new Pt(30 + 3 + i * 10, 5);
 				var p1 = new Pt(30 + 3 + i * 10, 15);
 				gfx.DrawLine(p0, p1, new PenDef(Color.White, i + 1));

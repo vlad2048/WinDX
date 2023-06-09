@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using D3DPlay.Rendering;
 using PowRxVar;
-using SysWinLib.Defaults;
 using SysWinLib.Structs;
 using SysWinLib;
 using Vortice.Mathematics;
@@ -21,8 +20,7 @@ static class Program
 		var winCtx = appCtx.GetWinCtx(win).D(win.D);
 		var brush = winCtx.D2DRenderTarget.CreateSolidColorBrush(new Color4(64, 32, 255, 255)).D(win.D);
 
-		win.WhenMsg.WhenPAINT().Subscribe(_ =>
-		{
+		win.WhenMsg.WhenPAINT().Subscribe(_ => {
 			using var gfx = winCtx.GetGfx();
 			var r = new RectangleF(30, 20, 70, 50);
 
@@ -37,24 +35,15 @@ static class Program
 		App.Run();
 	}
 
-
-
-	private static SysWin MakeWindow() =>
-		new(
-			WinClasses.MainWindow,
-			new CreateWindowParams
-			{
-				Name = "Main Win",
-				Styles = WindowStyles.WS_OVERLAPPEDWINDOW | WindowStyles.WS_VISIBLE,
-				X = -500,
-				Y = 100,
-				Width = 400,
-				Height = 500,
-			},
-			opt =>
-			{
-				opt.NCAreaCustom = true;
-			}
-		);
+	private static SysWin MakeWindow() => new(opt => {
+		opt.CreateWindowParams = new CreateWindowParams {
+			Name = "Main Win",
+			Styles = WindowStyles.WS_OVERLAPPEDWINDOW | WindowStyles.WS_VISIBLE,
+			X = -500,
+			Y = 100,
+			Width = 400,
+			Height = 500,
+		};
+	});
 }
 

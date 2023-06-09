@@ -11,7 +11,7 @@ static class SysWinUtils
 {
 	public static void SetupCustomNCAreaIFN(this SysWin sysWin, SysWinOpt opt)
 	{
-		if (!opt.NCAreaCustom) return;
+		if (opt.NCStrat is not CustomNCStrat { HitTest: var hitTest }) return;
 
 		// Without this, the custom NC area will not be displayed until the user resizes the window
 		sysWin.WhenMsg.WhenCREATE().Subscribe(_ =>
@@ -29,7 +29,7 @@ static class SysWinUtils
 
 		sysWin.WhenMsg.WhenNCHITTEST().Subscribe(e =>
 		{
-			e.Result = opt.NCAreaHitTest(sysWin.GetR(RType.WinWithGripAreas), e.Point.ToPt());
+			e.Result = hitTest(sysWin.GetR(RType.WinWithGripAreas), e.Point.ToPt());
 			e.MarkAsHandled();
 		});
 	}

@@ -50,11 +50,11 @@ partial class NodeEditor : UserControl
 						node => node with { Strat = ChangeStratAlign(node.Strat, (Align)stratAlignCombo.SelectedIndex) }
 					),
 
-					horzDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<DimOpt, Func<FlexNode, FlexNode>>(val =>
+					horzDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<Dim, Func<FlexNode, FlexNode>>(val =>
 						node => node with { Dim = node.Dim with { X = val } }
 					),
 
-					vertDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<DimOpt, Func<FlexNode, FlexNode>>(val =>
+					vertDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<Dim, Func<FlexNode, FlexNode>>(val =>
 						node => node with { Dim = node.Dim with { Y = val } }
 					),
 

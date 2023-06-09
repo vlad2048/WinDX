@@ -7,7 +7,7 @@ public interface IStrat
 	LayNfo Lay(
 		Node node,
 		FreeSz freeSz,
-		DimVec[] kidDims
+		FDimVec[] kidDims
 	);
 }
 

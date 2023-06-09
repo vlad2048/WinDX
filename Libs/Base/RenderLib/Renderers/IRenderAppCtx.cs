@@ -1,6 +1,6 @@
 ﻿using PowBasics.Geom;
 using RenderLib.Structs;
-using SysWinLib;
+using SysWinInterfaces;
 
 namespace RenderLib.Renderers;
 

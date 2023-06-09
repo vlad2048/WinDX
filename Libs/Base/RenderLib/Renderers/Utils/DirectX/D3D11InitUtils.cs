@@ -62,7 +62,7 @@ static class D3D11InitUtils
             var d3dDebug = d3dDevice.QueryInterfaceOrNull<D3D11.Debug.ID3D11Debug>();
             if (d3dDebug == null)
             {
-                L("  Failed to retrieve the Debug interface");
+                Console.WriteLine("  Failed to retrieve the Debug interface");
             }
             else
             {

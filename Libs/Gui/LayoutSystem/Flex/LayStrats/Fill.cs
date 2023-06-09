@@ -16,20 +16,21 @@ public class FillStrat : IStrat
 	public LayNfo Lay(
 		Node node,
 		FreeSz freeSz,
-		DimVec[] kidDims
+		FDimVec[] kidDims
 	)
 	{
-		int MkDir(Dir dir) => freeSz.IsInfinite(dir) switch
-		{
-			false => freeSz.Dir(dir),
-			true => kidDims.Any() switch
+		var sz = GeomMaker.SzDirFun(
+			dir => freeSz.IsInfinite(dir) switch
 			{
-				false => 0,
-				true => kidDims.Max(e => e.Dir(dir).Max)
+				false => freeSz.Dir(dir),
+				true => kidDims.Any() switch
+				{
+					false => 0,
+					true => kidDims.Max(e => e.Dir(dir).Max)
+				}
 			}
-		};
-	
-		var sz = new Sz(MkDir(Dir.Horz), MkDir(Dir.Vert));
+		);
+
 		var kidR = new R(Pt.Empty, sz);
 		return new LayNfo(
 			sz,

@@ -15,7 +15,7 @@ static class SolverChecker
 		TNod<R> expRTree
 	)
 	{
-		var freeSz = FreeSz.FromSz(totalSz);
+		var freeSz = FreeSzMaker.FromSz(totalSz);
 		var (tree, _) = treeRaw.RespectRules(freeSz);
 		treeRaw.L("Raw");
 		tree.L("Good");

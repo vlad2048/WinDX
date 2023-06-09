@@ -23,14 +23,14 @@ partial class DimEditor : UserControl
 	}
 
 
-	public IRwBndVar<Maybe<DimOpt>> Value { get; }
+	public IRwBndVar<Maybe<Dim>> Value { get; }
 
 
 	public DimEditor()
 	{
 		InitializeComponent();
 
-		var rxVar = Var.MakeBnd(May.None<DimOpt>());
+		var rxVar = Var.MakeBnd(May.None<Dim>());
 		Value = rxVar.ToRwBndVar();
 
 		this.InitRX(d =>
@@ -41,15 +41,15 @@ partial class DimEditor : UserControl
 				enableUI: on => typCombo.Visible = minNumeric.Visible = maxNumeric.Visible = on,
 				setUI: Set,
 				UI2Val: Observable.Merge(
-					typCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select(_ => (DType)typCombo.SelectedIndex)
-						.Select<DType, DimOpt>(typ => {
+					typCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select(_ => (DimType)typCombo.SelectedIndex)
+						.Select<DimType, Dim>(typ => {
 							var rndMin = rnd.Next(30, 160);
 							var rndMax = rnd.Next(rndMin + 1, 200);
 							return typ switch {
-								DType.Fix => D.Fix(rnd.Next(30, 160)),
-								DType.Flt => D.Flt(rndMin, rndMax),
-								DType.Fil => D.Fil,
-								DType.Fit => null
+								DimType.Fix => D.Fix(rnd.Next(30, 160)),
+								DimType.Flt => D.Flt(rndMin, rndMax),
+								DimType.Fil => D.Fil,
+								DimType.Fit => null
 							};
 						}),
 					Observable.Merge(
@@ -57,14 +57,14 @@ partial class DimEditor : UserControl
 							maxNumeric.Events().ValueChanged
 						).Where(_ => eventsEnabled)
 						.Select(_ => {
-							var typ = (DType)typCombo.SelectedIndex;
+							var typ = (DimType)typCombo.SelectedIndex;
 							var min = (int)minNumeric.Value;
 							var max = (int)maxNumeric.Value;
 							return typ switch {
-								DType.Fix => D.Fix(min),
-								DType.Flt => D.Flt(min, max),
-								DType.Fil => D.Fil,
-								DType.Fit => (DimOpt)null
+								DimType.Fix => D.Fix(min),
+								DimType.Flt => D.Flt(min, max),
+								DimType.Fil => D.Fil,
+								DimType.Fit => (Dim)null
 							};
 						})
 				)
@@ -73,32 +73,32 @@ partial class DimEditor : UserControl
 		});
 	}
 
-	private void Set(DimOpt v)
+	private void Set(Dim v)
 	{
 		eventsEnabled = false;
 		var typ = v.Typ();
 		typCombo.SelectedIndex = (int)typ;
 		switch (typ) {
-			case DType.Fix: {
+			case DimType.Fix: {
 				var dim = v!.Value;
 				minNumeric.Value = dim.Min;
 				(minNumeric.Visible, maxNumeric.Visible) = (true, false);
 				break;
 			}
 
-			case DType.Flt: {
+			case DimType.Flt: {
 				var dim = v!.Value;
 				(minNumeric.Value, maxNumeric.Value) = (dim.Min, dim.Max);
 				(minNumeric.Visible, maxNumeric.Visible) = (true, true);
 				break;
 			}
 
-			case DType.Fil: {
+			case DimType.Fil: {
 				(minNumeric.Visible, maxNumeric.Visible) = (false, false);
 				break;
 			}
 
-			case DType.Fit: {
+			case DimType.Fit: {
 				(minNumeric.Visible, maxNumeric.Visible) = (false, false);
 				break;
 			}
