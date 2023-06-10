@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\SysWinInterfaces\SysWinInterfaces.csproj" />
+		<ProjectReference Include="..\SysWinInterfaces\2_SysWinInterfaces.csproj" />
 	</ItemGroup>
 
 </Project>

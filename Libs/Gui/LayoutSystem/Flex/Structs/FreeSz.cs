@@ -1,4 +1,5 @@
-﻿using PowBasics.Geom;
+﻿using LayoutSystem.Flex.LayStrats;
+using PowBasics.Geom;
 using Dr = PowBasics.Geom.Dir;
 
 namespace LayoutSystem.Flex.Structs;
@@ -68,6 +69,17 @@ public readonly record struct FreeSz
 			false => r.Dir(dir)
 		}
 	);
+
+
+	public FreeSz UnbridleScrolls(Node node)
+	{
+		var f = this;
+		return node.V.Strat switch
+		{
+			ScrollStrat { Enabled: var enabled } => FreeSzMaker.DirFun(dir => enabled.Dir(dir) ? int.MaxValue : f.x),
+			_ => this
+		};
+	}
 }
 
 

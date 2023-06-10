@@ -5,6 +5,7 @@ using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using PowMaybe;
 using PowRxVar;
+using PowTrees.Algorithms;
 using PowWinForms;
 
 namespace LayoutDbgApp;
@@ -20,9 +21,7 @@ static class MainWinSetup
 		var layoutDef = Var.MakeBndNoCheck(May.None<LayoutDef>()).D(d);
 		var layout = layoutDef.Map2(ComputeLayout);
 
-		//layout.WhenOuter.Subscribe(_ => L("WhenOuter")).D(d);
-		//layout.WhenInner.Subscribe(_ => L("WhenInner")).D(d);
-		//layout.Subscribe(_ => L("When")).D(d);
+		ui.redrawBtn.Events().Click.Subscribe(_ => layoutDef.V = layoutDef.V).D(d);
 
 		var userPrefs = new UserPrefs().Track();
 

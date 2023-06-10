@@ -6,12 +6,12 @@ using LayoutDbgApp.Utils.Exts;
 using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Flex;
-using LayoutSystem.Flex.LayStratsInternal;
 using LayoutSystem.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
+using PowTrees.Algorithms;
 using PowWinForms.TreeEditing;
 using PowWinForms.TreeEditing.Structs;
 using PowWinForms.TreeEditing.Utils;
@@ -40,7 +40,16 @@ static partial class Setup
 			layout
 		).D(d);
 
-		Observable.Merge(
+
+		tree.WhenSome().Subscribe(treeVal =>
+		{
+			if (layoutDef.V.IsNone(out var lay)) return;
+			lay = lay with { Root = treeVal };
+			layoutDef.SetInner(May.Some(lay));
+		}).D(d);
+
+
+		/*Observable.Merge(
 				evtObs.WhenNodeAdded().ToUnit(),
 				evtObs.WhenNodeRemoved().ToUnit(),
 				evtObs.WhenNodeChanged().ToUnit()
@@ -49,8 +58,11 @@ static partial class Setup
 			{
 				var lay = layoutDef.V.Ensure();
 				lay = lay with { Root = tree.V.Ensure() };
+				L("[Edit        ] Def <- " + lay.Root.LogToString());
 				layoutDef.SetInner(May.Some(lay));
-			}).D(d);
+			}).D(d);*/
+
+
 
 		layoutDef.WhenOuter.SubscribeToSome(layoutDefVal => evtSig.SignalTreeLoaded(layoutDefVal.Root)).D(d);
 		layoutDef.WhenOuter.SubscribeToNone(() => evtSig.SignalTreeUnloaded()).D(d);
@@ -93,7 +105,9 @@ static partial class Setup
 
         //evtObs.WhenChanged.Subscribe(e => L($"{e}")).D(d);
 
-        layout.Map2(e => e.TotalSz).Subscribe(_ => ctrl.Refresh()).D(d);
+        layout.Map2(e => e.TotalSz)
+	        .ObserveOnUIThread()
+	        .Subscribe(_ => ctrl.Refresh()).D(d);
 
 
         SetupColumns(ctrl, layout);
@@ -214,7 +228,6 @@ static partial class Setup
                 return;
             }
 
-            ui.addMarginMenuItem.Visible = false;
             ui.removeNodeMenuItem.Enabled = node.Parent != null;
         }).D(d);
 
@@ -224,28 +237,28 @@ static partial class Setup
             if (mayNode.IsNone(out var node)) return;
             var r0 = DimEditor.rnd.Next(30, 160);
             var r1 = DimEditor.rnd.Next(30, 160);
-            evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fix(r0, r1), Mg.Zero, new FillStrat()));
+            evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fix(r0, r1), new FillStrat(), Mg.Zero));
         }).D(d);
 
         ui.addStackMenuItem.Events().Click.Subscribe(_ =>
         {
             var mayNode = selNode.V;
             if (mayNode.IsNone(out var node)) return;
-            evtSig.SignalNodeAdded(node, new FlexNode(Vec.FilFit, Mg.Zero, new StackStrat(Dir.Horz, Align.Start)));
+            evtSig.SignalNodeAdded(node, new FlexNode(Vec.FilFit, new StackStrat(Dir.Horz, Align.Start), Mg.Zero));
         }).D(d);
 
         ui.addWrapMenuItem.Events().Click.Subscribe(_ =>
         {
             var mayNode = selNode.V;
             if (mayNode.IsNone(out var node)) return;
-            evtSig.SignalNodeAdded(node, new FlexNode(Vec.FilFit, Mg.Zero, new WrapStrat(Dir.Horz)));
+            evtSig.SignalNodeAdded(node, new FlexNode(Vec.FilFit, new WrapStrat(Dir.Horz), Mg.Zero));
         }).D(d);
 
-        ui.addMarginMenuItem.Events().Click.Subscribe(_ =>
+        ui.addScrollMenuItem.Events().Click.Subscribe(_ =>
         {
 	        var mayNode = selNode.V;
 	        if (mayNode.IsNone(out var node)) return;
-	        evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fit, new Marg(10, 10, 10, 10), new MarginStrat()));
+	        evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fit, new ScrollStrat(new BoolVec(false, true)), Mg.Zero));
         }).D(d);
 
         ui.removeNodeMenuItem.Events().Click.ToUnit().Merge(

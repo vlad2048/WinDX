@@ -5,8 +5,8 @@ namespace LayoutSystem.Flex;
 
 public record FlexNode(
 	DimVec Dim,
-	Marg Marg,
-	IStrat Strat
+	IStrat Strat,
+	Marg Marg
 )
 {
 	public override string ToString() => $"{Dim} - {Strat}";

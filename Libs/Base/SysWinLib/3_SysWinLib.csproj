@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Folder Include="Defaults\" />
+		<Folder Include="Structs\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SysWinInterfaces\2_SysWinInterfaces.csproj" />
+	</ItemGroup>
+
+</Project>

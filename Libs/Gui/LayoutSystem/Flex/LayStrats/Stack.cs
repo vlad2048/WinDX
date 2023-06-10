@@ -1,7 +1,7 @@
 ﻿using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
-using System.Linq;
+using static LayoutSystem.Flex.LayStrats.StackUtilsShared;
 using static LayoutSystem.Flex.LayStrats.StackUtils;
 // ReSharper disable AccessToModifiedClosure
 
@@ -16,10 +16,10 @@ public enum Align
 }
 
 /// <summary>
-/// Stack the kids in a specific direction (MainDir / elseDir)
-///   - children are not allowed to use Fills on MainDir
-///   - respects DimVec Fit & Fix
-///   - uses the kids kids.DimFixSz
+/// Stack the kids in a specific direction (MainDir / elseDir) <br/>
+///   - children are not allowed to use Fills on MainDir <br/>
+///   - respects DimVec Fit and Fix <br/>
+///   - uses the kids kids.DimFixSz <br/>
 ///   - also uses the alignment along elseDir
 /// </summary>
 public class StackStrat : IStrat
@@ -94,7 +94,8 @@ public class StackStrat : IStrat
 }
 
 
-file static class StackUtils
+
+static class StackUtilsShared
 {
 	/// <summary>
 	/// Compute the sizes of the kids along the stacking direction
@@ -141,7 +142,12 @@ file static class StackUtils
 			indices.ForEach((i, addI) => lngs[i] += adds[addI]);
 		}
 	}
+}
 
+
+
+file static class StackUtils
+{
 	/// <summary>
 	/// Compute the position and sizes (spans) of the kids accross the stacking direction
 	/// </summary>

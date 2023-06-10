@@ -1,7 +1,6 @@
 ﻿using LayoutSystem.Flex.LayStratsInternal;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils;
-using PowBasics.Geom;
 
 namespace LayoutSystem.Flex.TreeLogic;
 
@@ -20,8 +19,8 @@ static class MarginOps
 								truer => D.Fil
 							}
 						),
-						root.V.Marg,
-						new MarginStrat()
+						new MarginStrat(),
+						root.V.Marg
 					),
 					Nod.Make(
 						root.V,

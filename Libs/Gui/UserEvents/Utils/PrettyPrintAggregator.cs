@@ -7,10 +7,13 @@ namespace UserEvents.Utils;
 public interface IPrettyUserEvt { DateTime Timestamp { get; } }
 
 // @formatter:off
-public record NormalPrettyUserEvt			(DateTime Timestamp, IUserEvt Evt)			: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"{Evt}");							}
-public record DelayPrettyUserEvt			(DateTime Timestamp)						: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, "(delay)");						}
-public record MouseMovePrettyUserEvt		(DateTime Timestamp, MouseMoveUserEvt Evt)	: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"Move Move {Evt.Pos}");			}
-public record MouseMoveUpdatePrettyUserEvt	(DateTime Timestamp, MouseMoveUserEvt Evt)	: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"Move Move Update {Evt.Pos}");	}
+public record NormalPrettyUserEvt			(DateTime Timestamp, IUserEvt Evt)					: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"{Evt}");							}
+public record DelayPrettyUserEvt			(DateTime Timestamp)								: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, "(delay)");						}
+public record MouseMovePrettyUserEvt		(DateTime Timestamp, MouseMoveUserEvt Evt)			: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"Move Move {Evt.Pos}");			}
+public record MouseMoveUpdatePrettyUserEvt	(DateTime Timestamp, MouseMoveUserEvt Evt, int Idx)	: IPrettyUserEvt {
+	public bool IsSubsequent => Idx > 1;
+	public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"Move Move Update {Evt.Pos} (x{Idx})");
+}
 // @formatter:on
 
 public static class PrettyPrintAggregator
@@ -39,11 +42,15 @@ public static class PrettyPrintAggregator
 			}
 		}
 
+		var updateIdx = 0;
+		void OnUpdate() => updateIdx++;
+		void OnNonUpdate() => updateIdx = 0;
 
 		uiEvt.Evt.Where(e => e is not MouseMoveUserEvt).Subscribe(e =>
 		{
 			isInMouseMove = false;
 			CheckDelay();
+			OnNonUpdate();
 			obs.OnNext(new NormalPrettyUserEvt(T(), e));
 		}).D(d);
 
@@ -53,12 +60,14 @@ public static class PrettyPrintAggregator
 
 			if (!isInMouseMove)
 			{
+				OnNonUpdate();
 				obs.OnNext(new MouseMovePrettyUserEvt(T(), e));
 				isInMouseMove = true;
 			}
 			else
 			{
-				obs.OnNext(new MouseMoveUpdatePrettyUserEvt(T(), e));
+				OnUpdate();
+				obs.OnNext(new MouseMoveUpdatePrettyUserEvt(T(), e, updateIdx));
 			}
 		}).D(d);
 

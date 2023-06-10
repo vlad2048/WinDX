@@ -1,25 +1,27 @@
 ﻿using LayoutSystem.Flex.Structs;
-using PowBasics.Geom;
 
 namespace LayoutSystem.Flex.LayStrats;
 
+/// <summary>
+/// If scrolling is enabled in a direction, we compute the kids
+/// layout as if this direction was Fit
+/// </summary>
 public class ScrollStrat : IStrat
 {
-	public BoolVec CanScroll { get; }
+	public BoolVec Enabled { get; }
 
-	public ScrollStrat(BoolVec canScroll)
+	public ScrollStrat(BoolVec enabled)
 	{
-		CanScroll = canScroll;
+		Enabled = enabled;
 	}
 
-	public override string ToString() => $"Scroll({CanScroll})";
+	public override string ToString() => $"Scroll(enabled:{Enabled})";
 
 	public LayNfo Lay(
 		Node node,
 		FreeSz freeSz,
 		FDimVec[] kidDims
 	)
-	{
-		throw new NotImplementedException();
-	}
+		=>
+			FillUtilsShared.ComputeLay(node, freeSz, kidDims);
 }

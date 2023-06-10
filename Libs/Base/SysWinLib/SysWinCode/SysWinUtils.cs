@@ -1,5 +1,7 @@
 ﻿using System.Reactive.Linq;
+using System.Reflection.Metadata;
 using PowBasics.Geom;
+using PowRxVar;
 using WinAPI.User32;
 using WinAPI.Utils.Exts;
 using WinAPI.Windows;
@@ -9,17 +11,17 @@ namespace SysWinLib;
 
 static class SysWinUtils
 {
-	public static void SetupCustomNCAreaIFN(this SysWin sysWin, SysWinOpt opt)
+	public static void SetupCustomNCAreaIFN(this SysWin win, SysWinOpt opt)
 	{
 		if (opt.NCStrat is not CustomNCStrat { HitTest: var hitTest }) return;
 
 		// Without this, the custom NC area will not be displayed until the user resizes the window
-		sysWin.WhenMsg.WhenCREATE().Subscribe(_ =>
+		win.WhenMsg.WhenCREATE().Subscribe(_ =>
 		{
-			sysWin.SetR(R.Empty, WindowPositionFlags.SWP_FRAMECHANGED | WindowPositionFlags.SWP_NOMOVE | WindowPositionFlags.SWP_NOSIZE);
+			win.SetR(R.Empty, WindowPositionFlags.SWP_FRAMECHANGED | WindowPositionFlags.SWP_NOMOVE | WindowPositionFlags.SWP_NOSIZE);
 		});
 
-		sysWin.WhenMsg.WhenNCCALCSIZE()
+		win.WhenMsg.WhenNCCALCSIZE()
 			.Skip(1)
 			.Where(p => p.ShouldCalcValidRects)
 			.Subscribe(p =>
@@ -27,10 +29,34 @@ static class SysWinUtils
 				p.MarkAsHandled();
 			});
 
-		sysWin.WhenMsg.WhenNCHITTEST().Subscribe(e =>
+		win.WhenMsg.WhenNCHITTEST().Subscribe(e =>
 		{
-			e.Result = hitTest(sysWin.GetR(RType.WinWithGripAreas), e.Point.ToPt());
+			e.Result = hitTest(win.GetR(RType.WinWithGripAreas), e.Point.ToPt());
 			e.MarkAsHandled();
 		});
+	}
+
+	public static void GenerateMouseLeaveMessagesIFN(this SysWin win, SysWinOpt opt)
+	{
+		if (!opt.GenerateMouseLeaveMessages) return;
+
+		var isTracking = Var.Make(
+			false,
+			val => val
+				.Select(v => v switch
+				{
+					false => win.WhenMsg.WhenMOUSEMOVE().Select(_ => true),
+					true => win.WhenMsg.WhenMOUSELEAVE().Select(_ => false),
+				})
+				.Switch()
+		).D(win.D);
+
+		isTracking
+			.Where(e => e)
+			.Where(_ => win.Handle != nint.Zero)
+			.Subscribe(_ =>
+			{
+				User32Helpers.TrackMouseEventGenerateLeaveMessage(win.Handle);
+			}).D(win.D);
 	}
 }

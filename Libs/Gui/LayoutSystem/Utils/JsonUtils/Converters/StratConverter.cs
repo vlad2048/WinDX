@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.LayStratsInternal;
+using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
 
 namespace LayoutSystem.Utils.JsonUtils.Converters;
@@ -15,16 +16,18 @@ public class StratConverter : JsonConverter<IStrat>
 		Stack,
 		Wrap,
 		Margin,
+		Scroll,
 	}
 
 	private record StratNfo(
 		StratType Type,
 		Dir StackMainDir,
 		Align StackAlign,
-		Dir WrapMainDir
+		Dir WrapMainDir,
+		BoolVec ScrollEnabled
 	)
 	{
-		public static readonly StratNfo Empty = new(StratType.Fill, Dir.Horz, Align.Start, Dir.Horz);
+		public static readonly StratNfo Empty = new(StratType.Fill, Dir.Horz, Align.Start, Dir.Horz, BoolVec.False);
 	}
 
 	private static StratNfo Strat2Nfo(IStrat s) => s switch
@@ -48,6 +51,11 @@ public class StratConverter : JsonConverter<IStrat>
 		{
 			Type = StratType.Margin
 		},
+		ScrollStrat { Enabled: var enabled } => StratNfo.Empty with
+		{
+			Type = StratType.Scroll,
+			ScrollEnabled = enabled
+		},
 		_ => throw new ArgumentException()
 	};
 
@@ -57,6 +65,7 @@ public class StratConverter : JsonConverter<IStrat>
 		StratType.Stack => new StackStrat(s.StackMainDir, s.StackAlign),
 		StratType.Wrap => new WrapStrat(s.WrapMainDir),
 		StratType.Margin => new MarginStrat(),
+		StratType.Scroll => new ScrollStrat(s.ScrollEnabled),
 		_ => throw new ArgumentException()
 	};
 

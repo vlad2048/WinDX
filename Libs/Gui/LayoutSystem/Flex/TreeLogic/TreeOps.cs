@@ -46,6 +46,7 @@ file static class TreeOpsUtils
 	public static Node CheckRules(this Node root, Dictionary<int, List<LayoutWarning>> warnings) =>
 		root
 			.Check(warnings, FixNoFilInFit)
+			.Check(warnings, FixNoFilInScroll)
 			.Check(warnings, FixWrapDims)
 			.Check(warnings, FixWrapFilKids);
 
@@ -61,6 +62,28 @@ file static class TreeOpsUtils
 		if (!fixX && !fixY) return null;
 		return new Fix(
 			LayoutWarning.MakeWithDirs(fixX, fixY, "You cannot have a Fil inside a Fit"),
+			n with
+			{
+				Dim = new DimVec(
+					fixX ? D.Fix(FALLBACK_LENGTH) : n.Dim.X,
+					fixY ? D.Fix(FALLBACK_LENGTH) : n.Dim.Y
+				)
+			}
+		);
+	}
+
+
+	private static Fix? FixNoFilInScroll(this Node node)
+	{
+		if (node.Parent == null) return null;
+		if (node.Parent.V.Strat is not ScrollStrat { Enabled: var enabled }) return null;
+		var n = node.V;
+		var kd = n.Dim;
+		var fixX = enabled.X && kd.X.IsFil();
+		var fixY = enabled.Y && kd.Y.IsFil();
+		if (!fixX && !fixY) return null;
+		return new Fix(
+			LayoutWarning.MakeWithDirs(fixX, fixY, "You cannot have a Fil inside a Scroll (equivalent to Fit)"),
 			n with
 			{
 				Dim = new DimVec(

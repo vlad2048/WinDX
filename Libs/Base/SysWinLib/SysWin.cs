@@ -15,7 +15,7 @@ namespace SysWinLib;
 /// <summary>
 /// Low level Win32 window wrapper
 /// </summary>
-public class SysWin : ISysWinUserEventsSupport, ISysWinRenderingSupport, IDisposable
+public class SysWin : ISysWin
 {
 	// static
 	private static bool isFirst = true;
@@ -91,6 +91,7 @@ public class SysWin : ISysWinUserEventsSupport, ISysWinRenderingSupport, IDispos
 		}).D(D);
 
 		this.SetupCustomNCAreaIFN(opt);
+		this.GenerateMouseLeaveMessagesIFN(opt);
 	}
 
 	public void Init()
@@ -153,6 +154,21 @@ public class SysWin : ISysWinUserEventsSupport, ISysWinRenderingSupport, IDispos
     }
 
 
+	private bool HandleDestroy(WindowMessage msg)
+	{
+		if (msg.Id != WM.NCDESTROY) return false;
+		hasDestroyBeenSent = true;
+		if (isMainWindow && App.IsWinDXAppRunning)
+		{
+			User32Methods.PostQuitMessage(0);
+		}
+
+		Dispose();
+
+		return true;
+	}
+
+
 	private static unsafe SysWin? ExtractWinFromMsg(WindowMessage msg)
 	{
 		SysWin win;
@@ -173,24 +189,10 @@ public class SysWin : ISysWinUserEventsSupport, ISysWinRenderingSupport, IDispos
 		}
 		return win;
 	}
-
-	private bool HandleDestroy(WindowMessage msg)
-	{
-		if (msg.Id != WM.NCDESTROY) return false;
-		hasDestroyBeenSent = true;
-		if (isMainWindow && App.IsWinDXAppRunning)
-		{
-			User32Methods.PostQuitMessage(0);
-		}
-
-		Dispose();
-
-		return true;
-	}
 }
 
 
-file static class SysWinFileExt
+file static class SysWinPrivateExt
 {
 	public static T GetWinFromPtr<T>(this IntPtr ptr) where T : class
 	{

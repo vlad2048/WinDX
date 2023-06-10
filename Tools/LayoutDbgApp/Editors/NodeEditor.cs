@@ -4,6 +4,7 @@ using LayoutSystem.Flex;
 using PowWinForms;
 using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.LayStratsInternal;
+using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
 using PowMaybe;
@@ -23,63 +24,42 @@ partial class NodeEditor : UserControl
 		var rxVar = Var.MakeBnd(May.None<FlexNode>());
 		Value = rxVar.ToRwBndVar();
 
-		this.InitRX(d =>
-		{
+		this.InitRX(d => {
 			rxVar.D(d);
 
 			rxVar.EditInner(
 				enableUI: on => Visible = on,
 				setUI: Set,
-				UI2Val: Observable.Merge(
-					stratCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => {
-						IStrat strat = stratCombo.SelectedIndex switch {
-							0 => new FillStrat(),
-							1 => new StackStrat(Dir.Horz, Align.Start),
-							2 => new WrapStrat(Dir.Horz),
-							3 => new MarginStrat(),
-							_ => throw new ArgumentException()
-						};
-						return node => node with { Strat = strat };
-					}),
+				UI2Val:
+					Observable.Merge(
+						stratCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => {
+							IStrat strat = stratCombo.SelectedIndex switch {
+								0 => new FillStrat(),
+								1 => new StackStrat(Dir.Horz, Align.Start),
+								2 => new WrapStrat(Dir.Horz),
+								3 => new ScrollStrat(new BoolVec(false, true)),
+								_ => throw new ArgumentException()
+							};
+							return node => node with { Strat = strat };
+						}),
 
-					stratDirCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
-						node => node with { Strat = ChangeStratMainDir(node.Strat, (Dir)stratDirCombo.SelectedIndex) }
-					),
+						// @formatter:off
+						horzDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<Dim, Func<FlexNode, FlexNode>>(val => node => node with { Dim = node.Dim with { X = val } }),
+						vertDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<Dim, Func<FlexNode, FlexNode>>(val => node => node with { Dim = node.Dim with { Y = val } }),
+						stratDirCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Strat = ChangeStratMainDir(node.Strat, (Dir)stratDirCombo.SelectedIndex) }),
+						stratAlignCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Strat = ChangeStratAlign(node.Strat, (Align)stratAlignCombo.SelectedIndex) }),
+						margUpNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.MgUp((int)margUpNumeric.Value) }),
+						margRightNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.MgRight((int)margRightNumeric.Value) }),
+						margDownNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.MgDown((int)margDownNumeric.Value) }),
+						margLeftNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.MgLeft((int)margLeftNumeric.Value) }),
+						margMinusBtn.Events().Click.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.Enlarge(-10) }),
+						margPlusBtn.Events().Click.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.Enlarge(10) }),
 
-					stratAlignCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
-						node => node with { Strat = ChangeStratAlign(node.Strat, (Align)stratAlignCombo.SelectedIndex) }
-					),
-
-					horzDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<Dim, Func<FlexNode, FlexNode>>(val =>
-						node => node with { Dim = node.Dim with { X = val } }
-					),
-
-					vertDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<Dim, Func<FlexNode, FlexNode>>(val =>
-						node => node with { Dim = node.Dim with { Y = val } }
-					),
-
-
-					margUpNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
-						node => node with { Marg = node.Marg.MgUp((int)margUpNumeric.Value) }
-					),
-					margRightNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
-						node => node with { Marg = node.Marg.MgRight((int)margRightNumeric.Value) }
-					),
-					margDownNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
-						node => node with { Marg = node.Marg.MgDown((int)margDownNumeric.Value) }
-					),
-					margLeftNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
-						node => node with { Marg = node.Marg.MgLeft((int)margLeftNumeric.Value) }
-					),
-
-					margMinusBtn.Events().Click.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
-						node => node with { Marg = node.Marg.Enlarge(-10) }
-					),
-
-					margPlusBtn.Events().Click.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
-						node => node with { Marg = node.Marg.Enlarge(10) }
+						scrollXCheckBox.Events().CheckedChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Strat = ChangeStratScrollX(node.Strat, scrollXCheckBox.Checked) }),
+						scrollYCheckBox.Events().CheckedChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Strat = ChangeStratScrollY(node.Strat, scrollYCheckBox.Checked) })
+					// @formatter:on
 					)
-				)
+			//.Where(_ => eventsEnabled)
 			).D(d);
 		});
 	}
@@ -94,6 +74,7 @@ partial class NodeEditor : UserControl
 			case FillStrat:
 				stratCombo.SelectedIndex = 0;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (false, false);
+				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (false, false);
 				break;
 
 			case StackStrat s:
@@ -101,17 +82,21 @@ partial class NodeEditor : UserControl
 				stratDirCombo.SelectedIndex = (int)s.MainDir;
 				stratAlignCombo.SelectedIndex = (int)s.Align;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (true, true);
+				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (false, false);
 				break;
 
 			case WrapStrat s:
 				stratCombo.SelectedIndex = 2;
 				stratDirCombo.SelectedIndex = (int)s.MainDir;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (true, false);
+				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (false, false);
 				break;
 
-			case MarginStrat:
+			case ScrollStrat s:
 				stratCombo.SelectedIndex = 3;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (false, false);
+				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (true, true);
+				(scrollXCheckBox.Checked, scrollYCheckBox.Checked) = (s.Enabled.X, s.Enabled.Y);
 				break;
 		}
 
@@ -132,6 +117,15 @@ partial class NodeEditor : UserControl
 
 	private static IStrat ChangeStratAlign(IStrat strat, Align align) => strat switch {
 		StackStrat s => new StackStrat(s.MainDir, align),
+		_ => throw new ArgumentException()
+	};
+
+	private static IStrat ChangeStratScrollX(IStrat strat, bool enabled) => strat switch {
+		ScrollStrat s => new ScrollStrat(s.Enabled with { X = enabled }),
+		_ => throw new ArgumentException()
+	};
+	private static IStrat ChangeStratScrollY(IStrat strat, bool enabled) => strat switch {
+		ScrollStrat s => new ScrollStrat(s.Enabled with { Y = enabled }),
 		_ => throw new ArgumentException()
 	};
 }

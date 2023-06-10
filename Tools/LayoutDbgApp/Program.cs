@@ -9,14 +9,13 @@ static class Program
 	[STAThread]
 	static void Main()
 	{
+		//VarDbg.BreakpointOnDispAlloc(49);
+
 		ApplicationConfiguration.Initialize();
-
 		Kernel32Methods.AllocConsole();
-
 		using var win = new MainWin().Track();
-
 		Application.Run(win);
 
-		Var.CheckForUnDisposedDisps(true);
+		VarDbg.CheckForUndisposedDisps(true);
 	}
 }

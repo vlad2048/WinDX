@@ -3,6 +3,7 @@ using LayoutSystem.Utils.JsonUtils;
 using PowMaybe;
 using PowRxVar;
 using System.Reactive.Linq;
+using LayoutDbgApp.Utils.Exts;
 using PowMaybeErr;
 
 namespace LayoutDbgApp.SetupLogic;
@@ -77,6 +78,7 @@ static partial class Setup
 			openedFilename.ToUnit(),
 			isModified.ToUnit()
 		)
+			.ObserveOnUIThread()
 			.Subscribe(_ =>
 			{
 				ui.saveToolStripMenuItem.Enabled = layout.V.IsSome() && isModified.V;

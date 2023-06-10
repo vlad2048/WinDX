@@ -31,20 +31,16 @@ public static class UserEvtGenerator
 			win.WhenMsg.WhenSETFOCUS	().Select(_ => new GotFocusUserEvt			(									)),
 			win.WhenMsg.WhenKILLFOCUS	().Select(_ => new LostFocusUserEvt			(									)),
 
-			win.WhenMsg.WhenACTIVATE	()
-				.Where(e => e.Flag is WindowActivateFlag.WA_ACTIVE or WindowActivateFlag.WA_CLICKACTIVE)
-				.Select(e => new ActivateUserEvt(e.Flag == WindowActivateFlag.WA_CLICKACTIVE)),
-			win.WhenMsg.WhenACTIVATE	()
-				.Where(e => e.Flag is WindowActivateFlag.WA_INACTIVE)
-				.Select(_ => new InactivateUserEvt()),
+			win.WhenMsg.WhenACTIVATE	().Where(e => e.Flag.IsActive()		).Select(e => new ActivateUserEvt		(e.Flag.IsClickActive()	)),
+			win.WhenMsg.WhenACTIVATE	().Where(e => e.Flag.IsInactive()	).Select(_ => new InactivateUserEvt		(						)),
 
-			win.WhenMsg.WhenACTIVATEAPP	()
-				.Where(e => e.IsActive)
-				.Select(_ => new ActivateAppUserEvt()),
-			win.WhenMsg.WhenACTIVATEAPP	()
-				.Where(e => !e.IsActive)
-				.Select(_ => new InactivateAppUserEvt())
+			win.WhenMsg.WhenACTIVATEAPP	().Where(e => e.IsActive			).Select(_ => new ActivateAppUserEvt	(						)),
+			win.WhenMsg.WhenACTIVATEAPP	().Where(e => !e.IsActive			).Select(_ => new InactivateAppUserEvt	(						))
 		)
 	);
+
+	private static bool IsActive		(this WindowActivateFlag flag) => flag is WindowActivateFlag.WA_ACTIVE or WindowActivateFlag.WA_CLICKACTIVE;
+	private static bool IsInactive		(this WindowActivateFlag flag) => flag is WindowActivateFlag.WA_INACTIVE;
+	private static bool IsClickActive	(this WindowActivateFlag flag) => flag is WindowActivateFlag.WA_CLICKACTIVE;
 // @formatter:on
 }

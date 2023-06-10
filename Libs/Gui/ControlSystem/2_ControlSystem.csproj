@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="PowMaybe" Version="0.0.10" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Base\RenderLib\3_RenderLib.csproj" />
+		<ProjectReference Include="..\..\Base\SysWinLib\3_SysWinLib.csproj" />
+		<ProjectReference Include="..\LayoutSystem\1_LayoutSystem.csproj" />
+		<ProjectReference Include="..\UserEvents\1_UserEvents.csproj" />
+	</ItemGroup>
+
+</Project>

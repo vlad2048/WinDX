@@ -6,8 +6,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Libs\Base\SysWinLib\SysWinLib.csproj" />
-		<ProjectReference Include="..\..\Libs\Gui\UserEvents\UserEvents.csproj" />
+		<ProjectReference Include="..\..\Libs\Base\SysWinLib\3_SysWinLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Gui\UserEvents\1_UserEvents.csproj" />
 	</ItemGroup>
 
 </Project>

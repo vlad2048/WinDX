@@ -7,6 +7,17 @@ public static class User32Helpers
 {
 	public static void RedrawWindow(nint hwnd) => User32Methods.RedrawWindow(hwnd, IntPtr.Zero, IntPtr.Zero, RedrawWindowFlags.RDW_INVALIDATE);
 
+	public static void TrackMouseEventGenerateLeaveMessage(nint hwnd)
+	{
+		var opt = new TrackMouseEventOptions
+		{
+			Flags = TrackMouseEventFlags.TME_LEAVE,
+			Size = (uint) Marshal.SizeOf<TrackMouseEventOptions>(),
+			TrackedHwnd = hwnd
+		};
+		User32Methods.TrackMouseEvent(ref opt);
+	}
+
     public static IntPtr GetWindowLongPtr(IntPtr hwnd, WindowLongFlags nIndex)
     {
         return User32Methods.GetWindowLongPtr(hwnd, (int) nIndex);

@@ -14,7 +14,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Libs\Base\SysWinLib\SysWinLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Base\SysWinLib\3_SysWinLib.csproj" />
 	</ItemGroup>
 
 </Project>

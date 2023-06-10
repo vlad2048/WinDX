@@ -49,12 +49,13 @@ public static class FlexSolver
 		{
 			var layNfo = LayKids(node, freeSz);
 
-			rMap[node] = new R(pos, layNfo.ResolvedSz);
+			rMap[node] = new R(pos, layNfo.ResolvedSz.CapWith(freeSz));
 
 			foreach (var t in node.Children.Zip(layNfo.Kids))
 			{
 				var (kid, kidR) = t;
 				var kidFreeSz = FreeSz.MakeForKid(kid.V.Dim, kidR);
+				kidFreeSz = new FreeSz(kidR.Width, kidR.Height);
 				LayNode(kid, pos + kidR.Pos, kidFreeSz);
 			}
 		}
@@ -65,6 +66,7 @@ public static class FlexSolver
 
 	private static LayNfo LayKids(Node node, FreeSz freeSz)
 	{
+		freeSz = freeSz.UnbridleScrolls(node);
 		var kidDims = node.Children.Map(kid => ResolveKid(kid, freeSz));
 		var layNfo = node.V.Strat.Lay(
 			node,

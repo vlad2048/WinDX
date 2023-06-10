@@ -33,7 +33,7 @@ partial class MainWin
 		addFillMenuItem = new ToolStripMenuItem();
 		addStackMenuItem = new ToolStripMenuItem();
 		addWrapMenuItem = new ToolStripMenuItem();
-		addMarginMenuItem = new ToolStripMenuItem();
+		addScrollMenuItem = new ToolStripMenuItem();
 		removeNodeMenuItem = new ToolStripMenuItem();
 		nodeEditor = new Editors.NodeEditor();
 		menuStrip = new MenuStrip();
@@ -49,7 +49,7 @@ partial class MainWin
 		statusStrip = new StatusStrip();
 		showWinBtn = new Button();
 		rendererCombo = new ComboBox();
-		dbgBtn = new Button();
+		redrawBtn = new Button();
 		winDimsXCheckBox = new CheckBox();
 		groupBox1 = new GroupBox();
 		label3 = new Label();
@@ -77,7 +77,7 @@ partial class MainWin
 		layoutTree.MultiSelect = false;
 		layoutTree.Name = "layoutTree";
 		layoutTree.ShowGroups = false;
-		layoutTree.Size = new Size(389, 395);
+		layoutTree.Size = new Size(389, 410);
 		layoutTree.TabIndex = 5;
 		layoutTree.UseOverlays = false;
 		layoutTree.UseWaitCursorWhenExpanding = false;
@@ -86,45 +86,45 @@ partial class MainWin
 		// 
 		// layoutTreeContextMenu
 		// 
-		layoutTreeContextMenu.Items.AddRange(new ToolStripItem[] { addFillMenuItem, addStackMenuItem, addWrapMenuItem, addMarginMenuItem, removeNodeMenuItem });
+		layoutTreeContextMenu.Items.AddRange(new ToolStripItem[] { addFillMenuItem, addStackMenuItem, addWrapMenuItem, addScrollMenuItem, removeNodeMenuItem });
 		layoutTreeContextMenu.Name = "layoutTreeContextMenu";
-		layoutTreeContextMenu.Size = new Size(168, 114);
+		layoutTreeContextMenu.Size = new Size(159, 114);
 		// 
 		// addFillMenuItem
 		// 
 		addFillMenuItem.Name = "addFillMenuItem";
-		addFillMenuItem.Size = new Size(167, 22);
+		addFillMenuItem.Size = new Size(158, 22);
 		addFillMenuItem.Text = "Add Fill node";
 		// 
 		// addStackMenuItem
 		// 
 		addStackMenuItem.Name = "addStackMenuItem";
-		addStackMenuItem.Size = new Size(167, 22);
+		addStackMenuItem.Size = new Size(158, 22);
 		addStackMenuItem.Text = "Add Stack node";
 		// 
 		// addWrapMenuItem
 		// 
 		addWrapMenuItem.Name = "addWrapMenuItem";
-		addWrapMenuItem.Size = new Size(167, 22);
+		addWrapMenuItem.Size = new Size(158, 22);
 		addWrapMenuItem.Text = "Add Wrap node";
 		// 
-		// addMarginMenuItem
+		// addScrollMenuItem
 		// 
-		addMarginMenuItem.Name = "addMarginMenuItem";
-		addMarginMenuItem.Size = new Size(167, 22);
-		addMarginMenuItem.Text = "Add Margin node";
+		addScrollMenuItem.Name = "addScrollMenuItem";
+		addScrollMenuItem.Size = new Size(158, 22);
+		addScrollMenuItem.Text = "Add Scroll node";
 		// 
 		// removeNodeMenuItem
 		// 
 		removeNodeMenuItem.Name = "removeNodeMenuItem";
-		removeNodeMenuItem.Size = new Size(167, 22);
+		removeNodeMenuItem.Size = new Size(158, 22);
 		removeNodeMenuItem.Text = "Remove node";
 		// 
 		// nodeEditor
 		// 
 		nodeEditor.Location = new Point(6, 22);
 		nodeEditor.Name = "nodeEditor";
-		nodeEditor.Size = new Size(203, 275);
+		nodeEditor.Size = new Size(203, 290);
 		nodeEditor.TabIndex = 8;
 		// 
 		// menuStrip
@@ -198,7 +198,7 @@ partial class MainWin
 		// 
 		// statusStrip
 		// 
-		statusStrip.Location = new Point(0, 454);
+		statusStrip.Location = new Point(0, 469);
 		statusStrip.Name = "statusStrip";
 		statusStrip.Size = new Size(636, 22);
 		statusStrip.TabIndex = 13;
@@ -222,14 +222,14 @@ partial class MainWin
 		rendererCombo.Size = new Size(121, 23);
 		rendererCombo.TabIndex = 16;
 		// 
-		// dbgBtn
+		// redrawBtn
 		// 
-		dbgBtn.Location = new Point(134, 20);
-		dbgBtn.Name = "dbgBtn";
-		dbgBtn.Size = new Size(75, 23);
-		dbgBtn.TabIndex = 17;
-		dbgBtn.Text = "Dbg";
-		dbgBtn.UseVisualStyleBackColor = true;
+		redrawBtn.Location = new Point(263, 26);
+		redrawBtn.Name = "redrawBtn";
+		redrawBtn.Size = new Size(75, 23);
+		redrawBtn.TabIndex = 17;
+		redrawBtn.Text = "Redraw";
+		redrawBtn.UseVisualStyleBackColor = true;
 		// 
 		// winDimsXCheckBox
 		// 
@@ -245,7 +245,6 @@ partial class MainWin
 		groupBox1.Controls.Add(label3);
 		groupBox1.Controls.Add(winDimsYCheckBox);
 		groupBox1.Controls.Add(winDimsYNumeric);
-		groupBox1.Controls.Add(dbgBtn);
 		groupBox1.Controls.Add(label2);
 		groupBox1.Controls.Add(winDimsXCheckBox);
 		groupBox1.Controls.Add(winDimsXNumeric);
@@ -297,7 +296,7 @@ partial class MainWin
 		groupBox2.Controls.Add(nodeEditor);
 		groupBox2.Location = new Point(407, 151);
 		groupBox2.Name = "groupBox2";
-		groupBox2.Size = new Size(217, 299);
+		groupBox2.Size = new Size(217, 314);
 		groupBox2.TabIndex = 20;
 		groupBox2.TabStop = false;
 		groupBox2.Text = "Node";
@@ -315,9 +314,10 @@ partial class MainWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
-		ClientSize = new Size(636, 476);
+		ClientSize = new Size(636, 491);
 		Controls.Add(calcWinSzLabel);
 		Controls.Add(groupBox2);
+		Controls.Add(redrawBtn);
 		Controls.Add(groupBox1);
 		Controls.Add(rendererCombo);
 		Controls.Add(showWinBtn);
@@ -363,7 +363,7 @@ partial class MainWin
 	public StatusStrip statusStrip;
 	public ComboBox rendererCombo;
 	public Button showWinBtn;
-	public Button dbgBtn;
+	public Button redrawBtn;
 	private GroupBox groupBox1;
 	private Label label2;
 	private Label label3;
@@ -372,5 +372,5 @@ partial class MainWin
 	public CheckBox winDimsXCheckBox;
 	public CheckBox winDimsYCheckBox;
 	public Label calcWinSzLabel;
-	public ToolStripMenuItem addMarginMenuItem;
+	public ToolStripMenuItem addScrollMenuItem;
 }

@@ -38,7 +38,11 @@ static partial class Setup
 		var isOpen = Var.Make(false).D(d);
 		PersistRendererCombo(ui.rendererCombo, userPrefs).D(d);
 		ui.showWinBtn.EnableWhenSome(layout).D(d);
-		isOpen.Subscribe(open => ui.showWinBtn.Text = open ? "Close Window" : "Open Window").D(d);
+		isOpen.Subscribe(open =>
+		{
+			ui.showWinBtn.Text = open ? "Close Window" : "Open Window";
+			ui.redrawBtn.Enabled = open;
+		}).D(d);
 
 
 		ui.showWinBtn.Events().Click
@@ -55,7 +59,7 @@ static partial class Setup
 					var win = MakeWindow(layout.V.Ensure().TotalSz.Cap(MAX_WINDOW_SIZE), userPrefs).D(serD.Value);
 
 					var renderer = RendererGetter.Get((RendererType)ui.rendererCombo.SelectedIndex);
-					var renderWinCtx = renderer.GetWinCtx(win);
+					var renderWinCtx = renderer.GetWinCtx(win).D(win.D);
 
 					PaintWindow(win, layout, renderWinCtx, selNode, hoveredNode);
 					HookWinSizeBothWaysAndPersistPos(layout, userPrefs, winSzMutator, win);
@@ -111,25 +115,6 @@ static partial class Setup
 			ControlStyles = (uint)ControlStyles.OptimizedDoubleBuffer
 		};
 	});
-
-
-		/*new(
-			WinClasses.MainWindow,
-			new CreateWindowParams
-			{
-				Name = "Main Win",
-				Styles = WindowStyles.WS_OVERLAPPEDWINDOW | WindowStyles.WS_VISIBLE,
-				X = userPrefs.ExternalWindosPosX,
-				Y = userPrefs.ExternalWindosPosY,
-				Width = sz.Width,
-				Height = sz.Height,
-				ControlStyles = (uint)ControlStyles.OptimizedDoubleBuffer
-			},
-			opt =>
-			{
-				opt.NCAreaCustom = true;
-			}
-		);*/
 
 
 	private static void PaintWindow(SysWin win,

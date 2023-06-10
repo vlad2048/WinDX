@@ -16,9 +16,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Libs\Base\RenderLib\RenderLib.csproj" />
-		<ProjectReference Include="..\..\Libs\Base\SysWinLib\SysWinLib.csproj" />
-		<ProjectReference Include="..\..\Libs\Gui\LayoutSystem\LayoutSystem.csproj" />
+		<ProjectReference Include="..\..\Libs\Base\RenderLib\3_RenderLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Base\SysWinLib\3_SysWinLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Gui\LayoutSystem\1_LayoutSystem.csproj" />
 	</ItemGroup>
 
 </Project>
