@@ -65,7 +65,7 @@ public class SysWin : ISysWin
 		whenMsg = new Subject<IPacket>().D(D);
 		ClientR = Var.Make(
 			R.Empty,
-			Observable.Merge(
+			Obs.Merge(
 				// This observation was made with our custom NonClientArea
 				// =======================================================
 				// this is just so other code doesn't get ClientR=Empty in WM_CREATE.

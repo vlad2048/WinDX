@@ -15,7 +15,7 @@ namespace RenderLib.Renderers.Direct2D;
 // **********
 // * AppCtx *
 // **********
-public class Direct2D_AppCtx : IRenderAppCtx
+public class Direct2D_AppCtx : IRenderAppCtxWithDispose
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -141,7 +141,7 @@ public class Direct2D_Gfx : IGfx
 	public D2D.ID2D1HwndRenderTarget T { get; }
 	public D2D.ID2D1Factory1 D2DFactory { get; }
 
-	public R R { get; }
+	public R R { get; set; }
 
 	internal Direct2D_Gfx(ISysWinRenderingSupport win, Direct2D_WinCtx winCtx)
 	{

@@ -45,7 +45,7 @@ D3D11CreateDevice() ══╣                                  ║          D3DD
 // **********
 // * AppCtx *
 // **********
-public class Direct2DInDirect3D_AppCtx : IRenderAppCtx
+public class Direct2DInDirect3D_AppCtx : IRenderAppCtxWithDispose
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -192,7 +192,7 @@ public class Direct2DInDirect3D_Gfx : IGfx
 	public D2D.ID2D1RenderTarget T { get; }
 	public D2D.ID2D1Factory1 D2DFactory { get; }
 
-	public R R { get; }
+	public R R { get; set; }
 
 	internal Direct2DInDirect3D_Gfx(ISysWinRenderingSupport win, Direct2DInDirect3D_WinCtx winCtx)
 	{

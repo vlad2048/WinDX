@@ -5,27 +5,28 @@ using PowBasics.Geom;
 namespace LayoutSystem.Flex.LayStrats;
 
 /// <summary>
-/// All the children will be:
-///   - at the same position
-///   - fill the available space (under the kids.DimVec Min/Max constraint)
+/// • All the children will be overlapped at the same position (top left) <br/>
+/// • Support scrolling <br/>
+/// <br/>
+/// If scrolling is enabled in a direction: <br/>
+/// • We compute the kids layout as if this direction was Fit (to measure them) <br/>
+/// • The FlexSolver will not clip the kids to this node in that direction <br/>
 /// </summary>
 public class FillStrat : IStrat
 {
-	public override string ToString() => "Fill";
+	public BoolVec ScrollEnabled { get; }
+
+	public FillStrat(BoolVec scrollEnabled) => ScrollEnabled = scrollEnabled;
+
+	public override string ToString() => "Fill" + ScrollEnabled switch
+	{
+		(false, false) => string.Empty,
+		(truer, false) => "(scroll X)",
+		(false, truer) => "(scroll Y)",
+		(truer, truer) => "(scroll X/Y)",
+	};
 
 	public LayNfo Lay(
-		Node node,
-		FreeSz freeSz,
-		FDimVec[] kidDims
-	)
-		=>
-			FillUtilsShared.ComputeLay(node, freeSz, kidDims);
-}
-
-
-static class FillUtilsShared
-{
-	public static LayNfo ComputeLay(
 		Node node,
 		FreeSz freeSz,
 		FDimVec[] kidDims

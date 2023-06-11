@@ -7,7 +7,7 @@ using WinAPI.Utils.Exts;
 
 namespace RenderLib.Renderers.GDIPlus;
 
-public class GDIPlus_AppCtx : IRenderAppCtx
+public class GDIPlus_AppCtx : IRenderAppCtxWithDispose
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -49,7 +49,7 @@ public class GDIPlus_Gfx : IGfx
 	private readonly Pencils pencils;
 	private readonly Graphics gfx;
 
-	public R R { get; }
+	public R R { get; set; }
 
 	internal GDIPlus_Gfx(ISysWinRenderingSupport win, Pencils pencils)
 	{

@@ -1,17 +1,20 @@
-﻿namespace UserEvents.Structs;
+﻿using PowMaybe;
+using PowRxVar;
+
+namespace UserEvents.Structs;
 
 public interface IUIEvt
 {
-	IntPtr WinHandle { get; }
+	IRoVar<Maybe<nint>> WinHandle { get; }
 	IObservable<IUserEvt> Evt { get; }
 }
 
 public class UIEvt : IUIEvt
 {
-	public IntPtr WinHandle { get; }
+	public IRoVar<Maybe<nint>> WinHandle { get; }
 	public IObservable<IUserEvt> Evt { get; }
 
-	internal UIEvt(IntPtr winHandle, IObservable<IUserEvt> evt)
+	internal UIEvt(IRoVar<Maybe<nint>> winHandle, IObservable<IUserEvt> evt)
 	{
 		WinHandle = winHandle;
 		Evt = evt;

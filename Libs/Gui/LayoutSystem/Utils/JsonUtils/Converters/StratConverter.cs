@@ -16,25 +16,27 @@ public class StratConverter : JsonConverter<IStrat>
 		Stack,
 		Wrap,
 		Margin,
-		Scroll,
 	}
 
+	// @formatter:off
 	private record StratNfo(
-		StratType Type,
-		Dir StackMainDir,
-		Align StackAlign,
-		Dir WrapMainDir,
-		BoolVec ScrollEnabled
+		StratType	Type,
+		BoolVec		FillScrollEnabled,
+		Dir			StackMainDir,
+		Align		StackAlign,
+		Dir			WrapMainDir
 	)
 	{
-		public static readonly StratNfo Empty = new(StratType.Fill, Dir.Horz, Align.Start, Dir.Horz, BoolVec.False);
+		public static readonly StratNfo Empty = new(StratType.Fill, BoolVec.False, Dir.Horz, Align.Start, Dir.Horz);
 	}
+	// @formatter:on
 
 	private static StratNfo Strat2Nfo(IStrat s) => s switch
 	{
-		FillStrat => StratNfo.Empty with
+		FillStrat { ScrollEnabled: var scrollEnabled } => StratNfo.Empty with
 		{
-			Type = StratType.Fill
+			Type = StratType.Fill,
+			FillScrollEnabled = scrollEnabled
 		},
 		StackStrat { MainDir: var mainDir, Align: var align } => StratNfo.Empty with
 		{
@@ -51,21 +53,15 @@ public class StratConverter : JsonConverter<IStrat>
 		{
 			Type = StratType.Margin
 		},
-		ScrollStrat { Enabled: var enabled } => StratNfo.Empty with
-		{
-			Type = StratType.Scroll,
-			ScrollEnabled = enabled
-		},
 		_ => throw new ArgumentException()
 	};
 
 	private static IStrat Nfo2Strat(StratNfo s) => s.Type switch
 	{
-		StratType.Fill => new FillStrat(),
+		StratType.Fill => new FillStrat(s.FillScrollEnabled),
 		StratType.Stack => new StackStrat(s.StackMainDir, s.StackAlign),
 		StratType.Wrap => new WrapStrat(s.WrapMainDir),
 		StratType.Margin => new MarginStrat(),
-		StratType.Scroll => new ScrollStrat(s.ScrollEnabled),
 		_ => throw new ArgumentException()
 	};
 

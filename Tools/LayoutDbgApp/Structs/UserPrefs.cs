@@ -10,6 +10,7 @@ class UserPrefs
 	public int ExternalWindosPosX { get; set; }
 	public int ExternalWindosPosY { get; set; }
 	public RendererType SelectedRenderer { get; set; }
+	public (int, int, int, int) ConR { get; set; }
 
 	public void Save() => Saving?.Invoke(null, EventArgs.Empty);
 
@@ -23,6 +24,7 @@ class UserPrefs
 				e.ExternalWindosPosX,
 				e.ExternalWindosPosY,
 				e.SelectedRenderer,
+				e.ConR,
 			})
 			.PersistOn(nameof(Saving));
 }

@@ -2,7 +2,6 @@
 using PowBasics.Geom;
 using PowRxVar;
 using SysWinInterfaces;
-using SysWinLib;
 using Vortice.DCommon;
 
 namespace D3DPlay.Rendering;

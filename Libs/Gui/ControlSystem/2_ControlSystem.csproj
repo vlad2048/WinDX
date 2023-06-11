@@ -12,6 +12,7 @@
 		<ProjectReference Include="..\..\Base\RenderLib\3_RenderLib.csproj" />
 		<ProjectReference Include="..\..\Base\SysWinLib\3_SysWinLib.csproj" />
 		<ProjectReference Include="..\LayoutSystem\1_LayoutSystem.csproj" />
+		<ProjectReference Include="..\TreePusherLib\1_TreePusherLib.csproj" />
 		<ProjectReference Include="..\UserEvents\1_UserEvents.csproj" />
 	</ItemGroup>
 

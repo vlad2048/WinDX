@@ -29,6 +29,11 @@ partial class MainWin
 	{
 		label1 = new Label();
 		formEventDisplayer = new Controls.EventDisplayer();
+		basicControl = new Controls.BasicControl();
+		ctrlEventDisplayer = new Controls.EventDisplayer();
+		label2 = new Label();
+		dxFormEventDisplayer = new Controls.DXEventDisplayer();
+		label3 = new Label();
 		SuspendLayout();
 		// 
 		// label1
@@ -43,19 +48,65 @@ partial class MainWin
 		// 
 		// formEventDisplayer
 		// 
-		formEventDisplayer.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 		formEventDisplayer.Location = new Point(12, 47);
 		formEventDisplayer.Name = "formEventDisplayer";
-		formEventDisplayer.Size = new Size(250, 391);
+		formEventDisplayer.Size = new Size(250, 330);
 		formEventDisplayer.TabIndex = 2;
+		// 
+		// basicControl
+		// 
+		basicControl.Location = new Point(580, 47);
+		basicControl.Name = "basicControl";
+		basicControl.Size = new Size(150, 150);
+		basicControl.TabIndex = 3;
+		// 
+		// ctrlEventDisplayer
+		// 
+		ctrlEventDisplayer.Location = new Point(268, 47);
+		ctrlEventDisplayer.Name = "ctrlEventDisplayer";
+		ctrlEventDisplayer.Size = new Size(250, 330);
+		ctrlEventDisplayer.TabIndex = 4;
+		// 
+		// label2
+		// 
+		label2.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point);
+		label2.Location = new Point(268, 9);
+		label2.Name = "label2";
+		label2.Size = new Size(250, 35);
+		label2.TabIndex = 1;
+		label2.Text = "Ctrl";
+		label2.TextAlign = ContentAlignment.TopCenter;
+		// 
+		// dxFormEventDisplayer
+		// 
+		dxFormEventDisplayer.Location = new Point(12, 445);
+		dxFormEventDisplayer.Name = "dxFormEventDisplayer";
+		dxFormEventDisplayer.Size = new Size(250, 330);
+		dxFormEventDisplayer.TabIndex = 5;
+		// 
+		// label3
+		// 
+		label3.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point);
+		label3.Location = new Point(12, 407);
+		label3.Name = "label3";
+		label3.Size = new Size(250, 35);
+		label3.TabIndex = 1;
+		label3.Text = "DX Form";
+		label3.TextAlign = ContentAlignment.TopCenter;
 		// 
 		// MainWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
-		ClientSize = new Size(800, 450);
+		ClientSize = new Size(800, 790);
+		Controls.Add(dxFormEventDisplayer);
+		Controls.Add(ctrlEventDisplayer);
+		Controls.Add(basicControl);
 		Controls.Add(formEventDisplayer);
+		Controls.Add(label2);
+		Controls.Add(label3);
 		Controls.Add(label1);
+		KeyPreview = true;
 		Name = "MainWin";
 		Text = "Events Monitor";
 		ResumeLayout(false);
@@ -64,4 +115,9 @@ partial class MainWin
 	#endregion
 	private Label label1;
 	private Controls.EventDisplayer formEventDisplayer;
+	private Controls.BasicControl basicControl;
+	private Controls.EventDisplayer ctrlEventDisplayer;
+	private Label label2;
+	private Controls.DXEventDisplayer dxFormEventDisplayer;
+	private Label label3;
 }

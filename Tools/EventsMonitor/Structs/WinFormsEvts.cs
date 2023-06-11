@@ -43,7 +43,7 @@ public record        LeaveWinFormsEvt								: IWinFormsEvtWindow			{ public ove
 public static class WinFormsEvtGenerator
 {
 // @formatter:off
-	public static IObservable<IWinFormsEvt> MakeForControl(Control ctrl) => Observable.Merge<IWinFormsEvt>(
+	public static IObservable<IWinFormsEvt> MakeForControl(Control ctrl) => Obs.Merge<IWinFormsEvt>(
 		ctrl.Events().MouseDown		.Select(e => new MouseButtonDownWinFormsEvt		(e.GetPt(), e.GetBtn()	)),
 		ctrl.Events().MouseUp		.Select(e => new MouseButtonUpWinFormsEvt		(e.GetPt(), e.GetBtn()	)),
 
@@ -89,9 +89,9 @@ public static class WinFormsEvtGenerator
 public interface IPrettyWinFormsEvt { DateTime Timestamp { get; } }
 
 // @formatter:off
-public record NormalPrettyWinFormsEvt			(DateTime Timestamp, IWinFormsEvt Evt)					: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"{Evt}");							}
-public record DelayPrettyWinFormsEvt			(DateTime Timestamp)									: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, "(delay)");						}
-public record MouseMovePrettyWinFormsEvt		(DateTime Timestamp, MouseMoveWinFormsEvt Evt)			: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"Move {Evt.Pos}");				}
+public record NormalPrettyWinFormsEvt			(DateTime Timestamp, IWinFormsEvt Evt)					: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"{Evt}");				}
+public record DelayPrettyWinFormsEvt			(DateTime Timestamp)									: IPrettyWinFormsEvt { public override string ToString() => string.Empty;														}
+public record MouseMovePrettyWinFormsEvt		(DateTime Timestamp, MouseMoveWinFormsEvt Evt)			: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"Move {Evt.Pos}");	}
 public record MouseMoveUpdatePrettyWinFormsEvt	(DateTime Timestamp, MouseMoveWinFormsEvt Evt, int Idx)	: IPrettyWinFormsEvt {
 	public bool IsSubsequent => Idx > 1;
 	public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"Move {Evt.Pos} (x{Idx})");
@@ -104,7 +104,7 @@ public static class PrettyPrintWinFormsAggregator
 
 	private static readonly TimeSpan Delay = TimeSpan.FromSeconds(1);
 
-	public static IObservable<IPrettyWinFormsEvt> PrettyPrint(this IObservable<IWinFormsEvt> evt) => Observable.Create<IPrettyWinFormsEvt>(obs =>
+	public static IObservable<IPrettyWinFormsEvt> PrettyPrint(this IObservable<IWinFormsEvt> evt) => Obs.Create<IPrettyWinFormsEvt>(obs =>
 	{
 		var d = new Disp();
 

@@ -43,7 +43,7 @@ static partial class Setup
 				},
 
 				UI2Val:
-				Observable.Merge(
+				Obs.Merge(
 					xOn.Events().CheckedChanged.Select(_ => mut(Dir.Horz, xOn.Checked ? (int)xVal.Value : int.MaxValue)),
 					yOn.Events().CheckedChanged.Select(_ => mut(Dir.Vert, yOn.Checked ? (int)yVal.Value : int.MaxValue)),
 					xVal.Events().ValueChanged.Select(_ => mut(Dir.Horz, (int)xVal.Value)),

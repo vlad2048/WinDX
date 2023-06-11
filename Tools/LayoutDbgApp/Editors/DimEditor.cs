@@ -40,7 +40,7 @@ partial class DimEditor : UserControl
 			rxVar.EditInner(
 				enableUI: on => typCombo.Visible = minNumeric.Visible = maxNumeric.Visible = on,
 				setUI: Set,
-				UI2Val: Observable.Merge(
+				UI2Val: Obs.Merge(
 					typCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select(_ => (DimType)typCombo.SelectedIndex)
 						.Select<DimType, Dim>(typ => {
 							var rndMin = rnd.Next(30, 160);
@@ -52,7 +52,7 @@ partial class DimEditor : UserControl
 								DimType.Fit => null
 							};
 						}),
-					Observable.Merge(
+					Obs.Merge(
 							minNumeric.Events().ValueChanged,
 							maxNumeric.Events().ValueChanged
 						).Where(_ => eventsEnabled)

@@ -3,7 +3,6 @@ using LayoutDbgApp.Utils.Exts;
 using LayoutSystem.Flex;
 using PowWinForms;
 using LayoutSystem.Flex.LayStrats;
-using LayoutSystem.Flex.LayStratsInternal;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
@@ -31,13 +30,12 @@ partial class NodeEditor : UserControl
 				enableUI: on => Visible = on,
 				setUI: Set,
 				UI2Val:
-					Observable.Merge(
+					Obs.Merge(
 						stratCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => {
 							IStrat strat = stratCombo.SelectedIndex switch {
-								0 => new FillStrat(),
+								0 => new FillStrat(BoolVec.False),
 								1 => new StackStrat(Dir.Horz, Align.Start),
 								2 => new WrapStrat(Dir.Horz),
-								3 => new ScrollStrat(new BoolVec(false, true)),
 								_ => throw new ArgumentException()
 							};
 							return node => node with { Strat = strat };
@@ -71,10 +69,11 @@ partial class NodeEditor : UserControl
 		horzDimEditor.Value.V = May.Some(node.Dim.X);
 		vertDimEditor.Value.V = May.Some(node.Dim.Y);
 		switch (node.Strat) {
-			case FillStrat:
+			case FillStrat s:
 				stratCombo.SelectedIndex = 0;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (false, false);
-				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (false, false);
+				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (true, true);
+				(scrollXCheckBox.Checked, scrollYCheckBox.Checked) = (s.ScrollEnabled.X, s.ScrollEnabled.Y);
 				break;
 
 			case StackStrat s:
@@ -90,13 +89,6 @@ partial class NodeEditor : UserControl
 				stratDirCombo.SelectedIndex = (int)s.MainDir;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (true, false);
 				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (false, false);
-				break;
-
-			case ScrollStrat s:
-				stratCombo.SelectedIndex = 3;
-				(stratDirCombo.Visible, stratAlignCombo.Visible) = (false, false);
-				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (true, true);
-				(scrollXCheckBox.Checked, scrollYCheckBox.Checked) = (s.Enabled.X, s.Enabled.Y);
 				break;
 		}
 
@@ -121,11 +113,11 @@ partial class NodeEditor : UserControl
 	};
 
 	private static IStrat ChangeStratScrollX(IStrat strat, bool enabled) => strat switch {
-		ScrollStrat s => new ScrollStrat(s.Enabled with { X = enabled }),
+		FillStrat s => new FillStrat(s.ScrollEnabled with { X = enabled }),
 		_ => throw new ArgumentException()
 	};
 	private static IStrat ChangeStratScrollY(IStrat strat, bool enabled) => strat switch {
-		ScrollStrat s => new ScrollStrat(s.Enabled with { Y = enabled }),
+		FillStrat s => new FillStrat(s.ScrollEnabled with { Y = enabled }),
 		_ => throw new ArgumentException()
 	};
 }

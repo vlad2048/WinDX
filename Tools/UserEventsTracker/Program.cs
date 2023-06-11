@@ -1,12 +1,7 @@
-using System.Reactive.Linq;
-using System.Runtime.InteropServices;
 using PowRxVar;
-using SysWinInterfaces;
 using SysWinLib;
 using SysWinLib.Structs;
-using UserEvents.Structs;
 using UserEvents.Utils;
-using WinAPI.User32;
 
 namespace UserEventsTracker;
 

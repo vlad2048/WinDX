@@ -11,7 +11,6 @@ using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
-using PowTrees.Algorithms;
 using PowWinForms.TreeEditing;
 using PowWinForms.TreeEditing.Structs;
 using PowWinForms.TreeEditing.Utils;
@@ -25,10 +24,18 @@ static partial class Setup
 		IFullRwBndVar<Maybe<LayoutDef>> layoutDef,
 		IRoVar<Maybe<Layout>> layout,
 		out IRoVar<Maybe<Node>> selNode,
-		out IRoVar<Maybe<Node>> hoveredNode
+		out IRoVar<Maybe<Node>> hoveredNode,
+		bool disableTreeRefresh
 	)
 	{
 		var d = new Disp();
+
+		if (disableTreeRefresh)
+		{
+			selNode = Var.Make(May.None<Node>()).D(d);
+			hoveredNode = Var.Make(May.None<Node>()).D(d);
+			return d;
+		}
 
 		SetupEditor(
 			out var tree,
@@ -47,21 +54,6 @@ static partial class Setup
 			lay = lay with { Root = treeVal };
 			layoutDef.SetInner(May.Some(lay));
 		}).D(d);
-
-
-		/*Observable.Merge(
-				evtObs.WhenNodeAdded().ToUnit(),
-				evtObs.WhenNodeRemoved().ToUnit(),
-				evtObs.WhenNodeChanged().ToUnit()
-			)
-			.Subscribe(_ =>
-			{
-				var lay = layoutDef.V.Ensure();
-				lay = lay with { Root = tree.V.Ensure() };
-				L("[Edit        ] Def <- " + lay.Root.LogToString());
-				layoutDef.SetInner(May.Some(lay));
-			}).D(d);*/
-
 
 
 		layoutDef.WhenOuter.SubscribeToSome(layoutDefVal => evtSig.SignalTreeLoaded(layoutDefVal.Root)).D(d);
@@ -115,7 +107,7 @@ static partial class Setup
 
         hoveredNode = Var.Make(
 			May.None<Node>(),
-			Observable.Merge(
+			Obs.Merge(
 				ctrl.Events().MouseMove.Select(_ => TreeCtrlOps.GetNodeUnderMouse<FlexNode>(ctrl)),
 				evtObs.WhenTreeLoaded().Select(_ => May.None<Node>()),
 				evtObs.WhenTreeUnloaded().Select(_ => May.None<Node>())
@@ -237,7 +229,7 @@ static partial class Setup
             if (mayNode.IsNone(out var node)) return;
             var r0 = DimEditor.rnd.Next(30, 160);
             var r1 = DimEditor.rnd.Next(30, 160);
-            evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fix(r0, r1), new FillStrat(), Mg.Zero));
+            evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fix(r0, r1), new FillStrat(BoolVec.False), Mg.Zero));
         }).D(d);
 
         ui.addStackMenuItem.Events().Click.Subscribe(_ =>
@@ -252,13 +244,6 @@ static partial class Setup
             var mayNode = selNode.V;
             if (mayNode.IsNone(out var node)) return;
             evtSig.SignalNodeAdded(node, new FlexNode(Vec.FilFit, new WrapStrat(Dir.Horz), Mg.Zero));
-        }).D(d);
-
-        ui.addScrollMenuItem.Events().Click.Subscribe(_ =>
-        {
-	        var mayNode = selNode.V;
-	        if (mayNode.IsNone(out var node)) return;
-	        evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fit, new ScrollStrat(new BoolVec(false, true)), Mg.Zero));
         }).D(d);
 
         ui.removeNodeMenuItem.Events().Click.ToUnit().Merge(

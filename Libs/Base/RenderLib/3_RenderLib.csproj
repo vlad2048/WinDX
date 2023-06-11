@@ -23,4 +23,8 @@
 		<ProjectReference Include="..\SysWinInterfaces\2_SysWinInterfaces.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Renderers\Dummy\" />
+	</ItemGroup>
+
 </Project>

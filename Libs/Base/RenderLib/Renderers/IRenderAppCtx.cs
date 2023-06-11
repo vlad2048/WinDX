@@ -4,9 +4,13 @@ using SysWinInterfaces;
 
 namespace RenderLib.Renderers;
 
-public interface IRenderAppCtx : IDisposable
+public interface IRenderAppCtx
 {
 	IRenderWinCtx GetWinCtx(ISysWinRenderingSupport win);
+}
+
+public interface IRenderAppCtxWithDispose : IRenderAppCtx, IDisposable
+{
 }
 
 public interface IRenderWinCtx : IDisposable
@@ -17,7 +21,7 @@ public interface IRenderWinCtx : IDisposable
 
 public interface IGfx : IDisposable
 {
-	R R { get; }
+	R R { get; set; }
 
 	void Dbg();
 	void FillR(R r, BrushDef brush);

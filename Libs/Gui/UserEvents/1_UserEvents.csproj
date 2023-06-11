@@ -9,6 +9,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="DynamicData" Version="7.14.2" />
+	  <PackageReference Include="PowMaybe" Version="0.0.10" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\..\Base\SysWinInterfaces\2_SysWinInterfaces.csproj" />
 	</ItemGroup>
 

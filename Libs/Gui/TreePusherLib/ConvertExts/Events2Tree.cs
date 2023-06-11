@@ -5,10 +5,6 @@ namespace TreePusherLib;
 
 public static class Events2Tree
 {
-	// TODO: check for unbalanced events
-	//   - return which Ctrl is responsible for it
-	//   - returns the rest of the tree
-	//   - test all that
 	public static TNod<T> ToTree<T>(this ITreeEvtObs<T> evtObs, Action runAction)
 	{
 		using var d = new Disp();

@@ -70,6 +70,12 @@ public static class Kernel32Methods
     [DllImport(LibraryName, CharSet = Properties.BuildCharSet)]
     public static extern bool SetConsoleTitle(string lpConsoleTitle);
 
+    [DllImport(LibraryName, ExactSpelling = true)]
+    public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+    [DllImport(LibraryName, ExactSpelling = true)]
+    public static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+
     [DllImport(LibraryName, CharSet = Properties.BuildCharSet)]
     public static extern uint GetConsoleTitle(StringBuilder lpConsoleTitle, uint nSize);
 

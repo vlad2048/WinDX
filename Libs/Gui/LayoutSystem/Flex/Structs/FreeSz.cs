@@ -76,7 +76,7 @@ public readonly record struct FreeSz
 		var f = this;
 		return node.V.Strat switch
 		{
-			ScrollStrat { Enabled: var enabled } => FreeSzMaker.DirFun(dir => enabled.Dir(dir) ? int.MaxValue : f.x),
+			FillStrat { ScrollEnabled: var scrollEnabled } => FreeSzMaker.DirFun(dir => scrollEnabled.Dir(dir) ? int.MaxValue : f.x),
 			_ => this
 		};
 	}

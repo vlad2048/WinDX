@@ -61,10 +61,8 @@ static partial class Setup
 		}
 
 
-		if (userPrefs.OpenFile != null)
+		if (userPrefs.OpenFile != null && File.Exists(userPrefs.OpenFile))
 			LoadFile(userPrefs.OpenFile);
-
-
 
 
 		//ui.statusStrip.AddVar("Layout", layout.Select(e => e.IsSome())).D(d);
@@ -73,7 +71,7 @@ static partial class Setup
 
 		layout.WhenInner.Subscribe(_ => isModified.V = true).D(d);
 
-		Observable.Merge(
+		Obs.Merge(
 			layout.ToUnit(),
 			openedFilename.ToUnit(),
 			isModified.ToUnit()
@@ -120,7 +118,7 @@ static partial class Setup
 			SaveCurrent();
 		}).D(d);
 
-		Observable.Merge(
+		Obs.Merge(
 			ui.saveToolStripMenuItem.Events().Click.Where(_ => openedFilename.V.IsNone()),
 			ui.saveAsToolStripMenuItem.Events().Click
 		)

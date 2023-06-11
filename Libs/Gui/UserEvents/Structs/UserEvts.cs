@@ -28,6 +28,7 @@ public interface IUserEvtWindow : IUserEvt { }
 public record MouseButtonDownUserEvt(Pt Pos, MouseBtn Btn)		: IUserEvtMousePos			{ public override string ToString() => $"{Btn} down ({Pos})";							}
 public record   MouseButtonUpUserEvt(Pt Pos, MouseBtn Btn)		: IUserEvtMousePos			{ public override string ToString() => $"{Btn} up ({Pos})";								}
 public record       MouseMoveUserEvt(Pt Pos)					: IUserEvtMousePos			{ public override string ToString() => $"Move {Pos}";									}
+public record      MouseEnterUserEvt(Pt Pos)					: IUserEvtMousePos			{ public override string ToString() => $"Enter {Pos}";									}
 public record      MouseLeaveUserEvt							: IUserEvtMouse				{ public override string ToString() => "Leave";											}
 
 public record         KeyDownUserEvt(VirtualKey Key)			: IUserEvtKeyboard			{ public override string ToString() => $"'{Key}' down";									}
@@ -51,6 +52,7 @@ public static class IUserEvtExts
 		MouseButtonDownUserEvt e => e with { Pos = e.Pos + ofs },
 		  MouseButtonUpUserEvt e => e with { Pos = e.Pos + ofs },
 		      MouseMoveUserEvt e => e with { Pos = e.Pos + ofs },
+		     MouseEnterUserEvt e => e with { Pos = e.Pos + ofs },
 		_ => evt
 	};
 // @formatter:on

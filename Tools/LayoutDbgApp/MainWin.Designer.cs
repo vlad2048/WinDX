@@ -33,7 +33,6 @@ partial class MainWin
 		addFillMenuItem = new ToolStripMenuItem();
 		addStackMenuItem = new ToolStripMenuItem();
 		addWrapMenuItem = new ToolStripMenuItem();
-		addScrollMenuItem = new ToolStripMenuItem();
 		removeNodeMenuItem = new ToolStripMenuItem();
 		nodeEditor = new Editors.NodeEditor();
 		menuStrip = new MenuStrip();
@@ -86,7 +85,7 @@ partial class MainWin
 		// 
 		// layoutTreeContextMenu
 		// 
-		layoutTreeContextMenu.Items.AddRange(new ToolStripItem[] { addFillMenuItem, addStackMenuItem, addWrapMenuItem, addScrollMenuItem, removeNodeMenuItem });
+		layoutTreeContextMenu.Items.AddRange(new ToolStripItem[] { addFillMenuItem, addStackMenuItem, addWrapMenuItem, removeNodeMenuItem });
 		layoutTreeContextMenu.Name = "layoutTreeContextMenu";
 		layoutTreeContextMenu.Size = new Size(159, 114);
 		// 
@@ -107,12 +106,6 @@ partial class MainWin
 		addWrapMenuItem.Name = "addWrapMenuItem";
 		addWrapMenuItem.Size = new Size(158, 22);
 		addWrapMenuItem.Text = "Add Wrap node";
-		// 
-		// addScrollMenuItem
-		// 
-		addScrollMenuItem.Name = "addScrollMenuItem";
-		addScrollMenuItem.Size = new Size(158, 22);
-		addScrollMenuItem.Text = "Add Scroll node";
 		// 
 		// removeNodeMenuItem
 		// 
@@ -372,5 +365,4 @@ partial class MainWin
 	public CheckBox winDimsXCheckBox;
 	public CheckBox winDimsYCheckBox;
 	public Label calcWinSzLabel;
-	public ToolStripMenuItem addScrollMenuItem;
 }

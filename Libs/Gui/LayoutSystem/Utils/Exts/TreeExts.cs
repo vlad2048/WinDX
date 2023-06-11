@@ -1,6 +1,4 @@
-﻿using PowTrees.Algorithms;
-
-namespace LayoutSystem.Utils.Exts;
+﻿namespace LayoutSystem.Utils.Exts;
 
 static class TreeExts
 {

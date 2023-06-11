@@ -76,11 +76,11 @@ file static class TreeOpsUtils
 	private static Fix? FixNoFilInScroll(this Node node)
 	{
 		if (node.Parent == null) return null;
-		if (node.Parent.V.Strat is not ScrollStrat { Enabled: var enabled }) return null;
+		if (node.Parent.V.Strat is not FillStrat { ScrollEnabled: var scrollEnabled }) return null;
 		var n = node.V;
 		var kd = n.Dim;
-		var fixX = enabled.X && kd.X.IsFil();
-		var fixY = enabled.Y && kd.Y.IsFil();
+		var fixX = scrollEnabled.X && kd.X.IsFil();
+		var fixY = scrollEnabled.Y && kd.Y.IsFil();
 		if (!fixX && !fixY) return null;
 		return new Fix(
 			LayoutWarning.MakeWithDirs(fixX, fixY, "You cannot have a Fil inside a Scroll (equivalent to Fit)"),

@@ -58,8 +58,7 @@ static partial class Setup
 
 					var win = MakeWindow(layout.V.Ensure().TotalSz.Cap(MAX_WINDOW_SIZE), userPrefs).D(serD.Value);
 
-					var renderer = RendererGetter.Get((RendererType)ui.rendererCombo.SelectedIndex);
-					var renderWinCtx = renderer.GetWinCtx(win).D(win.D);
+					var renderWinCtx = RendererGetter.Get((RendererType)ui.rendererCombo.SelectedIndex, win).D(win.D);
 
 					PaintWindow(win, layout, renderWinCtx, selNode, hoveredNode);
 					HookWinSizeBothWaysAndPersistPos(layout, userPrefs, winSzMutator, win);
@@ -136,7 +135,7 @@ static partial class Setup
 				DrawOnWin(gfx, layoutDef, selNode, hoveredNode);
 			}).D(win.D);
 
-		Observable.Merge(
+		Obs.Merge(
 				layout.ToUnit(),
 				selNode.ToUnit(),
 				hoveredNode.ToUnit()

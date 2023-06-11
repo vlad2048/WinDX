@@ -3,7 +3,6 @@ global using static LayoutSystem.Utils.TreeBuilder;
 global using Node = TNod<LayoutSystem.Flex.FlexNode>;
 global using Vec = LayoutSystem.Flex.Structs.DimVecMaker;
 using LayoutSystem.Flex.LayStrats;
-using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.JsonUtils;
 using PowBasics.Geom;
 using PowTrees.Algorithms;

@@ -1,11 +1,11 @@
 using System.Drawing;
 using PowBasics.Geom;
+using PowRxVar;
 using RenderLib;
 using RenderLib.Structs;
 using WinAPI.User32;
 using WinAPI.Windows;
 using SysWinLib;
-using SysWinLib.Defaults;
 using SysWinLib.Structs;
 
 namespace WinPlayer;
@@ -38,8 +38,7 @@ static class Program
 		//win.WhenInit().Subscribe(_ => L("INIT"));
 		//win.ClientR.Subscribe(r => L($"{r}"));
 
-		var renderer = RendererGetter.Get(RendererType.Direct2D);
-		var renderWinCtx = renderer.GetWinCtx(win);
+		var renderWinCtx = RendererGetter.Get(RendererType.Direct2D, win).D(win.D);
 
 		win.WhenMsg.WhenPAINT().Subscribe(e => {
 			using var gfx = renderWinCtx.GetGfx();
