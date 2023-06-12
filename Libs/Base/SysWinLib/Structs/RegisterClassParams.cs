@@ -2,7 +2,7 @@
 
 namespace SysWinLib.Structs;
 
-public class RegisterClassParams
+public sealed class RegisterClassParams
 {
 	public WindowClassStyles Styles { get; init; }
 	public IntPtr? Icon { get; init; }

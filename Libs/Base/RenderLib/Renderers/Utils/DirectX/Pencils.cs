@@ -6,7 +6,7 @@ using Brush = Vortice.Direct2D1.ID2D1Brush;
 
 namespace RenderLib.Renderers.Utils.DirectX;
 
-public record PenNfo(
+sealed record PenNfo(
     Brush Brush,
     float Width,
     D2D.ID2D1StrokeStyle1 Style
@@ -19,7 +19,7 @@ public record PenNfo(
     }
 }
 
-public class Pencils : IDisposable
+sealed class Pencils : IDisposable
 {
     private readonly Disp d = new();
     public void Dispose() => d.Dispose();

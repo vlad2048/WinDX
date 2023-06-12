@@ -12,7 +12,7 @@ namespace LayoutSystem.Flex.LayStrats;
 /// • We compute the kids layout as if this direction was Fit (to measure them) <br/>
 /// • The FlexSolver will not clip the kids to this node in that direction <br/>
 /// </summary>
-public class FillStrat : IStrat
+public sealed class FillStrat : IStrat
 {
 	public BoolVec ScrollEnabled { get; }
 

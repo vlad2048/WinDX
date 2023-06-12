@@ -2,7 +2,7 @@
 
 namespace SysWinLib.Structs;
 
-public class CreateWindowParams
+public sealed class CreateWindowParams
 {
 	public int X { get; init; } = (int)CreateWindowFlags.CW_USEDEFAULT;
 	public int Y { get; init; } = (int)CreateWindowFlags.CW_USEDEFAULT;

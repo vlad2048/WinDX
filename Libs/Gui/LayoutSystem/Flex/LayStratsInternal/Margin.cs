@@ -3,7 +3,7 @@ using PowBasics.Geom;
 
 namespace LayoutSystem.Flex.LayStratsInternal;
 
-class MarginStrat : IStratInternal
+sealed class MarginStrat : IStratInternal
 {
 	public override string ToString() => "Margin";
 

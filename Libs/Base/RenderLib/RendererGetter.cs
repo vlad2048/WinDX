@@ -7,7 +7,7 @@ using SysWinInterfaces;
 
 namespace RenderLib;
 
-public class RendererGetter
+public static class RendererGetter
 {
 	public static IRenderWinCtx Get(RendererType type, ISysWinRenderingSupport win) => Get(type).GetWinCtx(win);
 

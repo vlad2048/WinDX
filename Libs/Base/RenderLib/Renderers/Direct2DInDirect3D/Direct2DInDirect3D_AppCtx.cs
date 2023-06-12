@@ -45,7 +45,7 @@ D3D11CreateDevice() ══╣                                  ║          D3DD
 // **********
 // * AppCtx *
 // **********
-public class Direct2DInDirect3D_AppCtx : IRenderAppCtxWithDispose
+public sealed class Direct2DInDirect3D_AppCtx : IRenderAppCtxWithDispose
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -81,7 +81,7 @@ public class Direct2DInDirect3D_AppCtx : IRenderAppCtxWithDispose
 // **********
 // * WinCtx *
 // **********
-public class Direct2DInDirect3D_WinCtx : IRenderWinCtx
+public sealed class Direct2DInDirect3D_WinCtx : IRenderWinCtx
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -179,15 +179,16 @@ public class Direct2DInDirect3D_WinCtx : IRenderWinCtx
 // *******
 // * Gfx *
 // *******
-public class Direct2DInDirect3D_Gfx : IGfx
+public sealed class Direct2DInDirect3D_Gfx : IGfx
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
 	private readonly ISysWinRenderingSupport win;
+	private readonly Pencils pencils;
+
 	public Direct2DInDirect3D_AppCtx AppCtx { get; }
 	public Direct2DInDirect3D_WinCtx WinCtx { get; }
-	public Pencils Pencils { get; }
 
 	public D2D.ID2D1RenderTarget T { get; }
 	public D2D.ID2D1Factory1 D2DFactory { get; }
@@ -199,7 +200,7 @@ public class Direct2DInDirect3D_Gfx : IGfx
 		this.win = win;
 		WinCtx = winCtx;
 		AppCtx = winCtx.AppCtx;
-		Pencils = winCtx.Pencils;
+		pencils = winCtx.Pencils;
 		R = win.ClientR.V;
 		T = winCtx.D2DRenderTarget;
 		D2DFactory = winCtx.AppCtx.D2DFactory;
@@ -214,20 +215,19 @@ public class Direct2DInDirect3D_Gfx : IGfx
 
 	public void Dbg()
 	{
-		if (!win.IsInit.V) return;
 	}
 
 	public void FillR(R r, BrushDef brush)
 	{
 		if (!win.IsInit.V) return;
-		T.FillRectangle(r.ToDrawRect(), Pencils.GetBrush(brush));
+		T.FillRectangle(r.ToDrawRect(), pencils.GetBrush(brush));
 	}
 
 	public void DrawR(R r, PenDef penDef)
 	{
 		if (!win.IsInit.V) return;
 
-		var pen = Pencils.GetPen(penDef);
+		var pen = pencils.GetPen(penDef);
 
 		var f = new RectangleF(r.X + 0.5f, r.Y + 0.5f, r.Width, r.Height);
 
@@ -237,7 +237,7 @@ public class Direct2DInDirect3D_Gfx : IGfx
 	public void DrawLine(Pt a, Pt b, PenDef penDef)
 	{
 		if (!win.IsInit.V) return;
-		var pen = Pencils.GetPen(penDef);
+		var pen = pencils.GetPen(penDef);
 
 		var m = (int)pen.Width % 2 == 0 ? 0.5f : 0.0f;
 		var isHorz = a.Y == b.Y;

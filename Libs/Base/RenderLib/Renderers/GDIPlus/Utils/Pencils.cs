@@ -5,7 +5,7 @@ using RenderLib.Structs;
 
 namespace RenderLib.Renderers.GDIPlus.Utils;
 
-class Pencils : IDisposable
+sealed class Pencils : IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();

@@ -5,7 +5,7 @@ using SysWinLib.Structs;
 namespace SysWinLib;
 
 
-public class SysWinOpt
+public sealed class SysWinOpt
 {
 	public string WinClass { get; set; } = WinClasses.MainWindow;
 	public CreateWindowParams CreateWindowParams = new();

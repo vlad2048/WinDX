@@ -1,5 +1,6 @@
 ﻿using PowRxVar;
 using TestBase;
+// ReSharper disable EmptyEmbeddedStatement
 
 namespace TreePusherLib.Tests.ConvertExts;
 

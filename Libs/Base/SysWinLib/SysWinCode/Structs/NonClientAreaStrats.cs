@@ -7,9 +7,9 @@ namespace SysWinLib;
 
 public interface INCStrat { }
 
-public class NoneNCStrat : INCStrat { }
+public sealed class NoneNCStrat : INCStrat { }
 
-public class CustomNCStrat : INCStrat
+public sealed class CustomNCStrat : INCStrat
 {
 	public NCHitTestDelegate HitTest { get; set; } = NcHitTestUtils.Make();
 }

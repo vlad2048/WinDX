@@ -8,7 +8,7 @@ using PowBasics.Geom;
 
 namespace LayoutSystem.Utils.JsonUtils.Converters;
 
-public class StratConverter : JsonConverter<IStrat>
+public sealed class StratConverter : JsonConverter<IStrat>
 {
 	private enum StratType
 	{

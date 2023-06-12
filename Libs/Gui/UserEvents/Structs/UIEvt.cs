@@ -9,7 +9,7 @@ public interface IUIEvt
 	IObservable<IUserEvt> Evt { get; }
 }
 
-public class UIEvt : IUIEvt
+public sealed class UIEvt : IUIEvt
 {
 	public IRoVar<Maybe<nint>> WinHandle { get; }
 	public IObservable<IUserEvt> Evt { get; }

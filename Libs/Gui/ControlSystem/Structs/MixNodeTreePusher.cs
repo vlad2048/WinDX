@@ -3,7 +3,7 @@ using TreePusherLib;
 
 namespace ControlSystem.Structs;
 
-class MixNodeTreePusher : TreePusher<IMixNode>, IDisposable
+sealed class MixNodeTreePusher : TreePusher<IMixNode>, IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();

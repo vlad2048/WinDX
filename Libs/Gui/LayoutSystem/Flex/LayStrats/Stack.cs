@@ -22,7 +22,7 @@ public enum Align
 ///   - uses the kids kids.DimFixSz <br/>
 ///   - also uses the alignment along elseDir
 /// </summary>
-public class StackStrat : IStrat
+public sealed class StackStrat : IStrat
 {
 	public Dir MainDir { get; }
 	public Dir ElseDir => MainDir.Neg();

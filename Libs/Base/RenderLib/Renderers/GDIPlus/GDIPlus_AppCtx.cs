@@ -7,7 +7,7 @@ using WinAPI.Utils.Exts;
 
 namespace RenderLib.Renderers.GDIPlus;
 
-public class GDIPlus_AppCtx : IRenderAppCtxWithDispose
+public sealed class GDIPlus_AppCtx : IRenderAppCtxWithDispose
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -22,7 +22,7 @@ public class GDIPlus_AppCtx : IRenderAppCtxWithDispose
 	public IRenderWinCtx GetWinCtx(ISysWinRenderingSupport win) => new GDIPlus_WinCtx(win, pencils);
 }
 
-public class GDIPlus_WinCtx : IRenderWinCtx
+public sealed class GDIPlus_WinCtx : IRenderWinCtx
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -41,7 +41,7 @@ public class GDIPlus_WinCtx : IRenderWinCtx
 	public IGfx GetGfx() => new GDIPlus_Gfx(win, pencils);
 }
 
-public class GDIPlus_Gfx : IGfx
+public sealed class GDIPlus_Gfx : IGfx
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();

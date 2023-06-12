@@ -2,7 +2,7 @@
 
 namespace Structs;
 
-public class WinOpt
+public sealed class WinOpt
 {
     public string Title { get; set; } = string.Empty;
     public Pt? Pos { get; set; }

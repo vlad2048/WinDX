@@ -15,7 +15,7 @@ namespace SysWinLib;
 /// <summary>
 /// Low level Win32 window wrapper
 /// </summary>
-public class SysWin : ISysWin
+public sealed class SysWin : ISysWin
 {
 	// static
 	private static bool isFirst = true;

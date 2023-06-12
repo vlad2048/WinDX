@@ -18,7 +18,7 @@ public interface ITreeEvtSig<in T>
 	void SignalPop(T args);
 }
 
-public class TreeEvents<T> : ITreeEvtSig<T>, ITreeEvtObs<T>, IDisposable
+public sealed class TreeEvents<T> : ITreeEvtSig<T>, ITreeEvtObs<T>, IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();

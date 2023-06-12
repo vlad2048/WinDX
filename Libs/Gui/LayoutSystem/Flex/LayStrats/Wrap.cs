@@ -15,7 +15,7 @@ namespace LayoutSystem.Flex.LayStrats;
 ///   - if a child is bigger than mainDim along MainDir we cap it to mainDim
 ///   - returns the space we need to lay all the children along elseDir in the Strat result
 /// </summary>
-public class WrapStrat : IStrat
+public sealed class WrapStrat : IStrat
 {
 	public Dir MainDir { get; }
 	public Dir ElseDir => MainDir.Neg();

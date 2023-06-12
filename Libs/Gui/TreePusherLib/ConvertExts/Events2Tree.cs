@@ -31,7 +31,7 @@ public static class Events2Tree
 
 	
 	
-	private class TreeStack<S> where S : class
+	private sealed class TreeStack<S> where S : class
 	{
 		private readonly Stack<S> stack = new();
 		private bool isFinished;

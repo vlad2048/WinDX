@@ -8,7 +8,7 @@ using TreePusherLib;
 
 namespace ControlSystem.Structs;
 
-public class RenderArgs : IDisposable
+public sealed class RenderArgs : IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();

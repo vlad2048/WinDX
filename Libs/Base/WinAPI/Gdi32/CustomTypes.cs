@@ -2,7 +2,7 @@
 
 namespace WinAPI.Gdi32;
 
-public class NativeBitmapInfoHandle : CriticalHandle
+public sealed class NativeBitmapInfoHandle : CriticalHandle
 {
 	public unsafe NativeBitmapInfoHandle(ref BitmapInfo bitmapInfo) : base(new IntPtr(0))
 	{

@@ -6,7 +6,7 @@ using UserEvents.Utils;
 
 namespace ControlSystem.Structs;
 
-public class NodeState : INodeState, IDisposable
+public sealed class NodeState : INodeState, IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
