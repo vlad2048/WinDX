@@ -6,9 +6,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowBasics" Version="0.0.11" />
-		<PackageReference Include="PowBasics.Geom" Version="0.0.11" />
-		<PackageReference Include="PowRxVar" Version="0.0.26" />
+		<PackageReference Include="PowBasics" Version="0.0.12" />
+		<PackageReference Include="PowBasics.Geom" Version="0.0.12" />
+		<PackageReference Include="PowRxVar" Version="0.0.27" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -24,7 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Renderers\Dummy\" />
+		<Folder Include="Renderers\Dummy\" />
 	</ItemGroup>
 
 </Project>

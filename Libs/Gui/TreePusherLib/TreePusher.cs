@@ -4,13 +4,13 @@ namespace TreePusherLib;
 
 public class TreePusher<T>
 {
-	private readonly ITreeEvtSig<T> evtSig;
+	protected ITreeEvtSig<T> EvtSig { get; }
 
-	public TreePusher(ITreeEvtSig<T> evtSig) => this.evtSig = evtSig;
+	public TreePusher(ITreeEvtSig<T> evtSig) => EvtSig = evtSig;
 
-	public IDisposable Push(T args)
+	public virtual IDisposable Push(T args)
 	{
-		evtSig.SignalPush(args);
-		return Disposable.Create(() => evtSig.SignalPop(args));
+		EvtSig.SignalPush(args);
+		return Disposable.Create(() => EvtSig.SignalPop(args));
 	}
 }

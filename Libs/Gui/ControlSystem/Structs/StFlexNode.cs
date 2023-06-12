@@ -1,28 +1,16 @@
 ﻿using LayoutSystem.Flex;
-using PowMaybe;
 
 namespace ControlSystem.Structs;
 
 
-public record StFlexNode
+public interface IMixNode { }
+
+public record CtrlNode(Ctrl Ctrl) : IMixNode
 {
-	public NodeState State { get; init; }
-	public FlexNode Flex { get; init; }
-	public Maybe<Ctrl> Ctrl { get; init; }
+	public override string ToString() => Ctrl.GetType().Name;
+}
 
-	public StFlexNode(NodeState state, FlexNode flex)
-	{
-		State = state;
-		Flex = flex;
-		Ctrl = May.None<Ctrl>();
-	}
-
-	public StFlexNode(Ctrl ctrl)
-	{
-		State = ctrl.RootState;
-		Flex = ctrl.RootFlex;
-		Ctrl = May.Some(ctrl);
-	}
-	
+public record StFlexNode(NodeState State, FlexNode Flex) : IMixNode
+{
 	public override string ToString() => $"[R:{State.R}] - {Flex}";
 }

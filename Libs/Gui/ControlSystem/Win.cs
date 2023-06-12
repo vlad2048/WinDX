@@ -1,13 +1,14 @@
 ﻿using ControlSystem.Structs;
+using ControlSystem.Utils;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
-using PowBasics.CollectionsExt;
 using PowBasics.Geom;
-using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
 using RenderLib;
+using RenderLib.Renderers;
 using RenderLib.Renderers.Dummy;
+using Structs;
 using SysWinLib;
 using SysWinLib.Structs;
 using TreePusherLib;
@@ -16,92 +17,32 @@ using WinAPI.Windows;
 
 namespace ControlSystem;
 
-public class WinOpt
-{
-	public string Title { get; set; } = string.Empty;
-	public Pt? Pos { get; set; }
-	public Sz? Size { get; set; }
-
-	public R R
-	{
-		set
-		{
-			Pos = value.Pos;
-			Size = value.Size;
-		}
-	}
-
-	private WinOpt() { }
-
-	public static WinOpt Build(Action<WinOpt>? optFun)
-	{
-		var opt = new WinOpt();
-		optFun?.Invoke(opt);
-		return opt;
-	}
-}
 
 public class Win : Ctrl
 {
 	public Win(Action<WinOpt>? optFun = null)
 	{
 		var opt = WinOpt.Build(optFun);
-		var sysWin = WinUtilsLocal.MakeWin(opt).D(D);
-		var (treeEvtSig, treeEvtObs) = TreeEvents<StFlexNode>.Make().D(D);
+		var sysWin = WinUtils.MakeWin(opt).D(D);
+		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
+
 
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
-			StNode stRoot;
-
-			// Retrieve the StFlexNode tree
-			// ============================
-			{
-				using var subD = new Disp();
-				var argsGfx = new RenderArgs(new TreePusher<StFlexNode>(treeEvtSig), new Dummy_Gfx());
-				treeEvtObs.WhenPush.Subscribe(stNode =>
-				{
-					if (stNode.Ctrl.IsSome(out var ctrl))
-						ctrl.SignalRender(argsGfx);
-				}).D(subD);
-				stRoot = treeEvtObs.ToTree(() => SignalRender(argsGfx));
-			}
-
-			// Compute its layout
-			// ==================
-			var root = stRoot.Map(e => e.Flex);
-			var layout = FlexSolver.Solve(root, FreeSzMaker.FromSz(sysWin.ClientR.V.Size));
-			var st2r = WinUtilsLocal.Build_St2R_Map(stRoot, root, layout);
-
-			// Go through the tree and set every Ctrl.Win
-			// ==========================================
-			stRoot.Select(e => e.V.Ctrl).WhereSome().ForEach(ctrl => ctrl.WinRW.V = May.Some(this));
-
-			{
-				using var paintD = new Disp();
-				var gfx = renderer.GetGfx().D(paintD);
-				var argsGfx = new RenderArgs(new TreePusher<StFlexNode>(treeEvtSig), gfx);
-
-				// Use the layout to update IGfx.R for each node
-				// =============================================
-				treeEvtObs.WhenPush.Subscribe(stNode =>
-				{
-					gfx.R = st2r[stNode.State];
-					if (stNode.Ctrl.IsSome(out var ctrl))
-						ctrl.SignalRender(argsGfx);
-				}).D(paintD);
-
-				// Render
-				// ======
-				SignalRender(argsGfx);
-			}
+			using var d = new Disp();
+			var mixRoot = WinUtils.BuildTree(treeEvtSig, treeEvtObs, this);
+			var rMap = WinUtils.SolveTree(mixRoot, sysWin.ClientR.V.Size);
+			var gfx = WinUtils.BuildGfxWithRMap(rMap, treeEvtObs, renderer).D(d);
+			WinUtils.Render(gfx, treeEvtSig, this).D(d);
 		}).D(D);
+
 	}
 }
 
 
 
-file static class WinUtilsLocal
+file static class WinUtils
 {
 	private const int DEFAULT = (int)CreateWindowFlags.CW_USEDEFAULT;
 
@@ -122,16 +63,68 @@ file static class WinUtilsLocal
 		return win;
 	}
 
-	public static IReadOnlyDictionary<NodeState, R> Build_St2R_Map(
-		StNode stRoot,
-		Node root,
-		Layout layout
+
+	public static MixNode BuildTree(
+		ITreeEvtSig<IMixNode> treeEvtSig,
+		ITreeEvtObs<IMixNode> treeEvtObs,
+		Ctrl rootCtrl
 	)
 	{
-		var st2node = root.Zip(stRoot).ToDictionary(e => e.Second.V.State, e => e.First);
+		using var d = new Disp();
+		var gfx = new Dummy_Gfx().D(d);
+		var renderArgs = new RenderArgs(gfx, treeEvtSig).D(d);
+		return treeEvtObs.ToTree(() =>
+		{
+			using (renderArgs.Ctrl(rootCtrl))
+			{
+			}
+		});
+	}
+
+	
+	public static IReadOnlyDictionary<NodeState, R> SolveTree(
+		MixNode mixRoot,
+		Sz winSz
+	)
+	{
+		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
+		var flexRoot = stFlexRoot.Map(e => e.Flex);
+		var layout = FlexSolver.Solve(flexRoot, FreeSzMaker.FromSz(winSz));
+
+		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
 		var map = new Dictionary<NodeState, R>();
-		foreach (var (st, node) in st2node)
-			map[st] = layout.RMap[node];
+		foreach (var (node, r) in layout.RMap)
+			map[flex2st[node]] = r;
 		return map;
+	}
+
+	public static (IGfx, IDisposable) BuildGfxWithRMap(
+		IReadOnlyDictionary<NodeState, R> rMap,
+		ITreeEvtObs<IMixNode> treeEvtObs,
+		IRenderWinCtx renderer
+	)
+	{
+		var d = new Disp();
+		var gfx = renderer.GetGfx().D(d);
+		treeEvtObs.WhenPush.OfType<StFlexNode, NodeState>(e => e.State).Subscribe(st =>
+		{
+			gfx.R = rMap[st];
+		}).D(d);
+		return (gfx, d);
+	}
+
+
+	public static IDisposable Render(
+		IGfx gfx,
+		ITreeEvtSig<IMixNode> treeEvtSig,
+		Ctrl rootCtrl
+	)
+	{
+		var d = new Disp();
+		var renderArgs = new RenderArgs(gfx, treeEvtSig).D(d);
+		using (renderArgs.Ctrl(rootCtrl))
+		{
+		}
+		return d;
 	}
 }

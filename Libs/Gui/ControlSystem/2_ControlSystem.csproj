@@ -5,7 +5,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="PowMaybe" Version="0.0.10" />
+		<PackageReference Include="PowMaybe" Version="0.0.11" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -14,6 +14,10 @@
 		<ProjectReference Include="..\LayoutSystem\1_LayoutSystem.csproj" />
 		<ProjectReference Include="..\TreePusherLib\1_TreePusherLib.csproj" />
 		<ProjectReference Include="..\UserEvents\1_UserEvents.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Utils\" />
 	</ItemGroup>
 
 </Project>

@@ -11,8 +11,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowRxVar.Maybe" Version="0.0.26" />
-		<PackageReference Include="PowWinForms" Version="0.0.15" />
+		<PackageReference Include="PowRxVar.Maybe" Version="0.0.27" />
+		<PackageReference Include="PowWinForms" Version="0.0.16" />
 	</ItemGroup>
 
 	<ItemGroup>

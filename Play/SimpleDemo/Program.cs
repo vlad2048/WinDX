@@ -13,9 +13,12 @@ static class Program
 {
 	static void Main()
 	{
-		using var d = new Disp();
-		var win = new SimpleWin().D(d);
-		App.Run();
+		using (var d = new Disp())
+		{
+			var _ = new SimpleWin().D(d);
+			App.Run();
+		}
+		VarDbg.CheckForUndisposedDisps(true);
 	}
 }
 
@@ -25,14 +28,18 @@ class SimpleWin : Win
 
 	public SimpleWin() : base(opt => opt.R = new R(-300, 64, 200, 300))
 	{
+		var nodeRoot = new NodeState().D(D);
 		var ctrl = new SimpleCtrl().D(D);
 
 		WhenRender.Subscribe(r =>
 		{
-			r.Gfx.FillR(r.Gfx.R, backBrush);
-			using (r.Ctrl(ctrl))
+			using (r.Flex(nodeRoot, Vec.Fix(200, 300), Strats.Fill))
 			{
+				r.Gfx.FillR(r.Gfx.R, backBrush);
+				using (r.Ctrl(ctrl))
+				{
 
+				}
 			}
 		}).D(D);
 	}
@@ -44,11 +51,11 @@ class SimpleCtrl : Ctrl
 
 	public SimpleCtrl()
 	{
-		var nodeTop = new NodeState().D(D);
+		var nodeRoot = new NodeState().D(D);
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(nodeTop, Vec.Fix(120, 180), Strats.Fill))
+			using (r.Flex(nodeRoot, Vec.Fix(120, 180), Strats.Fill))
 			{
 				r.Gfx.FillR(r.Gfx.R, backBrush);
 			}

@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Libs\Gui\ControlSystem\2_ControlSystem.csproj" />
+		<ProjectReference Include="..\..\Libs\Gui\ControlSystem\2_ControlSystem.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
@@ -7,22 +7,22 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="PowWinForms" Version="0.0.15" />
+		<PackageReference Include="PowWinForms" Version="0.0.16" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Structs\" />
+		<Folder Include="Structs\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Libs\Base\SysWinLib\3_SysWinLib.csproj" />
-	  <ProjectReference Include="..\..\Libs\Gui\UserEvents\1_UserEvents.csproj" />
+		<ProjectReference Include="..\..\Libs\Base\SysWinLib\3_SysWinLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Gui\UserEvents\1_UserEvents.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Controls\DXEventDisplayer.cs">
-	    <SubType>UserControl</SubType>
-	  </Compile>
+		<Compile Update="Controls\DXEventDisplayer.cs">
+			<SubType>UserControl</SubType>
+		</Compile>
 	</ItemGroup>
 
 </Project>

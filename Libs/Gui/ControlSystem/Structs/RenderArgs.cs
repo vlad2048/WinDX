@@ -3,19 +3,25 @@ using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils;
 using PowBasics.Geom;
 using RenderLib.Renderers;
+using PowRxVar;
 using TreePusherLib;
 
 namespace ControlSystem.Structs;
 
-public class RenderArgs
+public class RenderArgs : IDisposable
 {
-	private readonly TreePusher<StFlexNode> pusher;
+	private readonly Disp d = new();
+	public void Dispose() => d.Dispose();
+
+	private readonly MixNodeTreePusher pusher;
+
 	public IGfx Gfx { get; }
 
-	public RenderArgs(TreePusher<StFlexNode> pusher, IGfx gfx)
+	internal RenderArgs(IGfx gfx, ITreeEvtSig<IMixNode> treeEvtSig)
 	{
-		this.pusher = pusher;
 		Gfx = gfx;
+		pusher = new MixNodeTreePusher(treeEvtSig).D(d);
+		pusher.RenderArgs = this;
 	}
 
 	public IDisposable Flex(
@@ -36,7 +42,7 @@ public class RenderArgs
 	public IDisposable Ctrl(
 		Ctrl ctrl
 	) =>
-		pusher.Push(new StFlexNode(
+		pusher.Push(new CtrlNode(
 			ctrl
 		));
 }

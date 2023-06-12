@@ -54,8 +54,8 @@ public static class FlexSolver
 			foreach (var t in node.Children.Zip(layNfo.Kids))
 			{
 				var (kid, kidR) = t;
-				var kidFreeSz = FreeSz.MakeForKid(kid.V.Dim, kidR);
-				kidFreeSz = new FreeSz(kidR.Width, kidR.Height);
+				//var kidFreeSz = FreeSz.MakeForKid(kid.V.Dim, kidR);
+				var kidFreeSz = new FreeSz(kidR.Width, kidR.Height);
 				LayNode(kid, pos + kidR.Pos, kidFreeSz);
 			}
 		}
