@@ -4,7 +4,7 @@ using PowBasics.Geom;
 
 namespace LayoutSystem.Tests.Flex;
 
-class FlexSolverTests
+sealed class FlexSolverTests
 {
 	[Test]
 	public void _01_Wrap()

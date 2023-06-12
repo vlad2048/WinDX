@@ -6,7 +6,7 @@ using PowWinForms;
 
 namespace EventsMonitor.Controls;
 
-partial class EventDisplayer : UserControl
+sealed partial class EventDisplayer : UserControl
 {
 	private const int MAX_ITEMS = 256;
 

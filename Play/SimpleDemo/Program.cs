@@ -22,7 +22,7 @@ static class Program
 	}
 }
 
-class SimpleWin : Win
+sealed class SimpleWin : Win
 {
 	private static readonly BrushDef backBrush = new SolidBrushDef(Color.DarkOrange);
 
@@ -45,7 +45,7 @@ class SimpleWin : Win
 	}
 }
 
-class SimpleCtrl : Ctrl
+sealed class SimpleCtrl : Ctrl
 {
 	private static readonly BrushDef backBrush = new SolidBrushDef(Color.DodgerBlue);
 

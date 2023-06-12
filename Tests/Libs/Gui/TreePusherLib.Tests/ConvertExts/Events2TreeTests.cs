@@ -4,7 +4,7 @@ using TestBase;
 
 namespace TreePusherLib.Tests.ConvertExts;
 
-class Events2TreeTests : RxTest
+sealed class Events2TreeTests : RxTest
 {
 	[Test]
 	public void _00_Simple()

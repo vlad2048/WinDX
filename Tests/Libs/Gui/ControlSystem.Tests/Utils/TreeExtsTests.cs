@@ -4,7 +4,7 @@ using static ControlSystem.Tests.Utils.TestSupport;
 
 namespace ControlSystem.Tests.Utils;
 
-class TreeExtsTests
+sealed class TreeExtsTests
 {
 	[Test]
 	public void _00_Basic() =>

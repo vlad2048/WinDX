@@ -9,7 +9,7 @@ using PowWinForms;
 
 namespace LayoutDbgApp.Editors;
 
-partial class DimEditor : UserControl
+sealed partial class DimEditor : UserControl
 {
 	private Dir dir;
 	private bool eventsEnabled;

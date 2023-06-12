@@ -3,7 +3,7 @@ using PowWinForms;
 
 namespace EventsMonitor.Controls;
 
-partial class BasicControl : UserControl
+sealed partial class BasicControl : UserControl
 {
 	public BasicControl()
 	{

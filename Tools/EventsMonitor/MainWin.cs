@@ -9,7 +9,7 @@ using WinAPI.User32;
 
 namespace EventsMonitor;
 
-partial class MainWin : Form
+sealed partial class MainWin : Form
 {
 	public MainWin()
 	{

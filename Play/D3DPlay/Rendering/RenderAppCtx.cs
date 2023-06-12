@@ -6,7 +6,7 @@ using Vortice.DCommon;
 
 namespace D3DPlay.Rendering;
 
-public class RenderAppCtx : IDisposable
+public sealed class RenderAppCtx : IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -48,7 +48,7 @@ public class RenderAppCtx : IDisposable
 
 
 
-public class RenderWinCtx : IDisposable
+public sealed class RenderWinCtx : IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -129,7 +129,7 @@ public class RenderWinCtx : IDisposable
 
 
 
-public class RenderGfx : IDisposable
+public sealed class RenderGfx : IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();

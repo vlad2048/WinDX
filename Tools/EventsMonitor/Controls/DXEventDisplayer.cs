@@ -8,7 +8,7 @@ using UserEvents.Utils;
 
 namespace EventsMonitor.Controls;
 
-partial class DXEventDisplayer : UserControl
+sealed partial class DXEventDisplayer : UserControl
 {
 	private const int MAX_ITEMS = 256;
 

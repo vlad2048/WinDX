@@ -3,7 +3,7 @@ using RenderLib;
 
 namespace LayoutDbgApp.Structs;
 
-class UserPrefs
+sealed class UserPrefs
 {
 	public string? LastFolder { get; set; }
 	public string? OpenFile { get; set; }

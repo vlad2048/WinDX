@@ -4,7 +4,7 @@ using PowWinForms;
 
 namespace LayoutDbgApp;
 
-partial class MainWin : Form
+sealed partial class MainWin : Form
 {
 	public MainWin()
 	{

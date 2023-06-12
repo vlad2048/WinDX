@@ -12,7 +12,7 @@ using PowRxVar;
 namespace LayoutDbgApp.Editors;
 
 
-partial class NodeEditor : UserControl
+sealed partial class NodeEditor : UserControl
 {
 	private bool eventsEnabled;
 
