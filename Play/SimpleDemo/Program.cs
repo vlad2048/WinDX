@@ -6,6 +6,7 @@ using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Structs;
 using SysWinLib;
+using WinSpectorLib;
 
 namespace SimpleDemo;
 
@@ -16,7 +17,8 @@ static class Program
 		using (var d = new Disp())
 		{
 			var _ = new SimpleWin().D(d);
-			App.Run();
+			//App.Run();
+			WinSpector.Run();
 		}
 		VarDbg.CheckForUndisposedDisps(true);
 	}

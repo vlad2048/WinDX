@@ -26,7 +26,7 @@ public class Win : Ctrl
 		var sysWin = WinUtils.MakeWin(opt).D(D);
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
-
+		G.WinMan.AddWin(this);
 
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{

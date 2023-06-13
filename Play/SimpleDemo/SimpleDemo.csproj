@@ -7,6 +7,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Libs\Gui\ControlSystem\2_ControlSystem.csproj" />
+		<ProjectReference Include="..\..\Libs\Gui\WinSpectorLib\3_WinSpectorLib.csproj" />
 	</ItemGroup>
 
 </Project>

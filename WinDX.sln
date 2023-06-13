@@ -62,6 +62,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleDemo", "Play\SimpleDe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ControlSystem.Tests", "Tests\Libs\Gui\ControlSystem.Tests\ControlSystem.Tests.csproj", "{36BD078C-D417-43C4-B4D8-3D4A0F63D454}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "3_WinSpectorLib", "Libs\Gui\WinSpectorLib\3_WinSpectorLib.csproj", "{5FE3F4E1-7771-44FB-865E-1B26E1BA7845}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -144,6 +146,10 @@ Global
 		{36BD078C-D417-43C4-B4D8-3D4A0F63D454}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36BD078C-D417-43C4-B4D8-3D4A0F63D454}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36BD078C-D417-43C4-B4D8-3D4A0F63D454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FE3F4E1-7771-44FB-865E-1B26E1BA7845}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FE3F4E1-7771-44FB-865E-1B26E1BA7845}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FE3F4E1-7771-44FB-865E-1B26E1BA7845}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FE3F4E1-7771-44FB-865E-1B26E1BA7845}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -172,6 +178,7 @@ Global
 		{8A7E5754-0E76-4DD1-AAC0-69E5A4192688} = {EE6EF8DF-6182-4F66-820B-A2E6979DFBCF}
 		{B4FB4E7D-EC90-4BD6-94C8-740BC35D5199} = {D7C7DF00-23C2-44DC-84E0-67EB7C01BE9F}
 		{36BD078C-D417-43C4-B4D8-3D4A0F63D454} = {ACDCEE26-A1E7-40EF-A07F-2EE1054A7512}
+		{5FE3F4E1-7771-44FB-865E-1B26E1BA7845} = {96FD003F-5168-4FA4-AA4F-A8AFFE200037}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8A81DC4A-7CDC-4C36-B8C5-FC8B381A1124}

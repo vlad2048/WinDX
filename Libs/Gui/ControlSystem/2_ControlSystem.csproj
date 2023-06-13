@@ -17,7 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Singletons\" />
+		<Folder Include="Singletons\WinMan_\" />
 		<Folder Include="Utils\" />
 	</ItemGroup>
 
