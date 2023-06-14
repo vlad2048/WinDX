@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using ControlSystem.Singletons.WinMan_;
 using PowRxVar;
 
+[assembly:InternalsVisibleTo("3_WinSpectorLib")]
 [assembly:InternalsVisibleTo("ControlSystem.Tests")]
 
 namespace ControlSystem;

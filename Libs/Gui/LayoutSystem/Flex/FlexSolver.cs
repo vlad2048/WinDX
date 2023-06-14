@@ -19,7 +19,7 @@ public static class FlexSolver
 		return new Layout(
 			rootRaw,
 			rMap.Remap(rootRaw),
-			warnings
+			warnings.Remap(rootRaw)
 		);
 	}
 
@@ -32,6 +32,12 @@ public static class FlexSolver
 					e => e.First,
 					e => e.Second
 				);
+	}
+
+	private static IReadOnlyDictionary<Node, FlexWarning> Remap(this IReadOnlyDictionary<int, FlexWarning> warningMap, Node rootRaw)
+	{
+		var nodes = rootRaw.ToArray();
+		return warningMap.MapKeys(e => nodes[e]);
 	}
 
 

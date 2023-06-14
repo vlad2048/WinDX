@@ -11,14 +11,29 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowRxVar.Maybe" Version="0.0.27" />
-		<PackageReference Include="PowWinForms" Version="0.0.16" />
+		<PackageReference Include="PowRxVar.Maybe" Version="0.0.33" />
+		<PackageReference Include="PowWinForms" Version="0.0.18" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\Libs\Base\RenderLib\3_RenderLib.csproj" />
 		<ProjectReference Include="..\..\Libs\Base\SysWinLib\3_SysWinLib.csproj" />
 		<ProjectReference Include="..\..\Libs\Gui\LayoutSystem\1_LayoutSystem.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Resource.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resource.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resource.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 </Project>

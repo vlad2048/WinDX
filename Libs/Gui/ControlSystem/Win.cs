@@ -32,12 +32,14 @@ public class Win : Ctrl
 		{
 			using var d = new Disp();
 			var mixRoot = WinUtils.BuildTree(treeEvtSig, treeEvtObs, this);
-			var rMap = WinUtils.SolveTree(mixRoot, sysWin.ClientR.V.Size);
-			var gfx = WinUtils.BuildGfxWithRMap(rMap, treeEvtObs, renderer).D(d);
+			var mixLayout = WinUtils.SolveTree(this, mixRoot, sysWin.ClientR.V.Size);
+			G.WinMan.SetWinLayout(mixLayout);
+			var gfx = WinUtils.BuildGfxWithRMap(mixLayout.RMap, treeEvtObs, renderer).D(d);
 			WinUtils.Render(gfx, treeEvtSig, this).D(d);
 		}).D(D);
-
 	}
+
+	public override string ToString() => GetType().Name;
 }
 
 
@@ -81,8 +83,38 @@ file static class WinUtils
 		});
 	}
 
+
+	public static MixLayout SolveTree(
+		Win win,
+		MixNode mixRoot,
+		Sz winSz
+	)
+	{
+		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
+		var flexRoot = stFlexRoot.Map(e => e.Flex);
+		var layout = FlexSolver.Solve(flexRoot, FreeSzMaker.FromSz(winSz));
+
+		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
+
+		var rMap = new Dictionary<NodeState, R>();
+		foreach (var (node, r) in layout.RMap)
+			rMap[flex2st[node]] = r;
+
+		var warningMap = new Dictionary<NodeState, FlexWarning>();
+		foreach (var (node, warnings) in layout.WarningMap)
+			warningMap[flex2st[node]] = warnings;
+
+		return new MixLayout(
+			win,
+			mixRoot,
+			rMap,
+			warningMap
+		);
+	}
+
+
 	
-	public static IReadOnlyDictionary<NodeState, R> SolveTree(
+	/*public static IReadOnlyDictionary<NodeState, R> SolveTree(
 		MixNode mixRoot,
 		Sz winSz
 	)
@@ -96,7 +128,7 @@ file static class WinUtils
 		foreach (var (node, r) in layout.RMap)
 			map[flex2st[node]] = r;
 		return map;
-	}
+	}*/
 
 	public static (IGfx, IDisposable) BuildGfxWithRMap(
 		IReadOnlyDictionary<NodeState, R> rMap,

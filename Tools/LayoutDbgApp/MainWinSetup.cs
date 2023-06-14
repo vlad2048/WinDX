@@ -21,7 +21,7 @@ static class MainWinSetup
 
 		var userPrefs = new UserPrefs().Track();
 
-		var layoutDef = Var.MakeBndNoCheck(May.None<LayoutDef>()).D(d);
+		var layoutDef = VarMayNoCheck.MakeBnd<LayoutDef>().D(d);
 		var layout = layoutDef.Map2(ComputeLayout);
 		ui.redrawBtn.Events().Click.Subscribe(_ => layoutDef.V = layoutDef.V).D(d);
 
@@ -37,7 +37,7 @@ static class MainWinSetup
 
 	private static Layout ComputeLayout(LayoutDef def) => FlexSolver.Solve(def.Root, def.WinSize);
 
-	private static Action<FreeSz> WinSzMutator(IRwVar<Maybe<LayoutDef>> layoutDef) => freeSz =>
+	private static Action<FreeSz> WinSzMutator(IRwMayVar<LayoutDef> layoutDef) => freeSz =>
 	{
 		if (layoutDef.V.IsNone(out var def)) return;
 		layoutDef.V = May.Some(def with { WinSize = freeSz });

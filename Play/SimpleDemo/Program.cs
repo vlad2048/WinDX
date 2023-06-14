@@ -5,7 +5,6 @@ using LayoutSystem.Flex;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Structs;
-using SysWinLib;
 using WinSpectorLib;
 
 namespace SimpleDemo;
@@ -16,8 +15,8 @@ static class Program
 	{
 		using (var d = new Disp())
 		{
-			var _ = new SimpleWin().D(d);
-			//App.Run();
+			new SimpleWin().D(d);
+			new SimpleWin().D(d);
 			WinSpector.Run();
 		}
 		VarDbg.CheckForUndisposedDisps(true);
@@ -54,10 +53,14 @@ sealed class SimpleCtrl : Ctrl
 	public SimpleCtrl()
 	{
 		var nodeRoot = new NodeState().D(D);
+		var nodeFit = new NodeState().D(D);
+		var nodeFil = new NodeState().D(D);
 
 		WhenRender.Subscribe(r =>
 		{
 			using (r.Flex(nodeRoot, Vec.Fix(120, 180), Strats.Fill))
+			using (r.Flex(nodeFit, Vec.Fit, Strats.Fill))
+			using (r.Flex(nodeFil, Vec.Fil, Strats.Fill))
 			{
 				r.Gfx.FillR(r.Gfx.R, backBrush);
 			}

@@ -33,8 +33,8 @@ sealed class FlexSolverTests
 					M(Vec.Fix(40, 50))
 				)
 			)
-			.Check(new Sz(150, 50),
-				A(0, 0, 150, 50,
+			.Check(new Sz(150, 70),
+				A(0, 0, 150, 70,
 					A(0, 0, 150, 60,
 						A(0, 0, 30, 20),
 						A(30, 0, 80, 60),

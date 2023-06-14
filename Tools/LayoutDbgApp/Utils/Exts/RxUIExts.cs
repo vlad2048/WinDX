@@ -18,8 +18,10 @@ static class RxUIExts
 	public static IDisposable EnableWhenSome<T>(this Control ctrl, IObservable<Maybe<T>> obsMay) => obsMay.Subscribe(may => ctrl.Enabled = may.IsSome());
 
 
-	public static IRoVar<Maybe<U>> Map2<T, U>(this IRoVar<Maybe<T>> v, Func<T, U> fun) =>
-		v.SelectVar(e => e.Select(fun));
+	public static IRoMayVar<U> Map2<T, U>(this IRoMayVar<T> v, Func<T, U> fun) =>
+		VarMay.Make(
+			v.Select(e => e.Select(fun))
+		).D(v);
 
 	
 	public static IDisposable EditInner<T>(

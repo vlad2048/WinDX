@@ -25,10 +25,10 @@ static partial class Setup
 
 	public static IDisposable DisplayLayout(
 		MainWin ui,
-		IRoVar<Maybe<Layout>> layout,
+		IRoMayVar<Layout> layout,
 		UserPrefs userPrefs,
-		IRoVar<Maybe<Node>> selNode,
-		IRoVar<Maybe<Node>> hoveredNode,
+		IRoMayVar<Node> selNode,
+		IRoMayVar<Node> hoveredNode,
 		Action<FreeSz> winSzMutator
 	)
 	{

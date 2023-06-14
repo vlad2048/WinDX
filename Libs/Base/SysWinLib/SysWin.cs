@@ -34,7 +34,7 @@ public sealed class SysWin : ISysWin
 		D.Dispose();
 		isDisposed = true;
 	}
-	protected void Destroy()
+	private void Destroy()
 	{
 		if (hasDestroyBeenSent) return;
 		User32Methods.DestroyWindow(Handle);

@@ -10,7 +10,7 @@ namespace LayoutDbgApp.SetupLogic;
 
 static partial class Setup
 {
-	public static IDisposable EditLayoutDefWinSize(MainWin ui, IFullRwBndVar<Maybe<LayoutDef>> layout)
+	public static IDisposable EditLayoutDefWinSize(MainWin ui, IFullRwMayBndVar<LayoutDef> layout)
 	{
 		var xVal = ui.winDimsXNumeric;
 		var yVal = ui.winDimsYNumeric;
@@ -53,7 +53,7 @@ static partial class Setup
 	}
 
 
-	public static IDisposable DisplayCalcWinSize(MainWin ui, IRoVar<Maybe<Layout>> layout) =>
+	public static IDisposable DisplayCalcWinSize(MainWin ui, IRoMayVar<Layout> layout) =>
 		layout.Subscribe(may => ui.calcWinSzLabel.Text = may.IsSome(out var lay) switch
 		{
 			true => $"{lay.TotalSz}",

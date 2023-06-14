@@ -12,7 +12,7 @@ static partial class Setup
 {
 	public static IDisposable LoadSaveLayoutDef(
 		MainWin ui,
-		IFullRwBndVar<Maybe<LayoutDef>> layout,
+		IFullRwMayBndVar<LayoutDef> layout,
 		UserPrefs userPrefs
 	)
 	{

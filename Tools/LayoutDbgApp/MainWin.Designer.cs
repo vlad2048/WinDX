@@ -68,18 +68,14 @@ partial class MainWin
 		// 
 		// layoutTree
 		// 
-		layoutTree.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+		layoutTree.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 		layoutTree.CellEditUseWholeCell = false;
 		layoutTree.ContextMenuStrip = layoutTreeContextMenu;
-		layoutTree.FullRowSelect = true;
 		layoutTree.Location = new Point(12, 56);
-		layoutTree.MultiSelect = false;
 		layoutTree.Name = "layoutTree";
 		layoutTree.ShowGroups = false;
-		layoutTree.Size = new Size(389, 410);
+		layoutTree.Size = new Size(531, 410);
 		layoutTree.TabIndex = 5;
-		layoutTree.UseOverlays = false;
-		layoutTree.UseWaitCursorWhenExpanding = false;
 		layoutTree.View = View.Details;
 		layoutTree.VirtualMode = true;
 		// 
@@ -87,30 +83,30 @@ partial class MainWin
 		// 
 		layoutTreeContextMenu.Items.AddRange(new ToolStripItem[] { addFillMenuItem, addStackMenuItem, addWrapMenuItem, removeNodeMenuItem });
 		layoutTreeContextMenu.Name = "layoutTreeContextMenu";
-		layoutTreeContextMenu.Size = new Size(159, 114);
+		layoutTreeContextMenu.Size = new Size(158, 92);
 		// 
 		// addFillMenuItem
 		// 
 		addFillMenuItem.Name = "addFillMenuItem";
-		addFillMenuItem.Size = new Size(158, 22);
+		addFillMenuItem.Size = new Size(157, 22);
 		addFillMenuItem.Text = "Add Fill node";
 		// 
 		// addStackMenuItem
 		// 
 		addStackMenuItem.Name = "addStackMenuItem";
-		addStackMenuItem.Size = new Size(158, 22);
+		addStackMenuItem.Size = new Size(157, 22);
 		addStackMenuItem.Text = "Add Stack node";
 		// 
 		// addWrapMenuItem
 		// 
 		addWrapMenuItem.Name = "addWrapMenuItem";
-		addWrapMenuItem.Size = new Size(158, 22);
+		addWrapMenuItem.Size = new Size(157, 22);
 		addWrapMenuItem.Text = "Add Wrap node";
 		// 
 		// removeNodeMenuItem
 		// 
 		removeNodeMenuItem.Name = "removeNodeMenuItem";
-		removeNodeMenuItem.Size = new Size(158, 22);
+		removeNodeMenuItem.Size = new Size(157, 22);
 		removeNodeMenuItem.Text = "Remove node";
 		// 
 		// nodeEditor
@@ -125,7 +121,7 @@ partial class MainWin
 		menuStrip.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem });
 		menuStrip.Location = new Point(0, 0);
 		menuStrip.Name = "menuStrip";
-		menuStrip.Size = new Size(636, 24);
+		menuStrip.Size = new Size(778, 24);
 		menuStrip.TabIndex = 9;
 		menuStrip.Text = "menuStrip1";
 		// 
@@ -173,8 +169,9 @@ partial class MainWin
 		// 
 		// label1
 		// 
+		label1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 		label1.AutoSize = true;
-		label1.Location = new Point(404, 30);
+		label1.Location = new Point(549, 31);
 		label1.Name = "label1";
 		label1.Size = new Size(55, 15);
 		label1.TabIndex = 10;
@@ -193,7 +190,7 @@ partial class MainWin
 		// 
 		statusStrip.Location = new Point(0, 469);
 		statusStrip.Name = "statusStrip";
-		statusStrip.Size = new Size(636, 22);
+		statusStrip.Size = new Size(778, 22);
 		statusStrip.TabIndex = 13;
 		statusStrip.Text = "statusStrip";
 		// 
@@ -235,13 +232,14 @@ partial class MainWin
 		// 
 		// groupBox1
 		// 
+		groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 		groupBox1.Controls.Add(label3);
 		groupBox1.Controls.Add(winDimsYCheckBox);
 		groupBox1.Controls.Add(winDimsYNumeric);
 		groupBox1.Controls.Add(label2);
 		groupBox1.Controls.Add(winDimsXCheckBox);
 		groupBox1.Controls.Add(winDimsXNumeric);
-		groupBox1.Location = new Point(407, 56);
+		groupBox1.Location = new Point(549, 56);
 		groupBox1.Name = "groupBox1";
 		groupBox1.Size = new Size(217, 89);
 		groupBox1.TabIndex = 19;
@@ -286,8 +284,9 @@ partial class MainWin
 		// 
 		// groupBox2
 		// 
+		groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 		groupBox2.Controls.Add(nodeEditor);
-		groupBox2.Location = new Point(407, 151);
+		groupBox2.Location = new Point(549, 151);
 		groupBox2.Name = "groupBox2";
 		groupBox2.Size = new Size(217, 314);
 		groupBox2.TabIndex = 20;
@@ -296,8 +295,9 @@ partial class MainWin
 		// 
 		// calcWinSzLabel
 		// 
+		calcWinSzLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 		calcWinSzLabel.AutoSize = true;
-		calcWinSzLabel.Location = new Point(495, 30);
+		calcWinSzLabel.Location = new Point(640, 31);
 		calcWinSzLabel.Name = "calcWinSzLabel";
 		calcWinSzLabel.Size = new Size(49, 15);
 		calcWinSzLabel.TabIndex = 22;
@@ -307,7 +307,7 @@ partial class MainWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
-		ClientSize = new Size(636, 491);
+		ClientSize = new Size(778, 491);
 		Controls.Add(calcWinSzLabel);
 		Controls.Add(groupBox2);
 		Controls.Add(redrawBtn);

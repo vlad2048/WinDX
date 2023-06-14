@@ -8,14 +8,8 @@ public enum WarningDir
 	Vert = 2,
 }
 
-
-public record LayoutWarning(
+public record FlexWarning(
 	WarningDir Dir,
-	string Message
-)
-{
-	public static LayoutWarning MakeWithDirs(bool fixX, bool fixY, string message) => new(
-		(fixX ? WarningDir.Horz : 0) | (fixY ? WarningDir.Vert : 0),
-		message
-	);
-}
+	DimVec FixedDim,
+	string[] Messages
+);

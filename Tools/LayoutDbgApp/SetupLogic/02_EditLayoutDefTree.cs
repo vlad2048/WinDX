@@ -21,10 +21,10 @@ static partial class Setup
 {
 	public static IDisposable EditLayoutDefTree(
 		MainWin ui,
-		IFullRwBndVar<Maybe<LayoutDef>> layoutDef,
-		IRoVar<Maybe<Layout>> layout,
-		out IRoVar<Maybe<Node>> selNode,
-		out IRoVar<Maybe<Node>> hoveredNode,
+		IFullRwMayBndVar<LayoutDef> layoutDef,
+		IRoMayVar<Layout> layout,
+		out IRoMayVar<Node> selNode,
+		out IRoMayVar<Node> hoveredNode,
 		bool disableTreeRefresh
 	)
 	{
@@ -32,8 +32,8 @@ static partial class Setup
 
 		if (disableTreeRefresh)
 		{
-			selNode = Var.Make(May.None<Node>()).D(d);
-			hoveredNode = Var.Make(May.None<Node>()).D(d);
+			selNode = VarMay.Make<Node>().D(d);
+			hoveredNode = VarMay.Make<Node>().D(d);
 			return d;
 		}
 
@@ -75,13 +75,13 @@ static partial class Setup
 
 
     public static IDisposable SetupEditor(
-        out IRoVar<Maybe<Node>> tree,
-        out IRoVar<Maybe<Node>> selNode,
-        out IRoVar<Maybe<Node>> hoveredNode,
+        out IRoMayVar<Node> tree,
+        out IRoMayVar<Node> selNode,
+        out IRoMayVar<Node> hoveredNode,
         out ITreeEvtSig<FlexNode> evtSig,
         out ITreeEvtObs<FlexNode> evtObs,
         MainWin ui,
-		IRoVar<Maybe<Layout>> layout
+		IRoMayVar<Layout> layout
        )
     {
         var d = new Disp();
@@ -105,8 +105,7 @@ static partial class Setup
         SetupColumns(ctrl, layout);
         SetupContextMenu(ui, evtSig, selNode).D(d);
 
-        hoveredNode = Var.Make(
-			May.None<Node>(),
+        hoveredNode = VarMay.Make(
 			Obs.Merge(
 				ctrl.Events().MouseMove.Select(_ => TreeCtrlOps.GetNodeUnderMouse<FlexNode>(ctrl)),
 				evtObs.WhenTreeLoaded().Select(_ => May.None<Node>()),
@@ -119,94 +118,10 @@ static partial class Setup
 
 
 
-    private static void SetupColumns(
-	    TreeListView ctrl,
-	    IRoVar<Maybe<Layout>> layout
-	   )
-    {
-		//void AddCol(string name, int width,)
-
-		ctrl.UseCellFormatEvents = true;
-
-		ctrl.FormatCell += (_, args) =>
-		{
-			if (layout.V.IsNone(out var lay)) return;
-			var warnings = lay.WarningMap.GetMatchingWarnings((Node)args.Model, args.Column);
-			if (warnings.Length == 0) return;
-
-			args.SubItem.ForeColor = Color.FromArgb(245, 100, 124);
-		};
-
-		ctrl.CellToolTipShowing += (_, args) =>
-		{
-			if (layout.V.IsNone(out var lay)) return;
-			var warnings = lay.WarningMap.GetMatchingWarnings((Node)args.Model, args.Column);
-			if (warnings.Length == 0) return;
-
-			args.Text = warnings.Select(e => e.Message).JoinText(Environment.NewLine);
-			args.Title = "Layout Warning" + (warnings.Length > 1 ? "s" : "");
-			args.StandardIcon = ToolTipControl.StandardIcons.Warning;
-		};
-
-        ctrl.Columns.Add(new OLVColumn("Node", "Node")
-        {
-            FillsFreeSpace = true,
-			
-            AspectGetter = obj =>
-            {
-                if (obj is not Node nod) return "_";
-                return $"{nod.V.Strat}";
-            }
-        });
-        ctrl.Columns.Add(new OLVColumn("Width", "Width")
-        {
-	        Width = 80,
-	        AspectGetter = obj =>
-	        {
-		        if (obj is not Node nod) return "_";
-		        return nod.V.Dim.X.Fmt();
-	        }
-        });
-        ctrl.Columns.Add(new OLVColumn("Height", "Height")
-        {
-	        Width = 80,
-	        AspectGetter = obj =>
-	        {
-		        if (obj is not Node nod) return "_";
-		        return nod.V.Dim.Y.Fmt();
-	        }
-        });
-        ctrl.Columns.Add(new OLVColumn("R", "R")
-        {
-            Width = 100,
-            AspectGetter = obj =>
-            {
-                if (obj is not Node nod) return "_";
-                if (layout.V.IsNone(out var lay)) return "err_0";
-                if (!lay.RMap.TryGetValue(nod, out var r)) return "err_1";
-                return $"{r}";
-            }
-        });
-    }
-
-    private static LayoutWarning[] GetMatchingWarnings(this IReadOnlyDictionary<Node, LayoutWarning[]> warnings, Node node, OLVColumn column)
-    {
-	    if (!warnings.TryGetValue(node, out var arr)) return Array.Empty<LayoutWarning>();
-	    WarningDir? colDir = column.Text switch
-	    {
-		    "Width" => WarningDir.Horz,
-		    "Height" => WarningDir.Vert,
-		    _ => null
-	    };
-	    if (colDir == null) return Array.Empty<LayoutWarning>();
-	    return arr.WhereToArray(e => e.Dir.HasFlag(colDir.Value));
-    }
-
-
     private static IDisposable SetupContextMenu(
         MainWin ui,
         ITreeEvtSig<FlexNode> evtSig,
-        IRoVar<Maybe<Node>> selNode
+        IRoMayVar<Node> selNode
     )
     {
         var d = new Disp();
@@ -258,4 +173,161 @@ static partial class Setup
 
         return d;
     }
+
+
+
+
+
+	
+
+
+    private static class ColumnNames
+    {
+	    public const string Node = "Node";
+	    public const string Width = "Width";
+	    public const string Height = "Height";
+	    public const string R = "R";
+	    public const string Warnings = "Warnings";
+    }
+
+
+    private static void SetupColumns(
+	    TreeListView ctrl,
+	    IRoMayVar<Layout> layout
+	   )
+    {
+	    ctrl.FullRowSelect = true;
+	    ctrl.MultiSelect = false;
+	    ctrl.UseCellFormatEvents = true;
+	    ctrl.UseOverlays = false;
+	    ctrl.UseWaitCursorWhenExpanding = false;
+
+	    var warningIcon = Resource.LayoutTree_Warning;
+
+	    void AddImageColumn(string name, int width, Func<Node, Image?> imgFun) =>
+		    ctrl.Columns.Add(new OLVColumn(name, name)
+			    {
+				    Width = width,
+				    AspectGetter = _ => null,
+				    ImageGetter = obj =>
+				    {
+					    if (obj is not Node nod) return null;
+					    return imgFun(nod);
+				    }
+			    }
+		    );
+
+	    void AddTextColumn(string name, int? width, Func<Node, string> textFun) =>
+		    ctrl.Columns.Add(new OLVColumn(name, name)
+		    {
+			    Width = width ?? 60,
+			    FillsFreeSpace = !width.HasValue,
+			    AspectGetter = obj =>
+			    {
+				    if (obj is not Node nod) return null;
+				    return textFun(nod);
+			    }
+		    });
+
+		AddTextColumn(ColumnNames.Node, null, nod => $"{nod.V.Strat}");
+
+		AddTextColumn(ColumnNames.Width, 80, nod =>
+		{
+			var warn = WarningDir.Horz.GetDimWarningForColumn(nod, layout);
+			return warn switch
+			{
+				null => nod.V.Dim.X.Fmt(),
+				not null => warn.FixedDim.X.Fmt()
+			};
+		});
+
+		AddTextColumn(ColumnNames.Height, 80, nod =>
+		{
+			var warn = WarningDir.Vert.GetDimWarningForColumn(nod, layout);
+			return warn switch
+			{
+				null => nod.V.Dim.Y.Fmt(),
+				not null => warn.FixedDim.Y.Fmt()
+			};
+		});
+
+		AddTextColumn(ColumnNames.R, 100, nod =>
+		{
+			if (layout.V.IsNone(out var lay)) return "err_0";
+			if (!lay.RMap.TryGetValue(nod, out var r)) return "err_1";
+			return $"{r}";
+		});
+
+		AddImageColumn(ColumnNames.Warnings, 65, nod =>
+		{
+			if (layout.V.IsNone(out var lay)) return null;
+			return lay.WarningMap.ContainsKey(nod) switch
+			{
+				true => warningIcon,
+				false => null
+			};
+		});
+
+		ctrl.FormatCell += (_, args) =>
+		{
+			if (layout.V.IsNone(out var lay)) return;
+			var warn = lay.WarningMap.GetDimWarningForColumn((Node)args.Model, args.Column.GetWarnDir());
+			if (warn == null) return;
+			args.SubItem.ForeColor = Color.FromArgb(245, 100, 124);
+		};
+
+		ctrl.CellToolTipShowing += (_, args) =>
+		{
+			if (layout.V.IsNone(out var lay)) return;
+			var nod = (Node)args.Model;
+			var column = args.Column;
+
+			var warn = lay.WarningMap.GetDimWarningForColumn(nod, WarningDir.Horz | WarningDir.Vert);
+			if (warn == null) return;
+
+			switch (column.Text)
+			{
+				case ColumnNames.Warnings:
+					args.Text = warn.Messages.JoinText(Environment.NewLine);
+					args.Title = "Layout Warning" + (warn.Messages.Length > 1 ? "s" : "");
+					args.StandardIcon = ToolTipControl.StandardIcons.Warning;
+					break;
+				case ColumnNames.Width:
+				case ColumnNames.Height:
+					warn = lay.WarningMap.GetDimWarningForColumn(nod, column.GetWarnDir());
+					if (warn == null) return;
+					args.Text = nod.V.Dim.Dir(column.GetDir()).Fmt();
+					args.Title = "Original value";
+					break;
+			}
+		};
+    }
+
+
+    private static WarningDir GetWarnDir(this OLVColumn column) => column.Text switch
+    {
+	    ColumnNames.Width => WarningDir.Horz,
+	    ColumnNames.Height => WarningDir.Vert,
+	    _ => 0
+    };
+
+    private static Dir GetDir(this OLVColumn column) => column.Text switch
+    {
+	    ColumnNames.Width => Dir.Horz,
+	    ColumnNames.Height => Dir.Vert,
+	    _ => 0
+    };
+
+    private static FlexWarning? GetDimWarningForColumn(this IReadOnlyDictionary<Node, FlexWarning> warningMap, Node nod, WarningDir colDir)
+    {
+	    if (!warningMap.TryGetValue(nod, out var warn)) return null;
+	    if ((colDir & warn.Dir) == 0) return null;
+	    return warn;
+    }
+
+    private static FlexWarning? GetDimWarningForColumn(this WarningDir colDir, Node nod, IRoMayVar<Layout> layout) => layout.V.IsSome(out var lay) switch
+    {
+	    true => lay.WarningMap.GetDimWarningForColumn(nod, colDir),
+	    false => null
+    };
 }

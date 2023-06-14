@@ -1,5 +1,6 @@
 ﻿using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
+using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowTrees.Algorithms;
 
@@ -10,17 +11,20 @@ static class TreeOps
 	/// <summary>
 	/// Preprocesses the layout tree to avoid non-sensical combinations
 	/// </summary>
-	public static (Node, IReadOnlyDictionary<Node, LayoutWarning[]>) RespectRules(this Node root, FreeSz freeSz)
-	{
-		var warnings = new Dictionary<int, List<LayoutWarning>>();
-		var respectfulRoot = root
+	/*public static (Node, IReadOnlyDictionary<Node, FlexWarning>) RespectRules(this Node root, FreeSz freeSz) =>
+		root
 			.Clone()
 			.SetRootDims(freeSz)
-			.CheckRules(warnings);
-		return (
-			respectfulRoot,
-			warnings.MapBack(root)
-		);
+			.CheckRules();*/
+
+	public static (Node, IReadOnlyDictionary<int, FlexWarning>) RespectRules(this Node root, FreeSz freeSz)
+	{
+		var (fixedRoot, warnings) =
+			root
+				.Clone()
+				.SetRootDims(freeSz)
+				.CheckRules();
+		return (fixedRoot, warnings);
 	}
 }
 
@@ -28,11 +32,6 @@ static class TreeOps
 file static class TreeOpsUtils
 {
 	private const int FALLBACK_LENGTH = 50;
-
-	private record Fix(
-		LayoutWarning Warning,
-		FlexNode Flex
-	);
 
 	/// <summary>
 	/// The only Dims that make sense for the root node are to match the window size
@@ -43,13 +42,61 @@ file static class TreeOpsUtils
 		root.Children
 	);
 
-	public static Node CheckRules(this Node root, Dictionary<int, List<LayoutWarning>> warnings) =>
-		root
-			.Check(warnings, FixNoFilInFit)
-			.Check(warnings, FixNoFilInScroll)
-			.Check(warnings, FixWrapDims)
-			.Check(warnings, FixWrapFilKids);
+	public static (Node, IReadOnlyDictionary<int, FlexWarning>) CheckRules(this Node root)
+	{
+		var warnMap = new Dictionary<int, List<Warn>>();
+		var fixedRoot = root
+			.Check(warnMap, FixNoFilInFit)
+			.Check(warnMap, FixNoFilInScroll)
+			.Check(warnMap, FixWrapDims)
+			.Check(warnMap, FixWrapFilKids);
+		var nodes = fixedRoot.ToArray();
+		var warnings = warnMap
+			.Select(kv => new
+			{
+				kv.Key,
+				Val = MakeWarning(kv.Value, nodes[kv.Key])
+			})
+			.ToDictionary(e => e.Key, e => e.Val);
+		return (
+			fixedRoot,
+			warnings
+		);
+	}
 
+
+
+	
+
+	private class Warn
+	{
+		public WarningDir Dir { get; }
+		public string Message { get; }
+		public Warn(bool fixX, bool fixY, string message)
+		{
+			Dir = (fixX ? WarningDir.Horz : 0) | (fixY ? WarningDir.Vert : 0);
+			Message = message;
+		}
+	}
+
+	private record Fix(
+		Warn Warn,
+		FlexNode Flex
+	);
+
+
+
+	private static FlexWarning MakeWarning(IReadOnlyList<Warn> warns, Node node)
+	{
+		var dir = warns
+			.Select(e => e.Dir)
+			.Aggregate((WarningDir)0, (d1, d2) => d1 | d2);
+		return new FlexWarning(
+			dir,
+			node.V.Dim,
+			warns.SelectToArray(e => e.Message)
+		);
+	}
 
 	private static Fix? FixNoFilInFit(this Node node)
 	{
@@ -61,7 +108,7 @@ file static class TreeOpsUtils
 		var fixY = pd.Y.IsFit() && kd.Y.IsFil();
 		if (!fixX && !fixY) return null;
 		return new Fix(
-			LayoutWarning.MakeWithDirs(fixX, fixY, "You cannot have a Fil inside a Fit"),
+			new Warn(fixX, fixY, "You cannot have a Fil inside a Fit"),
 			n with
 			{
 				Dim = new DimVec(
@@ -75,15 +122,14 @@ file static class TreeOpsUtils
 
 	private static Fix? FixNoFilInScroll(this Node node)
 	{
-		if (node.Parent == null) return null;
-		if (node.Parent.V.Strat is not FillStrat { ScrollEnabled: var scrollEnabled }) return null;
+		if (node.Parent?.V.Strat is not FillStrat { ScrollEnabled: var scrollEnabled }) return null;
 		var n = node.V;
 		var kd = n.Dim;
 		var fixX = scrollEnabled.X && kd.X.IsFil();
 		var fixY = scrollEnabled.Y && kd.Y.IsFil();
 		if (!fixX && !fixY) return null;
 		return new Fix(
-			LayoutWarning.MakeWithDirs(fixX, fixY, "You cannot have a Fil inside a Scroll (equivalent to Fit)"),
+			new Warn(fixX, fixY, "You cannot have a Fil inside a Scroll (equivalent to Fit)"),
 			n with
 			{
 				Dim = new DimVec(
@@ -111,7 +157,7 @@ file static class TreeOpsUtils
 			truer => n with { Dim = DimVecMaker.MkDir(mainDir, D.Fix(FALLBACK_LENGTH), null) },
 		};
 		return new Fix(
-			LayoutWarning.MakeWithDirs(fixX, fixY, "A Wrap node needs to be Fil on its MainDir and Fit on its ElseDir"),
+			new Warn(fixX, fixY, "A Wrap node needs to be Fil on its MainDir and Fit on its ElseDir"),
 			fixedNode
 		);
 	}
@@ -125,7 +171,8 @@ file static class TreeOpsUtils
 		var fixY = n.Dim.Y.Typ() == DimType.Fil;
 		if (!fixX && !fixY) return null;
 		return new Fix(
-			LayoutWarning.MakeWithDirs(fixX, fixY, "A Wrap node kid cannot have a Fil in any direction"),
+			
+			new Warn(fixX, fixY, "A Wrap node kid cannot have a Fil in any direction"),
 			n with { Dim = Vec.Fix(FALLBACK_LENGTH, FALLBACK_LENGTH) }
 		);
 	}
@@ -134,14 +181,26 @@ file static class TreeOpsUtils
 
 	private static Node Check(
 		this Node root,
-		Dictionary<int, List<LayoutWarning>> warnings,
+		Dictionary<int, List<Warn>> warnings,
 		Func<Node, Fix?> fixFun
 	) =>
 		root.MapNIdx((node, nodeIdx) =>
 		{
 			var fix = fixFun(node);
 			if (fix == null) return node.V;
-			warnings.AddWarning(nodeIdx, fix.Warning);
+			warnings.AddWarning(nodeIdx, fix.Warn);
 			return fix.Flex;
 		});
+
+
+	private static void AddWarning(
+		this Dictionary<int, List<Warn>> map,
+		int nodeIdx,
+		Warn warn
+	)
+	{
+		if (!map.TryGetValue(nodeIdx, out var list))
+			map[nodeIdx] = list = new List<Warn>();
+		list.Add(warn);
+	}
 }
