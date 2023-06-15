@@ -4,7 +4,7 @@ using LayoutSystem.Flex.Structs;
 
 namespace LayoutSystem.Utils.JsonUtils.Converters;
 
-public sealed class DimConverter : JsonConverter<FDim>
+sealed class DimConverter : JsonConverter<FDim>
 {
 	private record Tup(int Min, int Max);
 

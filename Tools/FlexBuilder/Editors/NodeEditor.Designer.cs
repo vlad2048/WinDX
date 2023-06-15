@@ -69,7 +69,7 @@ partial class NodeEditor
 		// stratCombo
 		// 
 		stratCombo.FormattingEnabled = true;
-		stratCombo.Items.AddRange(new object[] { "Fill", "Stack", "Wrap", "Scroll" });
+		stratCombo.Items.AddRange(new object[] { "Fill", "Stack", "Wrap" });
 		stratCombo.Location = new Point(6, 22);
 		stratCombo.Name = "stratCombo";
 		stratCombo.Size = new Size(80, 23);

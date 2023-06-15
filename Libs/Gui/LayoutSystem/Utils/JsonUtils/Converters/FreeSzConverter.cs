@@ -5,7 +5,7 @@ using PowBasics.Geom;
 
 namespace LayoutSystem.Utils.JsonUtils.Converters;
 
-public sealed class FreeSzConverter : JsonConverter<FreeSz>
+sealed class FreeSzConverter : JsonConverter<FreeSz>
 {
 	private record Tup(int X, int Y);
 

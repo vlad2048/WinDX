@@ -4,7 +4,7 @@ using PowBasics.Geom;
 
 namespace LayoutSystem.Utils.JsonUtils.Converters;
 
-public sealed class MargConverter : JsonConverter<Marg>
+sealed class MargConverter : JsonConverter<Marg>
 {
 	private record Tup(int Top, int Right, int Bottom, int Left);
 
