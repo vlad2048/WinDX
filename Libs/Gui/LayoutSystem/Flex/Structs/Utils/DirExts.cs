@@ -25,7 +25,7 @@ public static class DirExts
 		Dr.Vert => vec.Y,
 	};
 
-	public static int Dir(this FreeSz freeSz, Dr dir) => dir switch
+	public static int? Dir(this FreeSz freeSz, Dr dir) => dir switch
 	{
 		Dr.Horz => freeSz.X,
 		Dr.Vert => freeSz.Y,

@@ -18,7 +18,7 @@ public static class Jsoner
     {
         jsonOpt.Converters.Add(new TNodSerializer<FlexNode>());
         jsonOpt.Converters.Add(new DimConverter());
-        jsonOpt.Converters.Add(new FreeSzConverter());
+        //jsonOpt.Converters.Add(new FreeSzConverter());
         jsonOpt.Converters.Add(new MargConverter());
         jsonOpt.Converters.Add(new PtSerializer());
         jsonOpt.Converters.Add(new RSerializer());

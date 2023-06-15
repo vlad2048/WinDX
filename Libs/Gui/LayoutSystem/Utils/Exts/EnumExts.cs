@@ -1,4 +1,6 @@
-﻿namespace LayoutSystem.Utils.Exts;
+﻿using LayoutSystem.Flex.Structs;
+
+namespace LayoutSystem.Utils.Exts;
 
 static class EnumExt
 {

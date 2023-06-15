@@ -9,17 +9,17 @@ namespace LayoutSystem.Flex;
 public static class FlexSolver
 {
 	public static Layout Solve(
-		Node rootRaw,
+		Node root,
 		FreeSz freeSz
 	)
 	{
-		var (root, warnings) = rootRaw.RespectRules(freeSz);
-		var rootMargins = root.AddMargins();
+		var (rootFixed, warnings) = root.RespectRules(freeSz);
+		var rootMargins = rootFixed.AddMargins();
 		var rMap = MakeRMap(rootMargins, freeSz);
 		return new Layout(
-			rootRaw,
-			rMap.Remap(rootRaw),
-			warnings.Remap(rootRaw)
+			root,
+			rMap.Remap(root),
+			warnings.Remap(root)
 		);
 	}
 
@@ -85,6 +85,9 @@ public static class FlexSolver
 	private static FDimVec ResolveKid(Node kid, FreeSz dadFreeSz)
 	{
 		var kidDim = kid.V.Dim;
+
+		//if (kid.V.Strat is FillStrat { Spec: PopSpec }) kidDim = Vec.Fix(1, 1);
+
 		if (kidDim.IsResolvable) return kidDim.ResolveEnsure();
 
 		var kidFreeSz = ComputeFreeSizeForKid(kidDim, dadFreeSz);
@@ -105,8 +108,8 @@ public static class FlexSolver
 		FreeSzMaker.DirFun(
 			dir => kidDim.Dir(dir).Typ() switch
 			{
-				DimType.Fit => int.MaxValue,
-				DimType.Fil => dadFreeSz.DirWithInfinites(dir),
+				DimType.Fit => null,
+				DimType.Fil => dadFreeSz.Dir(dir),
 				_ => kidDim.Dir(dir)!.Value.Max
 			}
 		);

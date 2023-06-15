@@ -14,16 +14,18 @@ namespace LayoutSystem.Flex.LayStrats;
 /// </summary>
 public sealed class FillStrat : IStrat
 {
-	public BoolVec ScrollEnabled { get; }
+	public ISpec Spec { get; }
 
-	public FillStrat(BoolVec scrollEnabled) => ScrollEnabled = scrollEnabled;
+	public FillStrat(ISpec spec) => Spec = spec;
 
-	public override string ToString() => "Fill" + ScrollEnabled switch
+	public override string ToString() => "Fill" + Spec switch
 	{
-		(false, false) => string.Empty,
-		(truer, false) => "(scroll X)",
-		(false, truer) => "(scroll Y)",
-		(truer, truer) => "(scroll X/Y)",
+		ScrollSpec {Enabled: (false, false)} => string.Empty,
+		ScrollSpec {Enabled: (truer, false)} => " (scroll X)",
+		ScrollSpec {Enabled: (false, truer)} => " (scroll Y)",
+		ScrollSpec {Enabled: (truer, truer)} => " (scroll X/Y)",
+		PopSpec => " (pop)",
+		_ => throw new ArgumentException()
 	};
 
 	public LayNfo Lay(
@@ -33,10 +35,10 @@ public sealed class FillStrat : IStrat
 	)
 	{
 		var sz = GeomMaker.SzDirFun(
-			dir => freeSz.IsInfinite(dir) switch
+			dir => freeSz.Dir(dir).HasValue switch
 			{
-				false => freeSz.Dir(dir),
-				truer => kidDims.Any() switch
+				truer => freeSz.Dir(dir)!.Value,
+				false => kidDims.Any() switch
 				{
 					truer => kidDims.Max(e => e.Dir(dir).Max.EnsureNotInf()),
 					false => 0,
@@ -49,10 +51,10 @@ public sealed class FillStrat : IStrat
 				.Select(t => (kid: t.First, kidDim: t.Second))
 				.Map(t => new R(
 					Pt.Empty,
-					GeomMaker.SzDirFun(dir => freeSz.IsInfinite(dir) switch
+					GeomMaker.SzDirFun(dir => freeSz.Dir(dir).HasValue switch
 					{
-						truer => t.kidDim.Dir(dir).Max.EnsureNotInf(),
-						false => StackUtilsShared.LayoutMain(freeSz.Dir(dir), new[] { t.kidDim.Dir(dir) })[0]
+						false => t.kidDim.Dir(dir).Max.EnsureNotInf(),
+						truer => StackUtilsShared.LayoutMain(freeSz.Dir(dir)!.Value, new[] { t.kidDim.Dir(dir) })[0]
 					})
 				));
 

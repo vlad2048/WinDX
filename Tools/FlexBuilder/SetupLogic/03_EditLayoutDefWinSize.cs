@@ -32,14 +32,14 @@ static partial class Setup
 				v =>
 				{
 					var s = v.WinSize;
-					var xEnabled = !s.IsInfinite(Dir.Horz);
-					var yEnabled = !s.IsInfinite(Dir.Vert);
+					var xEnabled = s.Dir(Dir.Horz).HasValue;
+					var yEnabled = s.Dir(Dir.Vert).HasValue;
 					xOn.Checked = xEnabled;
 					yOn.Checked = yEnabled;
 					xVal.Enabled = xEnabled;
 					yVal.Enabled = yEnabled;
-					if (xEnabled) xVal.Value = s.X;
-					if (yEnabled) yVal.Value = s.Y;
+					if (xEnabled) xVal.Value = s.X!.Value;
+					if (yEnabled) yVal.Value = s.Y!.Value;
 				},
 
 				UI2Val:

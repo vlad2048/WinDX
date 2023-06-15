@@ -25,8 +25,8 @@ static class LayNfoExts
 
 	private static R GetIntersection(this R r, FreeSz free)
 	{
-		var width = free.IsInfinite(Dir.Horz) ? int.MaxValue : free.X;
-		var height = free.IsInfinite(Dir.Vert) ? int.MaxValue : free.Y;
+		var width = free.X ?? int.MaxValue;
+		var height = free.Y ?? int.MaxValue;
 		var rFree = new R(Pt.Empty, new Sz(width, height));
 		return r.Intersection(rFree);
 	}

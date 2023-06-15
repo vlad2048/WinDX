@@ -1,5 +1,9 @@
-﻿namespace LayoutSystem.Flex.Structs;
+﻿using System.Text.Json.Serialization;
 
+namespace LayoutSystem.Flex.Structs;
+
+[JsonDerivedType(typeof(ScrollSpec), typeDiscriminator: "Scroll")]
+[JsonDerivedType(typeof(PopSpec), typeDiscriminator: "Pop")]
 public interface ISpec { }
 
 /// <summary>

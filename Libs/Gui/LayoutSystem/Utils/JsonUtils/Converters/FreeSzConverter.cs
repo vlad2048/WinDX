@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿/*
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
@@ -22,3 +23,4 @@ sealed class FreeSzConverter : JsonConverter<FreeSz>
 		JsonSerializer.Serialize(writer, obj, options);
 	}
 }
+*/

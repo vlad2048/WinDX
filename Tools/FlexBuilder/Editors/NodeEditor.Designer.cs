@@ -33,8 +33,8 @@ partial class NodeEditor
 		stratDirCombo = new ComboBox();
 		stratAlignCombo = new ComboBox();
 		groupBox1 = new GroupBox();
-		scrollYCheckBox = new CheckBox();
-		scrollXCheckBox = new CheckBox();
+		specScrollYCheckBox = new CheckBox();
+		specScrollXCheckBox = new CheckBox();
 		groupBox2 = new GroupBox();
 		margMinusBtn = new Button();
 		margPlusBtn = new Button();
@@ -42,12 +42,15 @@ partial class NodeEditor
 		margDownNumeric = new NumericUpDown();
 		margLeftNumeric = new NumericUpDown();
 		margUpNumeric = new NumericUpDown();
+		specGroupBox = new GroupBox();
+		specTypeCombo = new ComboBox();
 		groupBox1.SuspendLayout();
 		groupBox2.SuspendLayout();
 		((System.ComponentModel.ISupportInitialize)margRightNumeric).BeginInit();
 		((System.ComponentModel.ISupportInitialize)margDownNumeric).BeginInit();
 		((System.ComponentModel.ISupportInitialize)margLeftNumeric).BeginInit();
 		((System.ComponentModel.ISupportInitialize)margUpNumeric).BeginInit();
+		specGroupBox.SuspendLayout();
 		SuspendLayout();
 		// 
 		// horzDimEditor
@@ -95,37 +98,36 @@ partial class NodeEditor
 		// 
 		// groupBox1
 		// 
-		groupBox1.Controls.Add(scrollYCheckBox);
-		groupBox1.Controls.Add(scrollXCheckBox);
+		groupBox1.Controls.Add(specGroupBox);
 		groupBox1.Controls.Add(stratCombo);
 		groupBox1.Controls.Add(stratAlignCombo);
 		groupBox1.Controls.Add(stratDirCombo);
 		groupBox1.Location = new Point(3, 185);
 		groupBox1.Name = "groupBox1";
-		groupBox1.Size = new Size(200, 103);
+		groupBox1.Size = new Size(200, 161);
 		groupBox1.TabIndex = 5;
 		groupBox1.TabStop = false;
 		groupBox1.Text = "Strat";
 		// 
-		// scrollYCheckBox
+		// specScrollYCheckBox
 		// 
-		scrollYCheckBox.AutoSize = true;
-		scrollYCheckBox.Location = new Point(92, 80);
-		scrollYCheckBox.Name = "scrollYCheckBox";
-		scrollYCheckBox.Size = new Size(65, 19);
-		scrollYCheckBox.TabIndex = 6;
-		scrollYCheckBox.Text = "Scroll Y";
-		scrollYCheckBox.UseVisualStyleBackColor = true;
+		specScrollYCheckBox.AutoSize = true;
+		specScrollYCheckBox.Location = new Point(101, 47);
+		specScrollYCheckBox.Name = "specScrollYCheckBox";
+		specScrollYCheckBox.Size = new Size(65, 19);
+		specScrollYCheckBox.TabIndex = 6;
+		specScrollYCheckBox.Text = "Scroll Y";
+		specScrollYCheckBox.UseVisualStyleBackColor = true;
 		// 
-		// scrollXCheckBox
+		// specScrollXCheckBox
 		// 
-		scrollXCheckBox.AutoSize = true;
-		scrollXCheckBox.Location = new Point(6, 80);
-		scrollXCheckBox.Name = "scrollXCheckBox";
-		scrollXCheckBox.Size = new Size(65, 19);
-		scrollXCheckBox.TabIndex = 5;
-		scrollXCheckBox.Text = "Scroll X";
-		scrollXCheckBox.UseVisualStyleBackColor = true;
+		specScrollXCheckBox.AutoSize = true;
+		specScrollXCheckBox.Location = new Point(101, 22);
+		specScrollXCheckBox.Name = "specScrollXCheckBox";
+		specScrollXCheckBox.Size = new Size(65, 19);
+		specScrollXCheckBox.TabIndex = 5;
+		specScrollXCheckBox.Text = "Scroll X";
+		specScrollXCheckBox.UseVisualStyleBackColor = true;
 		// 
 		// groupBox2
 		// 
@@ -198,6 +200,27 @@ partial class NodeEditor
 		margUpNumeric.Size = new Size(45, 23);
 		margUpNumeric.TabIndex = 0;
 		// 
+		// specGroupBox
+		// 
+		specGroupBox.Controls.Add(specTypeCombo);
+		specGroupBox.Controls.Add(specScrollYCheckBox);
+		specGroupBox.Controls.Add(specScrollXCheckBox);
+		specGroupBox.Location = new Point(6, 80);
+		specGroupBox.Name = "specGroupBox";
+		specGroupBox.Size = new Size(188, 73);
+		specGroupBox.TabIndex = 7;
+		specGroupBox.TabStop = false;
+		specGroupBox.Text = "Spec";
+		// 
+		// specTypeCombo
+		// 
+		specTypeCombo.FormattingEnabled = true;
+		specTypeCombo.Items.AddRange(new object[] { "Scroll", "Pop" });
+		specTypeCombo.Location = new Point(6, 31);
+		specTypeCombo.Name = "specTypeCombo";
+		specTypeCombo.Size = new Size(74, 23);
+		specTypeCombo.TabIndex = 0;
+		// 
 		// NodeEditor
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
@@ -207,14 +230,15 @@ partial class NodeEditor
 		Controls.Add(vertDimEditor);
 		Controls.Add(horzDimEditor);
 		Name = "NodeEditor";
-		Size = new Size(203, 290);
+		Size = new Size(203, 348);
 		groupBox1.ResumeLayout(false);
-		groupBox1.PerformLayout();
 		groupBox2.ResumeLayout(false);
 		((System.ComponentModel.ISupportInitialize)margRightNumeric).EndInit();
 		((System.ComponentModel.ISupportInitialize)margDownNumeric).EndInit();
 		((System.ComponentModel.ISupportInitialize)margLeftNumeric).EndInit();
 		((System.ComponentModel.ISupportInitialize)margUpNumeric).EndInit();
+		specGroupBox.ResumeLayout(false);
+		specGroupBox.PerformLayout();
 		ResumeLayout(false);
 	}
 
@@ -233,6 +257,8 @@ partial class NodeEditor
 	public NumericUpDown margDownNumeric;
 	public NumericUpDown margLeftNumeric;
 	public NumericUpDown margUpNumeric;
-	public CheckBox scrollXCheckBox;
-	public CheckBox scrollYCheckBox;
+	public CheckBox specScrollXCheckBox;
+	public CheckBox specScrollYCheckBox;
+	public GroupBox specGroupBox;
+	public ComboBox specTypeCombo;
 }

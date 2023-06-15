@@ -20,10 +20,10 @@ sealed class MarginStrat : IStratInternal
 		var marg = node.V.Marg;
 
 		var sz = GeomMaker.SzDirFun(
-			dir => freeSz.IsInfinite(dir) switch
+			dir => freeSz.Dir(dir).HasValue switch
 			{
-				false => freeSz.Dir(dir),
-				truer => kidDim.Dir(dir).Max + marg.Dir(dir)
+				truer => freeSz.Dir(dir)!.Value,
+				false => kidDim.Dir(dir).Max + marg.Dir(dir)
 			}
 		);
 

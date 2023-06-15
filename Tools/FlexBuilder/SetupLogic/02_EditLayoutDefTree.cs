@@ -144,7 +144,7 @@ static partial class Setup
             if (mayNode.IsNone(out var node)) return;
             var r0 = DimEditor.rnd.Next(30, 160);
             var r1 = DimEditor.rnd.Next(30, 160);
-            evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fix(r0, r1), new FillStrat(BoolVec.False), Mg.Zero));
+            evtSig.SignalNodeAdded(node, new FlexNode(Vec.Fix(r0, r1), new FillStrat(new ScrollSpec(BoolVec.False)), Mg.Zero));
         }).D(d);
 
         ui.addStackMenuItem.Events().Click.Subscribe(_ =>

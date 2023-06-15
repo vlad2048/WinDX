@@ -40,6 +40,8 @@ public sealed class WrapStrat : IStrat
 		 *   - kids.Main != FIL
 		 *   - kids.Else != FIL
 		 */
+		if (!freeSz.Dir(MainDir).HasValue) throw new ArgumentException("This should be impossible (I forgot why right now)");
+
 		var dim = node.V.Dim;
 		//if (freeSz.IsInfinite(MainDir) || !freeSz.IsInfinite(ElseDir) || !dim.Dir(MainDir).HasValue || dim.Dir(ElseDir).HasValue) throw new ArgumentException("Wrap node assumptions broken");
 
@@ -47,7 +49,7 @@ public sealed class WrapStrat : IStrat
 		var kidSizes = kidDims.Map(kidDim => new Sz(kidDim.X.Max, kidDim.Y.Max));
 
 		var mainDim = dim.Dir(MainDir) ?? throw new ArgumentException("A Wrap node cannot be Fit along its main direction");
-		var mainLng = ResolveDim(mainDim, freeSz.Dir(MainDir));
+		var mainLng = ResolveDim(mainDim, freeSz.Dir(MainDir)!.Value);
 		var rows = WrapKids(kidSizes, MainDir, mainLng);
 		var elseLng = rows.Sum(row => row.Max(kid => kid.Dir(ElseDir)));
 

@@ -74,7 +74,7 @@ partial class MainWin
 		layoutTree.Location = new Point(12, 56);
 		layoutTree.Name = "layoutTree";
 		layoutTree.ShowGroups = false;
-		layoutTree.Size = new Size(531, 410);
+		layoutTree.Size = new Size(531, 470);
 		layoutTree.TabIndex = 5;
 		layoutTree.View = View.Details;
 		layoutTree.VirtualMode = true;
@@ -113,7 +113,7 @@ partial class MainWin
 		// 
 		nodeEditor.Location = new Point(6, 22);
 		nodeEditor.Name = "nodeEditor";
-		nodeEditor.Size = new Size(203, 290);
+		nodeEditor.Size = new Size(203, 348);
 		nodeEditor.TabIndex = 8;
 		// 
 		// menuStrip
@@ -188,7 +188,7 @@ partial class MainWin
 		// 
 		// statusStrip
 		// 
-		statusStrip.Location = new Point(0, 469);
+		statusStrip.Location = new Point(0, 529);
 		statusStrip.Name = "statusStrip";
 		statusStrip.Size = new Size(778, 22);
 		statusStrip.TabIndex = 13;
@@ -288,7 +288,7 @@ partial class MainWin
 		groupBox2.Controls.Add(nodeEditor);
 		groupBox2.Location = new Point(549, 151);
 		groupBox2.Name = "groupBox2";
-		groupBox2.Size = new Size(217, 314);
+		groupBox2.Size = new Size(217, 376);
 		groupBox2.TabIndex = 20;
 		groupBox2.TabStop = false;
 		groupBox2.Text = "Node";
@@ -307,7 +307,7 @@ partial class MainWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
-		ClientSize = new Size(778, 491);
+		ClientSize = new Size(778, 551);
 		Controls.Add(calcWinSzLabel);
 		Controls.Add(groupBox2);
 		Controls.Add(redrawBtn);

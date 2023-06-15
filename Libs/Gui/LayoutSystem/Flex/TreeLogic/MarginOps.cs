@@ -35,7 +35,7 @@ static class MarginOps
 		};
 
 
-	public static Node RemoveMargins(this Node root)
+	/*public static Node RemoveMargins(this Node root)
 	{
 		Node Mk(Node node) => Nod.Make(node.V, node.Children.Select(RemoveMargins));
 
@@ -44,5 +44,5 @@ static class MarginOps
 			truer => Mk(root.Children.Single()),
 			false => Mk(root)
 		};
-	}
+	}*/
 }

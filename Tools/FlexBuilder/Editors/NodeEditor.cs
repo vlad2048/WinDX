@@ -30,10 +30,12 @@ sealed partial class NodeEditor : UserControl
 				enableUI: on => Visible = on,
 				setUI: Set,
 				UI2Val:
-					Obs.Merge(
-						stratCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => {
-							IStrat strat = stratCombo.SelectedIndex switch {
-								0 => new FillStrat(BoolVec.False),
+				Obs.Merge(
+						stratCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ =>
+						{
+							IStrat strat = stratCombo.SelectedIndex switch
+							{
+								0 => new FillStrat(new ScrollSpec(BoolVec.False)),
 								1 => new StackStrat(Dir.Horz, Align.Start),
 								2 => new WrapStrat(Dir.Horz),
 								_ => throw new ArgumentException()
@@ -42,22 +44,23 @@ sealed partial class NodeEditor : UserControl
 						}),
 
 						// @formatter:off
-						horzDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<Dim, Func<FlexNode, FlexNode>>(val => node => node with { Dim = node.Dim with { X = val } }),
-						vertDimEditor.Value.WhenInner.WhenSome().Where(_ => eventsEnabled).Select<Dim, Func<FlexNode, FlexNode>>(val => node => node with { Dim = node.Dim with { Y = val } }),
-						stratDirCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Strat = ChangeStratMainDir(node.Strat, (Dir)stratDirCombo.SelectedIndex) }),
-						stratAlignCombo.Events().SelectedIndexChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Strat = ChangeStratAlign(node.Strat, (Align)stratAlignCombo.SelectedIndex) }),
-						margUpNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.MgUp((int)margUpNumeric.Value) }),
-						margRightNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.MgRight((int)margRightNumeric.Value) }),
-						margDownNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.MgDown((int)margDownNumeric.Value) }),
-						margLeftNumeric.Events().ValueChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.MgLeft((int)margLeftNumeric.Value) }),
-						margMinusBtn.Events().Click.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.Enlarge(-10) }),
-						margPlusBtn.Events().Click.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Marg = node.Marg.Enlarge(10) }),
+						horzDimEditor.Value.WhenInner.WhenSome()			.Select<Dim,		Func<FlexNode, FlexNode>>(val =>	node => node with { Dim = node.Dim with { X = val } }),
+						vertDimEditor.Value.WhenInner.WhenSome()			.Select<Dim,		Func<FlexNode, FlexNode>>(val =>	node => node with { Dim = node.Dim with { Y = val } }),
+						stratDirCombo		.Events().SelectedIndexChanged	.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Strat = ChangeStratMainDir(node.Strat, (Dir)stratDirCombo.SelectedIndex) }),
+						stratAlignCombo		.Events().SelectedIndexChanged	.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Strat = ChangeStratAlign(node.Strat, (Align)stratAlignCombo.SelectedIndex) }),
+						margUpNumeric		.Events().ValueChanged			.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Marg = node.Marg.MgUp((int)margUpNumeric.Value) }),
+						margRightNumeric	.Events().ValueChanged			.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Marg = node.Marg.MgRight((int)margRightNumeric.Value) }),
+						margDownNumeric		.Events().ValueChanged			.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Marg = node.Marg.MgDown((int)margDownNumeric.Value) }),
+						margLeftNumeric		.Events().ValueChanged			.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Marg = node.Marg.MgLeft((int)margLeftNumeric.Value) }),
+						margMinusBtn		.Events().Click					.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Marg = node.Marg.Enlarge(-10) }),
+						margPlusBtn			.Events().Click					.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Marg = node.Marg.Enlarge(10) }),
 
-						scrollXCheckBox.Events().CheckedChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Strat = ChangeStratScrollX(node.Strat, scrollXCheckBox.Checked) }),
-						scrollYCheckBox.Events().CheckedChanged.Where(_ => eventsEnabled).Select<EventArgs, Func<FlexNode, FlexNode>>(_ => node => node with { Strat = ChangeStratScrollY(node.Strat, scrollYCheckBox.Checked) })
-					// @formatter:on
+						specTypeCombo		.Events().SelectedIndexChanged	.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Strat = ChangeStratFillSpec(node.Strat, specTypeCombo.SelectedIndex) }),
+						specScrollXCheckBox	.Events().CheckedChanged		.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Strat = ChangeStratFillScrollX(node.Strat, specScrollXCheckBox.Checked) }),
+						specScrollYCheckBox	.Events().CheckedChanged		.Select<EventArgs,	Func<FlexNode, FlexNode>>(_ =>		node => node with { Strat = ChangeStratFillScrollY(node.Strat, specScrollYCheckBox.Checked) })
+						// @formatter:on
 					)
-			//.Where(_ => eventsEnabled)
+					.Where(_ => eventsEnabled)
 			).D(d);
 		});
 	}
@@ -72,23 +75,37 @@ sealed partial class NodeEditor : UserControl
 			case FillStrat s:
 				stratCombo.SelectedIndex = 0;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (false, false);
-				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (true, true);
-				(scrollXCheckBox.Checked, scrollYCheckBox.Checked) = (s.ScrollEnabled.X, s.ScrollEnabled.Y);
+				specTypeCombo.SelectedIndex = s.Spec switch
+				{
+					ScrollSpec => 0,
+					PopSpec => 1,
+					_ => throw new ArgumentException()
+				};
+				specGroupBox.Visible = true;
+				switch (s.Spec)
+				{
+					case ScrollSpec {Enabled: var scrollEnabled}:
+						(specScrollXCheckBox.Checked, specScrollYCheckBox.Checked) = (scrollEnabled.X, scrollEnabled.Y);
+						(specScrollXCheckBox.Visible, specScrollYCheckBox.Visible) = (true, true);
+						break;
+					case PopSpec:
+						(specScrollXCheckBox.Visible, specScrollYCheckBox.Visible) = (false, false);
+						break;
+				}
 				break;
 
 			case StackStrat s:
 				stratCombo.SelectedIndex = 1;
 				stratDirCombo.SelectedIndex = (int)s.MainDir;
 				stratAlignCombo.SelectedIndex = (int)s.Align;
-				(stratDirCombo.Visible, stratAlignCombo.Visible) = (true, true);
-				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (false, false);
+				specGroupBox.Visible = false;
 				break;
 
 			case WrapStrat s:
 				stratCombo.SelectedIndex = 2;
 				stratDirCombo.SelectedIndex = (int)s.MainDir;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (true, false);
-				(scrollXCheckBox.Visible, scrollYCheckBox.Visible) = (false, false);
+				specGroupBox.Visible = false;
 				break;
 		}
 
@@ -112,12 +129,24 @@ sealed partial class NodeEditor : UserControl
 		_ => throw new ArgumentException()
 	};
 
-	private static IStrat ChangeStratScrollX(IStrat strat, bool enabled) => strat switch {
-		FillStrat s => new FillStrat(s.ScrollEnabled with { X = enabled }),
+	private static IStrat ChangeStratFillSpec(IStrat strat, int specTypeIdx) => strat switch
+	{
+		FillStrat => new FillStrat(specTypeIdx switch
+		{
+			0 => new ScrollSpec(new BoolVec(false, false)),
+			1 => new PopSpec(),
+			_ => throw new ArgumentException()
+		}),
 		_ => throw new ArgumentException()
 	};
-	private static IStrat ChangeStratScrollY(IStrat strat, bool enabled) => strat switch {
-		FillStrat s => new FillStrat(s.ScrollEnabled with { Y = enabled }),
+
+
+	private static IStrat ChangeStratFillScrollX(IStrat strat, bool enabled) => strat switch {
+		FillStrat { Spec: ScrollSpec s } => new FillStrat(new ScrollSpec(s.Enabled with { X = enabled })),
+		_ => throw new ArgumentException()
+	};
+	private static IStrat ChangeStratFillScrollY(IStrat strat, bool enabled) => strat switch {
+		FillStrat { Spec: ScrollSpec s } => new FillStrat(new ScrollSpec(s.Enabled with { Y = enabled })),
 		_ => throw new ArgumentException()
 	};
 }
