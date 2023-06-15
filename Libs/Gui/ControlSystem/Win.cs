@@ -2,6 +2,7 @@
 using ControlSystem.Utils;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
+using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
 using PowTrees.Algorithms;
@@ -23,7 +24,9 @@ public class Win : Ctrl
 	public Win(Action<WinOpt>? optFun = null)
 	{
 		var opt = WinOpt.Build(optFun);
-		var sysWin = WinUtils.MakeWin(opt).D(D);
+		var sysWin = WinUtils.MakeWin(opt);
+		this.D(sysWin.D);
+		sysWin.D(D);
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
@@ -96,39 +99,13 @@ file static class WinUtils
 
 		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
 
-		var rMap = new Dictionary<NodeState, R>();
-		foreach (var (node, r) in layout.RMap)
-			rMap[flex2st[node]] = r;
-
-		var warningMap = new Dictionary<NodeState, FlexWarning>();
-		foreach (var (node, warnings) in layout.WarningMap)
-			warningMap[flex2st[node]] = warnings;
-
 		return new MixLayout(
 			win,
 			mixRoot,
-			rMap,
-			warningMap
+			layout.RMap.MapKeys(flex2st),
+			layout.WarningMap.MapKeys(flex2st)
 		);
 	}
-
-
-	
-	/*public static IReadOnlyDictionary<NodeState, R> SolveTree(
-		MixNode mixRoot,
-		Sz winSz
-	)
-	{
-		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
-		var flexRoot = stFlexRoot.Map(e => e.Flex);
-		var layout = FlexSolver.Solve(flexRoot, FreeSzMaker.FromSz(winSz));
-
-		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
-		var map = new Dictionary<NodeState, R>();
-		foreach (var (node, r) in layout.RMap)
-			map[flex2st[node]] = r;
-		return map;
-	}*/
 
 	public static (IGfx, IDisposable) BuildGfxWithRMap(
 		IReadOnlyDictionary<NodeState, R> rMap,

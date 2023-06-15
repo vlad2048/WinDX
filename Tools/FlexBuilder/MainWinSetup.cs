@@ -1,6 +1,6 @@
-﻿using LayoutDbgApp.SetupLogic;
-using LayoutDbgApp.Structs;
-using LayoutDbgApp.Utils.Exts;
+﻿using FlexBuilder.SetupLogic;
+using FlexBuilder.Structs;
+using FlexBuilder.Utils.Exts;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using PowMaybe;
@@ -9,7 +9,7 @@ using PowWinForms;
 
 #pragma warning disable CS0162
 
-namespace LayoutDbgApp;
+namespace FlexBuilder;
 
 static class MainWinSetup
 {

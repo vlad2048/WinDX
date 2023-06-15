@@ -1,6 +1,6 @@
 ﻿using PowBasics.Geom;
 
-namespace LayoutDbgApp.Utils.Exts;
+namespace FlexBuilder.Utils.Exts;
 
 static class GeomExt
 {

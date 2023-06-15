@@ -2,7 +2,7 @@ using System.ComponentModel;
 using PowRxVar;
 using PowWinForms;
 
-namespace LayoutDbgApp;
+namespace FlexBuilder;
 
 sealed partial class MainWin : Form
 {

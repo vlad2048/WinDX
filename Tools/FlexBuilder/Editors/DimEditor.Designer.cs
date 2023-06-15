@@ -1,4 +1,4 @@
-﻿namespace LayoutDbgApp.Editors;
+﻿namespace FlexBuilder.Editors;
 
 partial class DimEditor
 {

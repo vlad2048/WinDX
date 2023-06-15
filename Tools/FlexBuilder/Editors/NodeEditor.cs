@@ -1,15 +1,15 @@
 ﻿using System.Reactive.Linq;
-using LayoutDbgApp.Utils.Exts;
+using FlexBuilder.Utils.Exts;
 using LayoutSystem.Flex;
-using PowWinForms;
 using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
+using PowWinForms;
 
-namespace LayoutDbgApp.Editors;
+namespace FlexBuilder.Editors;
 
 
 sealed partial class NodeEditor : UserControl

@@ -1,4 +1,4 @@
-﻿namespace LayoutDbgApp;
+﻿namespace FlexBuilder;
 
 partial class MainWin
 {

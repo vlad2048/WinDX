@@ -1,7 +1,7 @@
 ﻿using PowWinForms;
 using RenderLib;
 
-namespace LayoutDbgApp.Structs;
+namespace FlexBuilder.Structs;
 
 sealed class UserPrefs
 {

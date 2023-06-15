@@ -1,7 +1,7 @@
 using PowRxVar;
 using PowWinForms;
 
-namespace LayoutDbgApp;
+namespace FlexBuilder;
 
 static class Program
 {

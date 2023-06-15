@@ -1,10 +1,10 @@
 ﻿using System.Reactive.Disposables;
-using LayoutDbgApp.Structs;
+using FlexBuilder.Structs;
 using PowBasics.Geom;
 using PowRxVar;
 using WinAPI.Utils;
 
-namespace LayoutDbgApp.SetupLogic;
+namespace FlexBuilder.SetupLogic;
 
 static partial class Setup
 {

@@ -1,13 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Reactive.Linq;
-using LayoutDbgApp.Utils.Exts;
+using FlexBuilder.Utils.Exts;
 using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
 using PowWinForms;
 
-namespace LayoutDbgApp.Editors;
+namespace FlexBuilder.Editors;
 
 sealed partial class DimEditor : UserControl
 {

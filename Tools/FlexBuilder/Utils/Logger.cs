@@ -1,4 +1,4 @@
-﻿namespace LayoutDbgApp.Utils;
+﻿namespace FlexBuilder.Utils;
 
 static class Logger
 {

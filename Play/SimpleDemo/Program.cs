@@ -16,7 +16,7 @@ static class Program
 		using (var d = new Disp())
 		{
 			new SimpleWin().D(d);
-			new SimpleWin().D(d);
+			//new SimpleWin().D(d);
 			WinSpector.Run();
 		}
 		VarDbg.CheckForUndisposedDisps(true);

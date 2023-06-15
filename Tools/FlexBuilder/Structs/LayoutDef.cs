@@ -2,7 +2,7 @@
 using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
 
-namespace LayoutDbgApp.Structs;
+namespace FlexBuilder.Structs;
 
 record LayoutDef(
 	FreeSz WinSize,

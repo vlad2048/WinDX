@@ -1,12 +1,12 @@
-﻿using LayoutDbgApp.Structs;
+﻿using System.Reactive.Linq;
+using FlexBuilder.Structs;
+using FlexBuilder.Utils.Exts;
 using LayoutSystem.Utils.JsonUtils;
 using PowMaybe;
-using PowRxVar;
-using System.Reactive.Linq;
-using LayoutDbgApp.Utils.Exts;
 using PowMaybeErr;
+using PowRxVar;
 
-namespace LayoutDbgApp.SetupLogic;
+namespace FlexBuilder.SetupLogic;
 
 static partial class Setup
 {

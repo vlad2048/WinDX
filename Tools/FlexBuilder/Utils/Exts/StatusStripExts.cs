@@ -1,6 +1,6 @@
 ﻿using PowRxVar;
 
-namespace LayoutDbgApp.Utils.Exts;
+namespace FlexBuilder.Utils.Exts;
 
 static class StatusStripExts
 {

@@ -1,11 +1,11 @@
 ﻿using System.Reactive.Linq;
 using BrightIdeasSoftware;
-using LayoutDbgApp.Editors;
-using LayoutDbgApp.Structs;
-using LayoutDbgApp.Utils.Exts;
+using FlexBuilder.Editors;
+using FlexBuilder.Structs;
+using FlexBuilder.Utils.Exts;
+using LayoutSystem.Flex;
 using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
-using LayoutSystem.Flex;
 using LayoutSystem.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
@@ -15,7 +15,7 @@ using PowWinForms.TreeEditing;
 using PowWinForms.TreeEditing.Structs;
 using PowWinForms.TreeEditing.Utils;
 
-namespace LayoutDbgApp.SetupLogic;
+namespace FlexBuilder.SetupLogic;
 
 static partial class Setup
 {

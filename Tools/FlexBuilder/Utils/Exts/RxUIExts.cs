@@ -1,8 +1,8 @@
-﻿using PowMaybe;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
+using PowMaybe;
 using PowRxVar;
 
-namespace LayoutDbgApp.Utils.Exts;
+namespace FlexBuilder.Utils.Exts;
 
 static class RxUIExts
 {

@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using LayoutDbgApp.Structs;
-using LayoutDbgApp.Utils.Exts;
+using FlexBuilder.Structs;
+using FlexBuilder.Utils.Exts;
 using LayoutSystem.Flex.Structs;
 using PowBasics.ColorCode;
 using PowBasics.Geom;
@@ -17,7 +17,7 @@ using WinAPI.Utils.Exts;
 using WinAPI.Windows;
 using Color = System.Drawing.Color;
 
-namespace LayoutDbgApp.SetupLogic;
+namespace FlexBuilder.SetupLogic;
 
 static partial class Setup
 {
