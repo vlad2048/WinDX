@@ -34,7 +34,7 @@ public sealed class StackStrat : IStrat
 		Align = align;
 	}
 
-	public override string ToString() => $"Stack({MainDir} / {Align})";
+	public override string ToString() => $"Stack({MainDir.Fmt()},{Align.Fmt()})";
 
 	public LayNfo Lay(
 		Node node,

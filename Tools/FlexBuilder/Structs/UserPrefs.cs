@@ -7,10 +7,12 @@ sealed class UserPrefs
 {
 	public string? LastFolder { get; set; }
 	public string? OpenFile { get; set; }
-	public int ExternalWindosPosX { get; set; }
-	public int ExternalWindosPosY { get; set; }
+	public bool ExternalWindowVisible { get; set; }
+	public (int, int) ExternalWindosPos { get; set; }
 	public RendererType SelectedRenderer { get; set; }
 	public (int, int, int, int) ConR { get; set; }
+	public TabName SelectedTab { get; set; }
+	public int DetailsSplitterPos { get; set; }
 
 	public void Save() => Saving?.Invoke(null, EventArgs.Empty);
 
@@ -21,10 +23,12 @@ sealed class UserPrefs
 			{
 				e.LastFolder,
 				e.OpenFile,
-				e.ExternalWindosPosX,
-				e.ExternalWindosPosY,
+				e.ExternalWindowVisible,
+				e.ExternalWindosPos,
 				e.SelectedRenderer,
 				e.ConR,
+				e.SelectedTab,
+				e.DetailsSplitterPos,
 			})
 			.PersistOn(nameof(Saving));
 }

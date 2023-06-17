@@ -6,7 +6,7 @@ using PowMaybe;
 using PowMaybeErr;
 using PowRxVar;
 
-namespace FlexBuilder.SetupLogic;
+namespace FlexBuilder.Logic;
 
 static partial class Setup
 {

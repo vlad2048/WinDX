@@ -1,13 +1,22 @@
 ﻿using LayoutSystem.Utils.Exts;
+using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 
 namespace LayoutSystem.Flex.Structs;
 
 
-public record LayNfo(
-    Sz ResolvedSz,
-    R[] Kids
-);
+public sealed record LayNfo(
+	Sz ResolvedSz,
+	R[] Kids
+)
+{
+	public override string ToString() => $"{ResolvedSz} - [{Kids.Select(e => $"({e})").JoinText()}]";
+
+	public bool IsSame(LayNfo l) =>
+		l.ResolvedSz == ResolvedSz &&
+		l.Kids.Length == Kids.Length &&
+		l.Kids.Zip(Kids).All(t => t.First == t.Second);
+}
 
 
 static class LayNfoExts

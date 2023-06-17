@@ -16,10 +16,20 @@ static class RxUIExts
 		obs.WhenNone().Subscribe(_ => action());
 
 	public static IDisposable EnableWhenSome<T>(this Control ctrl, IObservable<Maybe<T>> obsMay) => obsMay.Subscribe(may => ctrl.Enabled = may.IsSome());
+	public static IDisposable EnableWhenSome<T>(this ToolStripItem ctrl, IObservable<Maybe<T>> obsMay) => obsMay.Subscribe(may => ctrl.Enabled = may.IsSome());
 
 
+	// TODO: Move to PowRxVar
+	public static IDisposable PipeInto<T>(this IObservable<T> obs, IRwVar<T> rwVar)
+	{
+		var d = new Disp();
+		obs.Subscribe(v => rwVar.V = v).D(d);
+		return d;
+	}
+
+	// TODO: Move to PowRxVar
 	public static IRoMayVar<U> Map2<T, U>(this IRoMayVar<T> v, Func<T, U> fun) =>
-		VarMay.Make(
+		VarMayNoCheck.Make(
 			v.Select(e => e.Select(fun))
 		).D(v);
 

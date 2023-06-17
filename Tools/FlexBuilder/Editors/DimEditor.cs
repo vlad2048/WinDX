@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using FlexBuilder.Utils.Exts;
 using LayoutSystem.Flex.Structs;
@@ -30,13 +31,11 @@ sealed partial class DimEditor : UserControl
 	{
 		InitializeComponent();
 
-		var rxVar = Var.MakeBnd(May.None<Dim>());
+		var rxVar = Var.MakeBnd(May.None<Dim>()).D(this);
 		Value = rxVar.ToRwBndVar();
 
 		this.InitRX(d =>
 		{
-			rxVar.D(d);
-
 			rxVar.EditInner(
 				enableUI: on => typCombo.Visible = minNumeric.Visible = maxNumeric.Visible = on,
 				setUI: Set,

@@ -1,1 +1,0 @@
-﻿global using static SysWinLib.Utils.LogUtils;

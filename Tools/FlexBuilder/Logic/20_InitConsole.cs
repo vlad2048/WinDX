@@ -4,7 +4,7 @@ using PowBasics.Geom;
 using PowRxVar;
 using WinAPI.Utils;
 
-namespace FlexBuilder.SetupLogic;
+namespace FlexBuilder.Logic;
 
 static partial class Setup
 {

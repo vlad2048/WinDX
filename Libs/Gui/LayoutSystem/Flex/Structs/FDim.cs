@@ -69,7 +69,7 @@ public readonly record struct FDim
 	public override string ToString() => Type switch
 	{
 		DimType.Fix => $"Fix({Min})",
-		DimType.Flt => $"Flt[{Min}-{Max}]",
+		DimType.Flt => $"Flt({Min}-{Max})",
 		DimType.Fil => "Fil",
 		DimType.Fit => throw new ArgumentException("Impossible")
 	};

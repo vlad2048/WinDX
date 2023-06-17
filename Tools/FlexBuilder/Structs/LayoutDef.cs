@@ -11,6 +11,6 @@ record LayoutDef(
 {
 	public static readonly LayoutDef Default = new(
 		new FreeSz(150, 200),
-		M(Vec.Fil, Stack(Dir.Vert, Align.Start))
+		M(Vec.Fil, Stack(Dir.Horz, Align.Start))
 	);
 }

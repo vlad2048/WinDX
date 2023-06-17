@@ -20,12 +20,11 @@ sealed partial class NodeEditor : UserControl
 	public NodeEditor()
 	{
 		InitializeComponent();
-		var rxVar = Var.MakeBnd(May.None<FlexNode>());
+
+		var rxVar = Var.MakeBnd(May.None<FlexNode>()).D(this);
 		Value = rxVar.ToRwBndVar();
 
 		this.InitRX(d => {
-			rxVar.D(d);
-
 			rxVar.EditInner(
 				enableUI: on => Visible = on,
 				setUI: Set,
@@ -98,6 +97,7 @@ sealed partial class NodeEditor : UserControl
 				stratCombo.SelectedIndex = 1;
 				stratDirCombo.SelectedIndex = (int)s.MainDir;
 				stratAlignCombo.SelectedIndex = (int)s.Align;
+				(stratDirCombo.Visible, stratAlignCombo.Visible) = (true, true);
 				specGroupBox.Visible = false;
 				break;
 

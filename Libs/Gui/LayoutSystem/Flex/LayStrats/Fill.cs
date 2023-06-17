@@ -18,7 +18,7 @@ public sealed class FillStrat : IStrat
 
 	public FillStrat(ISpec spec) => Spec = spec;
 
-	public override string ToString() => "Fill" + Spec switch
+	/*public override string ToString() => "Fill" + Spec switch
 	{
 		ScrollSpec {Enabled: (false, false)} => string.Empty,
 		ScrollSpec {Enabled: (truer, false)} => " (scroll X)",
@@ -26,7 +26,23 @@ public sealed class FillStrat : IStrat
 		ScrollSpec {Enabled: (truer, truer)} => " (scroll X/Y)",
 		PopSpec => " (pop)",
 		_ => throw new ArgumentException()
-	};
+	};*/
+
+	public override string ToString()
+	{
+		static string b(bool v) => v switch
+		{
+			true => "☑",
+			false => "☐"
+		};
+		return Spec switch
+		{
+			ScrollSpec { Enabled: (false, false) } => "Fill",
+			ScrollSpec { Enabled: var (sx, sy) } => $"Scroll({b(sx)},{b(sy)})",
+			PopSpec => "Pop",
+			_ => throw new ArgumentException()
+		};
+	}
 
 	public LayNfo Lay(
 		Node node,
@@ -34,7 +50,7 @@ public sealed class FillStrat : IStrat
 		FDimVec[] kidDims
 	)
 	{
-		var sz = GeomMaker.SzDirFun(
+		/*var sz = GeomMaker.SzDirFun(
 			dir => freeSz.Dir(dir).HasValue switch
 			{
 				truer => freeSz.Dir(dir)!.Value,
@@ -44,7 +60,24 @@ public sealed class FillStrat : IStrat
 					false => 0,
 				}
 			}
-		);
+		);*/
+
+		var sz = GeomMaker.SzDirFun(dir =>
+			{
+				var d = node.V.Dim.Dir(dir);
+				return d.Typ() switch
+				{
+					DimType.Fix => d!.Value.Max,
+					DimType.Flt => d!.Value.Max,
+					DimType.Fit => kidDims.MaxT(e => e.Dir(dir).Max.EnsureNotInf()),
+					DimType.Fil => freeSz.Dir(dir).HasValue switch
+					{
+						truer => freeSz.Dir(dir)!.Value,
+						false => 0
+					}
+				};
+			}
+		).CapWith(freeSz);
 
 		var kidRs =
 			node.Children.Zip(kidDims)
@@ -53,7 +86,12 @@ public sealed class FillStrat : IStrat
 					Pt.Empty,
 					GeomMaker.SzDirFun(dir => freeSz.Dir(dir).HasValue switch
 					{
-						false => t.kidDim.Dir(dir).Max.EnsureNotInf(),
+						//false => t.kidDim.Dir(dir).Max.EnsureNotInf(),
+						false => t.kidDim.Dir(dir).Type switch
+						{
+							DimType.Fil => 0,
+							_ => t.kidDim.Dir(dir).Max.EnsureNotInf()
+						},
 						truer => StackUtilsShared.LayoutMain(freeSz.Dir(dir)!.Value, new[] { t.kidDim.Dir(dir) })[0]
 					})
 				));

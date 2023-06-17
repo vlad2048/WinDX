@@ -17,7 +17,7 @@ using WinAPI.Utils.Exts;
 using WinAPI.Windows;
 using Color = System.Drawing.Color;
 
-namespace FlexBuilder.SetupLogic;
+namespace FlexBuilder.Logic;
 
 static partial class Setup
 {
@@ -25,6 +25,7 @@ static partial class Setup
 
 	public static IDisposable DisplayLayout(
 		MainWin ui,
+		IRwMayVar<LayoutDef> layoutDefForRedraw,
 		IRoMayVar<Layout> layout,
 		UserPrefs userPrefs,
 		IRoMayVar<Node> selNode,
@@ -35,49 +36,87 @@ static partial class Setup
 		var d = new Disp();
 		var serD = new SerialDisp<Disp>().D(d);
 
-		var isOpen = Var.Make(false).D(d);
-		PersistRendererCombo(ui.rendererCombo, userPrefs).D(d);
-		ui.showWinBtn.EnableWhenSome(layout).D(d);
+		ui.redrawStatusBtn.Events().Click.Subscribe(_ => layoutDefForRedraw.V = layoutDefForRedraw.V).D(d);
+
+		var isOpen = Var.Make(userPrefs.ExternalWindowVisible).D(d);
+
+		var renderer = Var.Make(
+			userPrefs.SelectedRenderer,
+			Obs.Merge(
+				ui.gdiplusStatusItem.Events().Click.Select(_ => RendererType.GDIPlus),
+				ui.direct2dStatusItem.Events().Click.Select(_ => RendererType.Direct2D),
+				ui.direct2dindirect3dStatusItem.Events().Click.Select(_ => RendererType.Direct2DInDirect3D)
+			)
+		).D(d);
+		renderer.Subscribe(r =>
+		{
+			userPrefs.SelectedRenderer = r;
+			userPrefs.Save();
+		}).D(d);
+
+		layout.Subscribe(may => ui.calcWinSzStatusLabel.Text = may.IsSome(out var lay) switch
+		{
+			true => $"{lay.TotalSz}",
+			false => "_"
+		});
+
+
+
+		void Show()
+		{
+			// Open button
+			// ===========
+			serD.Value = null;
+			serD.Value = new Disp();
+			isOpen.V = true;
+
+			var win = MakeWindow(layout.V.Ensure().TotalSz.Cap(MAX_WINDOW_SIZE), userPrefs).D(serD.Value);
+
+			var renderWinCtx = RendererGetter.Get(renderer.V, win).D(win.D);
+
+			PaintWindow(win, layout, renderWinCtx, selNode, hoveredNode);
+			HookWinSizeBothWaysAndPersistPos(layout, userPrefs, winSzMutator, win);
+
+			Disposable.Create(() =>
+			{
+				if (!isOpen.IsDisposed)
+					isOpen.V = false;
+			}).D(win.D);
+
+			win.Init();
+		}
+
+		void Hide()
+		{
+			// Close button
+			// ============
+			serD.Value = null;
+			isOpen.V = false;
+		}
+
+		//PersistRendererCombo(ui.rendererCombo, userPrefs).D(d);
+
+		if (isOpen.V)
+			Show();
+
+
+		ui.showWinStatusBtn.EnableWhenSome(layout).D(d);
 		isOpen.Subscribe(open =>
 		{
-			ui.showWinBtn.Text = open ? "Close Window" : "Open Window";
-			ui.redrawBtn.Enabled = open;
+			ui.showWinStatusBtn.Text = open ? "Hide" : "Show";
+			ui.redrawStatusBtn.Enabled = open;
+			userPrefs.ExternalWindowVisible = open;
+			userPrefs.Save();
 		}).D(d);
 
 
-		ui.showWinBtn.Events().Click
+		ui.showWinStatusBtn.Events().Click
 			.Subscribe(_ =>
 			{
 				if (!isOpen.V)
-				{
-					// Open button
-					// ===========
-					serD.Value = null;
-					serD.Value = new Disp();
-					isOpen.V = true;
-
-					var win = MakeWindow(layout.V.Ensure().TotalSz.Cap(MAX_WINDOW_SIZE), userPrefs).D(serD.Value);
-
-					var renderWinCtx = RendererGetter.Get((RendererType)ui.rendererCombo.SelectedIndex, win).D(win.D);
-
-					PaintWindow(win, layout, renderWinCtx, selNode, hoveredNode);
-					HookWinSizeBothWaysAndPersistPos(layout, userPrefs, winSzMutator, win);
-
-					Disposable.Create(() =>
-					{
-						if (!isOpen.IsDisposed)
-							isOpen.V = false;
-					}).D(win.D);
-
-					win.Init();
-				}
+					Show();
 				else
-				{
-					// Close button
-					// ============
-					serD.Value = null;
-					isOpen.V = false;
-				}
+					Hide();
 			}).D(d);
 
 		return d;
@@ -92,8 +131,7 @@ static partial class Setup
 			.Throttle(TimeSpan.FromSeconds(1))
 			.Subscribe(pt =>
 			{
-				userPrefs.ExternalWindosPosX = pt.X;
-				userPrefs.ExternalWindosPosY = pt.Y;
+				userPrefs.ExternalWindosPos = (pt.X, pt.Y);
 				userPrefs.Save();
 			}).D(win.D);
 
@@ -107,8 +145,8 @@ static partial class Setup
 		{
 			Name = "Main Win",
 			Styles = WindowStyles.WS_OVERLAPPEDWINDOW | WindowStyles.WS_VISIBLE,
-			X = userPrefs.ExternalWindosPosX,
-			Y = userPrefs.ExternalWindosPosY,
+			X = userPrefs.ExternalWindosPos.Item1,
+			Y = userPrefs.ExternalWindosPos.Item2,
 			Width = sz.Width,
 			Height = sz.Height,
 			ControlStyles = (uint)ControlStyles.OptimizedDoubleBuffer
@@ -168,7 +206,19 @@ static partial class Setup
 		Rec(lay.Root);
 
 
-		if (maySelNode.V.IsSome(out var selNode) && mayHovNode.V.IsSome(out var hovNode) && selNode == hovNode && lay.RMap.TryGetValue(selNode, out var r))
+		bool GetR(Node node, out R rl)
+		{
+			var rOpt = (lay.RMap.ContainsKey(node), lay.RMapFixed.ContainsKey(node)) switch
+			{
+				(true, _) => lay.RMap[node],
+				(_, true) => lay.RMapFixed[node],
+				_ => (R?)null
+			};
+			rl = rOpt ?? R.Empty;
+			return rOpt.HasValue;
+		}
+
+		if (maySelNode.V.IsSome(out var selNode) && mayHovNode.V.IsSome(out var hovNode) && selNode == hovNode && GetR(selNode, out var r))
 		{
 			gfx.DrawR(r.Enlarge(-2), PaintConsts.SelPen);
 			gfx.DrawR(r.Enlarge(-1), PaintConsts.HoverPen);
@@ -177,13 +227,13 @@ static partial class Setup
 		}
 		else
 		{
-			if (maySelNode.V.IsSome(out selNode) && lay.RMap.TryGetValue(selNode, out r))
+			if (maySelNode.V.IsSome(out selNode) && GetR(selNode, out r))
 			{
 				gfx.DrawR(r.Enlarge(-2), PaintConsts.SelPen);
 				gfx.DrawR(r.Enlarge(-1), PaintConsts.HoverPen);
 				gfx.DrawR(r.Enlarge(-0), PaintConsts.SelPen);
 			}
-			if (mayHovNode.V.IsSome(out hovNode) && lay.RMap.TryGetValue(hovNode, out r))
+			if (mayHovNode.V.IsSome(out hovNode) && GetR(hovNode, out r))
 			{
 				gfx.DrawR(r.Enlarge(-2), PaintConsts.HoverPen);
 				gfx.DrawR(r.Enlarge(-1), PaintConsts.HoverPen);
@@ -195,7 +245,7 @@ static partial class Setup
 
 
 
-	private static IDisposable PersistRendererCombo(ComboBox rendererCombo, UserPrefs userPrefs)
+	/*private static IDisposable PersistRendererCombo(ComboBox rendererCombo, UserPrefs userPrefs)
 	{
 		rendererCombo.SelectedIndex = (int)userPrefs.SelectedRenderer;
 		return rendererCombo.Events().SelectedIndexChanged.Subscribe(_ =>
@@ -203,7 +253,7 @@ static partial class Setup
 			userPrefs.SelectedRenderer = (RendererType)rendererCombo.SelectedIndex;
 			userPrefs.Save();
 		});
-	}
+	}*/
 }
 
 

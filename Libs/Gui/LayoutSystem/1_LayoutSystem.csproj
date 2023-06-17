@@ -5,9 +5,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowBasics" Version="0.0.13" />
+		<PackageReference Include="PowBasics" Version="0.0.15" />
 		<PackageReference Include="PowMaybeErr" Version="0.0.11" />
-		<PackageReference Include="PowTrees" Version="0.0.22" />
+		<PackageReference Include="PowTrees" Version="0.0.24" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Flex\Details\Structs\" />
 	</ItemGroup>
 
 </Project>

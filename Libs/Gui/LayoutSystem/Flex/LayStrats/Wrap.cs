@@ -25,7 +25,7 @@ public sealed class WrapStrat : IStrat
 		MainDir = mainDir;
 	}
 
-	public override string ToString() => $"Wrap({MainDir})";
+	public override string ToString() => $"Wrap({MainDir.Fmt()})";
 
 	public LayNfo Lay(
 		Node node,
