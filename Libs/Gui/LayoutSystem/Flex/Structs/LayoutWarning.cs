@@ -18,7 +18,7 @@ public enum WarningType
 	PopIsNotFil = 16,
 }
 
-public record FlexWarning(
+public sealed record FlexWarning(
 	WarningType Type,
 	WarningDir Dir,
 	DimVec FixedDim,

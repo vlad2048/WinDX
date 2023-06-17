@@ -7,10 +7,10 @@ namespace UserEvents.Utils;
 public interface IPrettyUserEvt { DateTime Timestamp { get; } }
 
 // @formatter:off
-public record NormalPrettyUserEvt			(DateTime Timestamp, IUserEvt Evt)					: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"{Evt}");				}
-public record DelayPrettyUserEvt			(DateTime Timestamp)								: IPrettyUserEvt { public override string ToString() => string.Empty;												}
-public record MouseMovePrettyUserEvt		(DateTime Timestamp, MouseMoveUserEvt Evt)			: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"Move {Evt.Pos}");	}
-public record MouseMoveUpdatePrettyUserEvt	(DateTime Timestamp, MouseMoveUserEvt Evt, int Idx)	: IPrettyUserEvt {
+public sealed record NormalPrettyUserEvt			(DateTime Timestamp, IUserEvt Evt)					: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"{Evt}");				}
+public sealed record DelayPrettyUserEvt			(DateTime Timestamp)								: IPrettyUserEvt { public override string ToString() => string.Empty;												}
+public sealed record MouseMovePrettyUserEvt		(DateTime Timestamp, MouseMoveUserEvt Evt)			: IPrettyUserEvt { public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"Move {Evt.Pos}");	}
+public sealed record MouseMoveUpdatePrettyUserEvt	(DateTime Timestamp, MouseMoveUserEvt Evt, int Idx)	: IPrettyUserEvt {
 	public bool IsSubsequent => Idx > 1;
 	public override string ToString() => PrettyPrintAggregator.Fmt(Timestamp, $"Move {Evt.Pos} (x{Idx})");
 }

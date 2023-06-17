@@ -5,9 +5,13 @@ using PowBasics.Geom;
 
 namespace Structs;
 
-record MixLayout(
+
+sealed record MixLayout(
 	Win Win,
 	MixNode MixRoot,
 	IReadOnlyDictionary<NodeState, R> RMap,
-	IReadOnlyDictionary<NodeState, FlexWarning> WarningMap
+	IReadOnlyDictionary<NodeState, FlexWarning> WarningMap,
+	IReadOnlyDictionary<Ctrl, IMixNode> UnbalancedCtrls,
+
+	IReadOnlyDictionary<Ctrl, MixNode> Ctrl2NodMap
 );

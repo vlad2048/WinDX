@@ -4,7 +4,7 @@ using PowBasics.Geom;
 namespace LayoutSystem.Flex.Structs;
 
 
-public record Layout(
+public sealed record Layout(
 	Node Root,
 	FreeSz WinSize,
 	IReadOnlyDictionary<Node, R> RMap,

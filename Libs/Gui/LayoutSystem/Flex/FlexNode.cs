@@ -3,7 +3,7 @@ using PowBasics.Geom;
 
 namespace LayoutSystem.Flex;
 
-public record FlexNode(
+public sealed record FlexNode(
 	DimVec Dim,
 	IStrat Strat,
 	Marg Marg

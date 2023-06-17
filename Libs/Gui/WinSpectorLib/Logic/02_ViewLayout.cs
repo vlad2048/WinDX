@@ -3,12 +3,11 @@ using BrightIdeasSoftware;
 using ControlSystem.Structs;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
-using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
-using PowWinForms.TreeEditing.Utils;
 using PowWinForms.Utils;
 using Structs;
+using WinSpectorLib.Utils;
 
 namespace WinSpectorLib.Logic;
 
@@ -21,13 +20,13 @@ static partial class Setup
 
 		PrepareTree(ctrl, selLayout);
 
-		selLayout.WhenNone().ObserveOnWinFormsUIThread().Subscribe(_ => TreeCtrlOps.NotifyTreeUnloaded(ctrl)).D(d);
-		selLayout.WhenSome().ObserveOnWinFormsUIThread().Subscribe(lay => TreeCtrlOps.NotifyTreeLoaded(ctrl, lay.MixRoot)).D(d);
+		ctrl.SetRoot(selLayout.Map2(e => e.MixRoot)).D(d);
 
 		return d;
 	}
 
-	private static class ColumnNames
+
+	private static class ColumnName
 	{
 		public const string Node = "Node";
 		public const string Width = "Width";
@@ -36,153 +35,126 @@ static partial class Setup
 		public const string Warnings = "Warnings";
 	}
 
-	private static void PrepareTree(TreeListView ctrl, IRoMayVar<MixLayout> selLayout)
+	private static void PrepareTree(TreeListView ctrl, IRoMayVar<MixLayout> layout)
 	{
-		ctrl.FullRowSelect = true;
-		ctrl.MultiSelect = false;
-		ctrl.UseCellFormatEvents = true;
-		ctrl.UseOverlays = false;
-		ctrl.UseWaitCursorWhenExpanding = false;
-
 		var warningIcon = Resource.LayoutTree_Warning;
+		var errorIcon = Resource.LayoutTree_Error;
 
-		TreeCtrlOps.SetNodGeneric<IMixNode>(ctrl);
+		ctrl.SetupForNodeType<IMixNode>();
 
-		void AddImageColumn(string name, int width, Func<MixNode, Image?> imgFun) =>
-			ctrl.Columns.Add(new OLVColumn(name, name)
-				{
-					Width = width,
-					AspectGetter = _ => null,
-					ImageGetter = obj =>
-					{
-						if (obj is not MixNode nod) return null;
-						return imgFun(nod);
-					}
-				}
-			);
 
-		void AddTextColumn(string name, int? width, Func<MixNode, string> textFun) =>
-			ctrl.Columns.Add(new OLVColumn(name, name)
-			{
-				Width = width ?? 60,
-				FillsFreeSpace = !width.HasValue,
-				AspectGetter = obj =>
-				{
-					if (obj is not MixNode nod) return null;
-					return textFun(nod);
-				}
-			});
-		
-		
-		AddTextColumn(ColumnNames.Node, null, nod => nod.V switch
+		ctrl.AddTextColumn<IMixNode>(ColumnName.Node, null, nod => nod.V switch
 		{
 			CtrlNode {Ctrl: var c} => c.GetType().Name,
 			StFlexNode {Flex: var flex} => $"{flex}",
 			_ => "_",
 		});
 
-		AddTextColumn(ColumnNames.Width, 80, nod =>
+		ctrl.AddTextColumnWithColorAndTooltip<IMixNode>(ColumnName.Width, 80, nod =>
 		{
-			if (nod.V is not StFlexNode { Flex: var flex }) return "_";
-			var warn = WarningDir.Horz.GetDimWarningForColumn(nod, selLayout);
+			if (nod.V is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
+			var warn = layout.GetDimWarningForColumn(nodState, WarningDir.Horz);
 			return warn switch
 			{
-				null => flex.Dim.X.Fmt(),
-				not null => warn.FixedDim.X.Fmt()
+				null => (
+					flex.Dim.X.Fmt(),
+					null,
+					null
+				),
+				not null => (
+					warn.FixedDim.X.Fmt(),
+					ColorName.Red,
+					new TooltipDef(
+						"Original value",
+						flex.Dim.X.Fmt(),
+						null
+					)
+				)
 			};
 		});
 
-		AddTextColumn(ColumnNames.Height, 80, nod =>
+		ctrl.AddTextColumnWithColorAndTooltip<IMixNode>(ColumnName.Height, 80, nod =>
 		{
-			if (nod.V is not StFlexNode { Flex: var flex }) return "_";
-			var warn = WarningDir.Vert.GetDimWarningForColumn(nod, selLayout);
+			if (nod.V is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
+			var warn = layout.GetDimWarningForColumn(nodState, WarningDir.Vert);
 			return warn switch
 			{
-				null => flex.Dim.Y.Fmt(),
-				not null => warn.FixedDim.Y.Fmt()
+				null => (
+					flex.Dim.Y.Fmt(),
+					null,
+					null
+				),
+				not null => (
+					warn.FixedDim.Y.Fmt(),
+					ColorName.Red,
+					new TooltipDef(
+						"Original value",
+						flex.Dim.Y.Fmt(),
+						null
+					)
+				)
 			};
 		});
 
-		AddTextColumn(ColumnNames.R, 100, nod =>
+		ctrl.AddTextColumn<IMixNode>(ColumnName.R, 100, nod =>
 		{
-			if (selLayout.V.IsNone(out var lay)) return "_";
-			if (nod.V is not StFlexNode { State: var nodeState }) return "_";
-			var r = lay.RMap[nodeState];
+			if (nod.V is not StFlexNode { State: var nodState }) return "_";
+			if (layout.V.IsNone(out var lay)) return "_";
+			var r = lay.RMap[nodState];
 			return $"{r}";
 		});
-		
-		AddImageColumn(ColumnNames.Warnings, 65, nod =>
+
+		ctrl.AddImageColumnWithTooltip<IMixNode>(ColumnName.Warnings, 65, nod =>
 		{
-			if (selLayout.V.IsNone(out var lay)) return null;
-			if (nod.V is not StFlexNode {State: var nodeState}) return null;
-			return lay.WarningMap.ContainsKey(nodeState) switch
+			if (layout.V.IsNone(out var lay)) return (null, null);
+
+			switch (nod.V)
 			{
-				true => warningIcon,
-				false => null
-			};
-		});
+				case StFlexNode { State: var nodState }:
+					var warn = lay.WarningMap.GetDimWarningForColumn(nodState, WarningDir.Horz | WarningDir.Vert);
+					if (warn == null) return (null, null);
+					return (
+						warningIcon,
+						new TooltipDef(
+							"Layout Warning" + (warn.Messages.Length > 1 ? "s" : ""),
+							warn.Messages.JoinText(Environment.NewLine),
+							ToolTipControl.StandardIcons.Warning
+						)
+					);
 
 
-		ctrl.FormatCell += (_, args) =>
-		{
-			if (selLayout.V.IsNone(out var lay)) return;
-			var warn = lay.WarningMap.GetDimWarningForColumn((MixNode)args.Model, args.Column.GetWarnDir());
-			if (warn == null) return;
-			args.SubItem.ForeColor = Color.FromArgb(245, 100, 124);
-		};
+				case CtrlNode { Ctrl: var ctr }:
+					return lay.UnbalancedCtrls.TryGetValue(ctr, out var errNode) switch
+					{
+						true => (
+							errorIcon,
+							new TooltipDef(
+								"Unbalanced Ctrl",
+								$"{errNode}",
+								ToolTipControl.StandardIcons.ErrorLarge
+							)
+						),
+						false => (null, null)
+					};
 
-		ctrl.CellToolTipShowing += (_, args) =>
-		{
-			if (selLayout.V.IsNone(out var lay)) return;
-			var nod = (MixNode)args.Model;
-			var column = args.Column;
-
-			var warn = lay.WarningMap.GetDimWarningForColumn(nod, WarningDir.Horz | WarningDir.Vert);
-			if (warn == null) return;
-
-			switch (column.Text)
-			{
-				case ColumnNames.Warnings:
-					args.Text = warn.Messages.JoinText(Environment.NewLine);
-					args.Title = "Layout Warning" + (warn.Messages.Length > 1 ? "s" : "");
-					args.StandardIcon = ToolTipControl.StandardIcons.Warning;
-					break;
-				case ColumnNames.Width:
-				case ColumnNames.Height:
-					warn = lay.WarningMap.GetDimWarningForColumn(nod, column.GetWarnDir());
-					if (warn == null) return;
-					if (nod.V is not StFlexNode { Flex: var flex }) return;
-					args.Text = flex.Dim.Dir(column.GetDir()).Fmt();
-					args.Title = "Original value";
-					break;
+				default:
+					return (null, null);
 			}
-		};
+
+		});
 	}
 
-	private static WarningDir GetWarnDir(this OLVColumn column) => column.Text switch
+	private static FlexWarning? GetDimWarningForColumn(this IReadOnlyDictionary<NodeState, FlexWarning> warningMap, NodeState nodState, WarningDir colDir)
 	{
-		ColumnNames.Width => WarningDir.Horz,
-		ColumnNames.Height => WarningDir.Vert,
-		_ => 0
-	};
-
-	private static Dir GetDir(this OLVColumn column) => column.Text switch
-	{
-		ColumnNames.Width => Dir.Horz,
-		ColumnNames.Height => Dir.Vert,
-		_ => 0
-	};
-
-	private static FlexWarning? GetDimWarningForColumn(this IReadOnlyDictionary<NodeState, FlexWarning> warningMap, MixNode nod, WarningDir colDir)
-	{
-		if (nod.V is not StFlexNode { State: var nodeState } || !warningMap.TryGetValue(nodeState, out var warn)) return null;
+		if (!warningMap.TryGetValue(nodState, out var warn)) return null;
 		if ((colDir & warn.Dir) == 0) return null;
 		return warn;
 	}
 
-	private static FlexWarning? GetDimWarningForColumn(this WarningDir colDir, MixNode nod, IRoMayVar<MixLayout> layout) => layout.V.IsSome(out var lay) switch
-	{
-		true => lay.WarningMap.GetDimWarningForColumn(nod, colDir),
-		false => null
-	};
+	private static FlexWarning? GetDimWarningForColumn(this IRoMayVar<MixLayout> layout, NodeState nodState, WarningDir colDir) =>
+		layout.V.IsSome(out var lay) switch
+		{
+			true => lay.WarningMap.GetDimWarningForColumn(nodState, colDir),
+			false => null
+		};
 }

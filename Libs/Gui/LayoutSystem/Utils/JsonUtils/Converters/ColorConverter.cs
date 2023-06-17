@@ -6,7 +6,7 @@ namespace LayoutSystem.Utils.JsonUtils.Converters;
 
 sealed class ColorConverter : JsonConverter<Color>
 {
-	private record Tup(byte A, byte R, byte G, byte B);
+	private sealed record Tup(byte A, byte R, byte G, byte B);
 
 	public override Color Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{

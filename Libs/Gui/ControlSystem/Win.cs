@@ -25,7 +25,7 @@ public class Win : Ctrl
 	{
 		var opt = WinOpt.Build(optFun);
 		var sysWin = WinUtils.MakeWin(opt);
-		this.D(sysWin.D);
+		//this.D(sysWin.D);		// this throws an Exception when disposing
 		sysWin.D(D);
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
@@ -69,7 +69,7 @@ file static class WinUtils
 	}
 
 
-	public static MixNode BuildTree(
+	public static ReconstructedTree<IMixNode> BuildTree(
 		ITreeEvtSig<IMixNode> treeEvtSig,
 		ITreeEvtObs<IMixNode> treeEvtObs,
 		Ctrl rootCtrl
@@ -78,21 +78,24 @@ file static class WinUtils
 		using var d = new Disp();
 		var gfx = new Dummy_Gfx().D(d);
 		var renderArgs = new RenderArgs(gfx, treeEvtSig).D(d);
-		return treeEvtObs.ToTree(() =>
+		var reconstructedTree = treeEvtObs.ToTree(() =>
 		{
 			using (renderArgs.Ctrl(rootCtrl))
 			{
 			}
 		});
+		return reconstructedTree;
 	}
 
 
 	public static MixLayout SolveTree(
 		Win win,
-		MixNode mixRoot,
+		ReconstructedTree<IMixNode> reconstructedTree,
 		Sz winSz
 	)
 	{
+		var mixRoot = reconstructedTree.Root;
+
 		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
 		var flexRoot = stFlexRoot.Map(e => e.Flex);
 		var layout = FlexSolver.Solve(flexRoot, FreeSzMaker.FromSz(winSz));
@@ -103,8 +106,30 @@ file static class WinUtils
 			win,
 			mixRoot,
 			layout.RMap.MapKeys(flex2st),
-			layout.WarningMap.MapKeys(flex2st)
+			layout.WarningMap.MapKeys(flex2st),
+
+			reconstructedTree.IncompleteNodes
+				.GroupBy(e => e.ParentNod)
+				.Select(e => e.First())
+				.ToDictionary(
+					e => e.ParentNod.FindCtrlContaining(),
+					e => e.ChildNode
+				),
+
+			mixRoot
+				.Where(e => e.V is CtrlNode)
+				.ToDictionary(
+					e => ((CtrlNode)e.V).Ctrl,
+					e => e
+				)
 		);
+	}
+
+	private static Ctrl FindCtrlContaining(this MixNode nod)
+	{
+		while (nod.V is not CtrlNode { Ctrl: not null })
+			nod = nod.Parent ?? throw new ArgumentException("Cannot find containing Ctrl");
+		return ((CtrlNode)nod.V).Ctrl;
 	}
 
 	public static (IGfx, IDisposable) BuildGfxWithRMap(
@@ -117,7 +142,12 @@ file static class WinUtils
 		var gfx = renderer.GetGfx().D(d);
 		treeEvtObs.WhenPush.OfType<StFlexNode, NodeState>(e => e.State).Subscribe(st =>
 		{
-			gfx.R = rMap[st];
+			//gfx.R = rMap[st];
+			gfx.R = rMap.TryGetValue(st, out var r) switch
+			{
+				true => r,
+				false => R.Empty
+			};
 		}).D(d);
 		return (gfx, d);
 	}

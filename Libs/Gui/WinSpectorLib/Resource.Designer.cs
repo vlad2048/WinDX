@@ -63,6 +63,16 @@ namespace _3_WinSpectorLib {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap LayoutTree_Error {
+            get {
+                object obj = ResourceManager.GetObject("LayoutTree_Error", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap LayoutTree_Warning {
             get {
                 object obj = ResourceManager.GetObject("LayoutTree_Warning", resourceCulture);

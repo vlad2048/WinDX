@@ -72,7 +72,7 @@ file static class TreeOpsUtils
 		}
 	}
 
-	private record Fix(
+	private sealed record Fix(
 		Warn Warn,
 		FlexNode Flex
 	);

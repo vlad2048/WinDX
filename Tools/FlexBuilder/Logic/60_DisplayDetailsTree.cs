@@ -7,7 +7,7 @@ using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowMaybe;
 using PowRxVar;
-using PowWinForms.TreeEditing.Utils;
+using PowWinForms.Utils;
 
 namespace FlexBuilder.Logic;
 
@@ -38,7 +38,7 @@ static partial class Setup
 		ctrl.PipeSelectedNodeInto(selNode).D(d);
 		ctrl.PipeHoveredNodeInto(hovNode).D(d);
 
-		TreeCtrlOps.GetSelectedNode<FlexNode>(out var selNodeDetails, ctrl).D(d);
+		ctrl.GetSelectedNode<FlexNode>(out var selNodeDetails).D(d);
 
 		selNodeDetails.SubscribeToNone(rtb.Clear).D(d);
 		selNodeDetails.SubscribeToSome(nod =>
@@ -75,14 +75,10 @@ static partial class Setup
 			}
 			rtb.AppendText("\n");
 		}
-
-		var str = rtb.Rtf;
-
-		var abc = 123;
 	}
 
 	private static readonly FontFamily FontFamily = new("Consolas");
-	private record SizeStyle(float Size, FontStyle Style);
+	private sealed record SizeStyle(float Size, FontStyle Style);
 	private static SizeStyle ToSizeStyle(this TxtStyle style) => new(style.Size, (FontStyle)style.FontStyle);
 	private static readonly Dictionary<SizeStyle, Font> fontMap = new();
 	private static Font GetFont(TxtStyle style)

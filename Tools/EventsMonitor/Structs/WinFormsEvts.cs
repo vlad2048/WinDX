@@ -18,25 +18,25 @@ public interface IWinFormsEvtWindow : IWinFormsEvt { }
 
 
 // @formatter:off
-public record MouseButtonDownWinFormsEvt(Pt Pos, MouseBtn Btn)		: IWinFormsEvtMousePos			{ public override string ToString() => $"{Btn} down ({Pos})";							}
-public record   MouseButtonUpWinFormsEvt(Pt Pos, MouseBtn Btn)		: IWinFormsEvtMousePos			{ public override string ToString() => $"{Btn} up ({Pos})";								}
-public record       MouseMoveWinFormsEvt(Pt Pos)					: IWinFormsEvtMousePos			{ public override string ToString() => $"Move {Pos}";									}
-public record      MouseEnterWinFormsEvt							: IWinFormsEvtMouse				{ public override string ToString() => "Enter";											}
-public record      MouseLeaveWinFormsEvt							: IWinFormsEvtMouse				{ public override string ToString() => "Leave";											}
+public sealed record MouseButtonDownWinFormsEvt(Pt Pos, MouseBtn Btn)		: IWinFormsEvtMousePos			{ public override string ToString() => $"{Btn} down ({Pos})";							}
+public sealed record   MouseButtonUpWinFormsEvt(Pt Pos, MouseBtn Btn)		: IWinFormsEvtMousePos			{ public override string ToString() => $"{Btn} up ({Pos})";								}
+public sealed record       MouseMoveWinFormsEvt(Pt Pos)					: IWinFormsEvtMousePos			{ public override string ToString() => $"Move {Pos}";									}
+public sealed record      MouseEnterWinFormsEvt							: IWinFormsEvtMouse				{ public override string ToString() => "Enter";											}
+public sealed record      MouseLeaveWinFormsEvt							: IWinFormsEvtMouse				{ public override string ToString() => "Leave";											}
 
-public record         KeyDownWinFormsEvt(Keys Key)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Key}' down";									}
-public record           KeyUpWinFormsEvt(Keys Key)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Key}' up";									}
-public record         KeyCharWinFormsEvt(char Char)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Char}' char";								}
+public sealed record         KeyDownWinFormsEvt(Keys Key)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Key}' down";									}
+public sealed record           KeyUpWinFormsEvt(Keys Key)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Key}' up";									}
+public sealed record         KeyCharWinFormsEvt(char Char)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Char}' char";								}
 
-public record        GotFocusWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Got focus";										}
-public record       LostFocusWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Lost focus";									}
-public record        ActivateWinFormsEvt(bool WithMouseClick)		: IWinFormsEvtWindow			{ public override string ToString() => "Activate" + (WithMouseClick ? " (mouse)" : "");	}
-public record      InactivateWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Inactivate";									}
-public record     ActivateAppWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "ActivateApp";									}
-public record   InactivateAppWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "InactivateApp";									}
+public sealed record        GotFocusWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Got focus";										}
+public sealed record       LostFocusWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Lost focus";									}
+public sealed record        ActivateWinFormsEvt(bool WithMouseClick)		: IWinFormsEvtWindow			{ public override string ToString() => "Activate" + (WithMouseClick ? " (mouse)" : "");	}
+public sealed record      InactivateWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Inactivate";									}
+public sealed record     ActivateAppWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "ActivateApp";									}
+public sealed record   InactivateAppWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "InactivateApp";									}
 
-public record        EnterWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "CtrlEnter";										}
-public record        LeaveWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "CtrlLeave";										}
+public sealed record        EnterWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "CtrlEnter";										}
+public sealed record        LeaveWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "CtrlLeave";										}
 // @formatter:on
 
 
@@ -89,10 +89,10 @@ public static class WinFormsEvtGenerator
 public interface IPrettyWinFormsEvt { DateTime Timestamp { get; } }
 
 // @formatter:off
-public record NormalPrettyWinFormsEvt			(DateTime Timestamp, IWinFormsEvt Evt)					: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"{Evt}");				}
-public record DelayPrettyWinFormsEvt			(DateTime Timestamp)									: IPrettyWinFormsEvt { public override string ToString() => string.Empty;														}
-public record MouseMovePrettyWinFormsEvt		(DateTime Timestamp, MouseMoveWinFormsEvt Evt)			: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"Move {Evt.Pos}");	}
-public record MouseMoveUpdatePrettyWinFormsEvt	(DateTime Timestamp, MouseMoveWinFormsEvt Evt, int Idx)	: IPrettyWinFormsEvt {
+public sealed record NormalPrettyWinFormsEvt			(DateTime Timestamp, IWinFormsEvt Evt)					: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"{Evt}");				}
+public sealed record DelayPrettyWinFormsEvt			(DateTime Timestamp)									: IPrettyWinFormsEvt { public override string ToString() => string.Empty;														}
+public sealed record MouseMovePrettyWinFormsEvt		(DateTime Timestamp, MouseMoveWinFormsEvt Evt)			: IPrettyWinFormsEvt { public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"Move {Evt.Pos}");	}
+public sealed record MouseMoveUpdatePrettyWinFormsEvt	(DateTime Timestamp, MouseMoveWinFormsEvt Evt, int Idx)	: IPrettyWinFormsEvt {
 	public bool IsSubsequent => Idx > 1;
 	public override string ToString() => PrettyPrintWinFormsAggregator.Fmt(Timestamp, $"Move {Evt.Pos} (x{Idx})");
 }

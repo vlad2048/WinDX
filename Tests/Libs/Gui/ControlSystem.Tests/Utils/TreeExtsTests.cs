@@ -50,12 +50,12 @@ sealed class TreeExtsTests
 
 interface IMix { }
 
-record Bad(string Str) : IMix
+sealed record Bad(string Str) : IMix
 {
 	public override string ToString() => $"Bad({Str})";
 }
 
-record Good(int Num) : IMix
+sealed record Good(int Num) : IMix
 {
 	public override string ToString() => $"Good({Num})";
 }

@@ -12,6 +12,7 @@ using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
+using PowWinForms.Utils;
 
 namespace FlexBuilder.Logic;
 

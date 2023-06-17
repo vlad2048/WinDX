@@ -25,22 +25,22 @@ public interface IUserEvtWindow : IUserEvt { }
 
 
 // @formatter:off
-public record MouseButtonDownUserEvt(Pt Pos, MouseBtn Btn)		: IUserEvtMousePos			{ public override string ToString() => $"{Btn} down ({Pos})";							}
-public record   MouseButtonUpUserEvt(Pt Pos, MouseBtn Btn)		: IUserEvtMousePos			{ public override string ToString() => $"{Btn} up ({Pos})";								}
-public record       MouseMoveUserEvt(Pt Pos)					: IUserEvtMousePos			{ public override string ToString() => $"Move {Pos}";									}
-public record      MouseEnterUserEvt(Pt Pos)					: IUserEvtMousePos			{ public override string ToString() => $"Enter {Pos}";									}
-public record      MouseLeaveUserEvt							: IUserEvtMouse				{ public override string ToString() => "Leave";											}
+public sealed record MouseButtonDownUserEvt(Pt Pos, MouseBtn Btn)		: IUserEvtMousePos			{ public override string ToString() => $"{Btn} down ({Pos})";							}
+public sealed record   MouseButtonUpUserEvt(Pt Pos, MouseBtn Btn)		: IUserEvtMousePos			{ public override string ToString() => $"{Btn} up ({Pos})";								}
+public sealed record       MouseMoveUserEvt(Pt Pos)					: IUserEvtMousePos			{ public override string ToString() => $"Move {Pos}";									}
+public sealed record      MouseEnterUserEvt(Pt Pos)					: IUserEvtMousePos			{ public override string ToString() => $"Enter {Pos}";									}
+public sealed record      MouseLeaveUserEvt							: IUserEvtMouse				{ public override string ToString() => "Leave";											}
 
-public record         KeyDownUserEvt(VirtualKey Key)			: IUserEvtKeyboard			{ public override string ToString() => $"'{Key}' down";									}
-public record           KeyUpUserEvt(VirtualKey Key)			: IUserEvtKeyboard			{ public override string ToString() => $"'{Key}' up";									}
-public record         KeyCharUserEvt(char Char)					: IUserEvtKeyboard			{ public override string ToString() => $"'{Char}' char";								}
+public sealed record         KeyDownUserEvt(VirtualKey Key)			: IUserEvtKeyboard			{ public override string ToString() => $"'{Key}' down";									}
+public sealed record           KeyUpUserEvt(VirtualKey Key)			: IUserEvtKeyboard			{ public override string ToString() => $"'{Key}' up";									}
+public sealed record         KeyCharUserEvt(char Char)					: IUserEvtKeyboard			{ public override string ToString() => $"'{Char}' char";								}
 
-public record        GotFocusUserEvt							: IUserEvtWindow			{ public override string ToString() => "Got focus";										}
-public record       LostFocusUserEvt							: IUserEvtWindow			{ public override string ToString() => "Lost focus";									}
-public record        ActivateUserEvt(bool WithMouseClick)		: IUserEvtWindow			{ public override string ToString() => "Activate" + (WithMouseClick ? " (mouse)" : "");	}
-public record      InactivateUserEvt							: IUserEvtWindow			{ public override string ToString() => "Inactivate";									}
-public record     ActivateAppUserEvt							: IUserEvtWindow			{ public override string ToString() => "ActivateApp";									}
-public record   InactivateAppUserEvt							: IUserEvtWindow			{ public override string ToString() => "InactivateApp";									}
+public sealed record        GotFocusUserEvt							: IUserEvtWindow			{ public override string ToString() => "Got focus";										}
+public sealed record       LostFocusUserEvt							: IUserEvtWindow			{ public override string ToString() => "Lost focus";									}
+public sealed record        ActivateUserEvt(bool WithMouseClick)		: IUserEvtWindow			{ public override string ToString() => "Activate" + (WithMouseClick ? " (mouse)" : "");	}
+public sealed record      InactivateUserEvt							: IUserEvtWindow			{ public override string ToString() => "Inactivate";									}
+public sealed record     ActivateAppUserEvt							: IUserEvtWindow			{ public override string ToString() => "ActivateApp";									}
+public sealed record   InactivateAppUserEvt							: IUserEvtWindow			{ public override string ToString() => "InactivateApp";									}
 // @formatter:on
 
 

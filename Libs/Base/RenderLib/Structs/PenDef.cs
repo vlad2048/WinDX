@@ -9,7 +9,7 @@ public enum DashStyleDef
 	DashDotDot,
 }
 
-public record PenDef(Color Color, float Width)
+public sealed record PenDef(Color Color, float Width)
 {
 	public DashStyleDef DashStyle { get; init; } = DashStyleDef.Solid;
 }

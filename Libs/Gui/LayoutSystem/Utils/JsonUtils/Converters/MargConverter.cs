@@ -6,7 +6,7 @@ namespace LayoutSystem.Utils.JsonUtils.Converters;
 
 sealed class MargConverter : JsonConverter<Marg>
 {
-	private record Tup(int Top, int Right, int Bottom, int Left);
+	private sealed record Tup(int Top, int Right, int Bottom, int Left);
 
 	public override Marg Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{

@@ -12,7 +12,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="PowRxVar.Maybe" Version="0.0.34" />
-		<PackageReference Include="PowWinForms" Version="0.0.23" />
+		<PackageReference Include="PowWinForms" Version="0.0.27" />
 	</ItemGroup>
 
 	<ItemGroup>

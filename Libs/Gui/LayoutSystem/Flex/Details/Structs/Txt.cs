@@ -12,7 +12,7 @@ public enum TxtFontStyle
 	Strikeout = 8
 }
 
-public record TxtStyle(
+public sealed record TxtStyle(
 	Color Color,
 	float Size,
 	TxtFontStyle FontStyle

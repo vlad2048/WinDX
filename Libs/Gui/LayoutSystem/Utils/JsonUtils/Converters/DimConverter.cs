@@ -6,7 +6,7 @@ namespace LayoutSystem.Utils.JsonUtils.Converters;
 
 sealed class DimConverter : JsonConverter<FDim>
 {
-	private record Tup(int Min, int Max);
+	private sealed record Tup(int Min, int Max);
 
 	public override FDim Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
