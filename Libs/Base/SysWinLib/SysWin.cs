@@ -21,24 +21,19 @@ public sealed class SysWin : ISysWin
 	private static bool isFirst = true;
 
 	// IDisposable
-	private bool isDisposed;
 	public Disp D { get; } = new();
 	public void Dispose()
 	{
 		if (!hasDestroyBeenSent)
-		{
 			Destroy();
-			return;
-		}
-		if (isDisposed) return;
-		D.Dispose();
-		isDisposed = true;
+		else
+			D.Dispose();
 	}
 	private void Destroy()
 	{
 		if (hasDestroyBeenSent) return;
 		User32Methods.DestroyWindow(Handle);
-		hasDestroyBeenSent = true;
+		hasDestroyBeenSent = true;		// hasDestroyBeenSent should already be true when DestroyWindow returns, but just in case we set it here
 	}
 
 	// private
@@ -81,14 +76,9 @@ public sealed class SysWin : ISysWin
 			WhenMsg.WhenWINDOWPOSCHANGED().Select(e => new Pt(e.Position.X, e.Position.Y))
 		).D(D);
 		IsInit = Var.Make(false, WhenMsg.WhenCREATE().Select(_ => true)).D(D);
-		gcHandle = GCHandle.Alloc(this);
-		
 
-		Disposable.Create(() =>
-		{
-			Destroy();
-			gcHandle.Free();
-		}).D(D);
+		gcHandle = GCHandle.Alloc(this);
+		Disposable.Create(gcHandle.Free).D(D);
 
 		this.SetupCustomNCAreaIFN(opt);
 		this.GenerateMouseLeaveMessagesIFN(opt);
@@ -117,13 +107,11 @@ public sealed class SysWin : ISysWin
 		{
 			Check(Handle, "CreateWindowEx");
 		}
-
-		//Disposable.Create(Destroy).D(D);
 	}
+
 
 	public static IntPtr WndProc(IntPtr hWnd, WM id, IntPtr wParam, IntPtr lParam)
 	{
-		//L($"  {id}");
 	    var msg = new WindowMessage
 	    {
 		    Id = id,
@@ -139,19 +127,18 @@ public sealed class SysWin : ISysWin
 	    if (win == null) return DefProc();
 
 		// 2. Watch for WM_NCDESTROY. When it arrives, destroy the window and exit the message loop if this is the main window
-		if (win.HandleDestroy(msg))
-			return IntPtr.Zero;
+		if (win.HandleDestroy(msg)) return IntPtr.Zero;
 
 		// 3. Broadcast the message to WhenMsg
 		win.whenMsg.OnNext(Packetizer.MakePacket(ref msg));
-
 		// 4. If no receiver to the broadcast flagged the message as handled, send it to the default window procedure
-		return msg.Handled switch
+		var finalRes = msg.Handled switch
 		{
 			true => msg.Result,
 			false => DefProc()
 		};
-    }
+		return finalRes;
+	}
 
 
 	private bool HandleDestroy(WindowMessage msg)

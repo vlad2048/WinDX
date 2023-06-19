@@ -6,7 +6,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Libs\Gui\WinSpectorLib\3_WinSpectorLib.csproj" />
+		<ProjectReference Include="..\Libs\Gui\WinSpectorLib\3_WinSpectorLib.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Categories\Base\" />
+		<Folder Include="Structs\" />
 	</ItemGroup>
 
 </Project>

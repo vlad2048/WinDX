@@ -11,17 +11,16 @@ namespace WinSpectorLib;
 
 sealed partial class WinSpectorWin : Form
 {
-	public WinSpectorWin()
+	public WinSpectorWin(params DemoNfo[] demos)
 	{
 		InitializeComponent();
 
-		//DoubleBuffered = true;
-		//SetStyle(ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
-
 		this.InitRX(d => {
-
-			Setup.ListWindowsAndGetSelectedLayout(this, out var selLayout).D(d);
-			Setup.ViewLayout(this, selLayout).D(d);
+			var ui = this;
+			Setup.ShowDemos(ui, demos).D(d);
+			Setup.ListWindowsAndGetSelectedLayout(ui, out var selLayout).D(d);
+			Setup.ViewLayout(ui, selLayout).D(d);
+			Setup.OpenInFlexBuilder(ui, selLayout).D(d);
 		});
 	}
 }

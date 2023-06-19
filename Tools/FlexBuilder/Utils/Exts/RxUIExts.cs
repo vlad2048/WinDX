@@ -6,9 +6,6 @@ namespace FlexBuilder.Utils.Exts;
 
 static class RxUIExts
 {
-	public static IObservable<T> ObserveOnUIThread<T>(this IObservable<T> obs) => obs
-		.ObserveOn(SynchronizationContext.Current!);
-
 	public static IDisposable SubscribeToSome<T>(this IObservable<Maybe<T>> obs, Action<T> action) =>
 		obs.WhenSome().Subscribe(action);
 

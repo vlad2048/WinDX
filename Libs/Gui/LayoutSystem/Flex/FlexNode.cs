@@ -1,4 +1,5 @@
-﻿using LayoutSystem.Flex.Structs;
+﻿using System.Text.Json.Serialization;
+using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
 
 namespace LayoutSystem.Flex;
@@ -11,6 +12,7 @@ public sealed record FlexNode(
 {
 	public override string ToString() => $"{Dim} - {Strat}";
 
+	[JsonIgnore]
 	public DimVec DimWithMarg => new(DimWithMargDir(Dir.Horz), DimWithMargDir(Dir.Vert));
 
 	public Dim DimWithMargDir(Dir dir)

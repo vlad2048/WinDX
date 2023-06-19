@@ -8,6 +8,7 @@ namespace Structs;
 
 sealed record MixLayout(
 	Win Win,
+	FreeSz WinSize,
 	MixNode MixRoot,
 	IReadOnlyDictionary<NodeState, R> RMap,
 	IReadOnlyDictionary<NodeState, FlexWarning> WarningMap,

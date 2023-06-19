@@ -12,7 +12,7 @@ namespace FlexBuilder;
 
 sealed partial class MainWin : Form
 {
-	public MainWin()
+	public MainWin(Maybe<StartupFile> startupFile)
 	{
 		InitializeComponent();
 		if (LicenseManager.UsageMode == LicenseUsageMode.Designtime) return;
@@ -36,7 +36,7 @@ sealed partial class MainWin : Form
 			Setup.GetSelectedTab(ui, userPrefs, out var selTab).D(d);
 
 			Setup.InitConsole(userPrefs).D(d);
-			Setup.LoadSaveLayoutDef(ui, layoutDef, userPrefs).D(d);
+			Setup.LoadSaveLayoutDef(ui, layoutDef, userPrefs, startupFile).D(d);
 			Setup.DisplayLayout(ui, layoutDef, layout, userPrefs, selNode, hovNode, WinSzMutator(layoutDef)).D(d);
 
 			Setup.EditTreeInit(ui, layout);

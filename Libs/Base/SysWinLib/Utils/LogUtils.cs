@@ -4,8 +4,7 @@ public static class LogUtils
 {
 	public static void L(string s)
 	{
-		//Debug.WriteLine(s);
-		Console.WriteLine(s);
+		Console.WriteLine($"{Timestamp} {s}");
 	}
 
 	public static void LTitle(string s)
@@ -14,4 +13,6 @@ public static class LogUtils
 		L(s);
 		L(new string('=', s.Length));
 	}
+
+	private static string Timestamp => $"[{DateTime.Now:HH:mm:ss.fffffff}]";
 }

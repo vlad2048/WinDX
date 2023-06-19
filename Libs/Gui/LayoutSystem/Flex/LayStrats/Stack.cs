@@ -1,4 +1,5 @@
-﻿using LayoutSystem.Flex.Structs;
+﻿using System.Text.Json.Serialization;
+using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
 using static LayoutSystem.Flex.LayStrats.StackUtilsShared;
@@ -25,8 +26,10 @@ public enum Align
 public sealed class StackStrat : IStrat
 {
 	public Dir MainDir { get; }
-	public Dir ElseDir => MainDir.Neg();
 	public Align Align { get; }
+
+	[JsonIgnore]
+	public Dir ElseDir => MainDir.Neg();
 
 	public StackStrat(Dir mainDir, Align align)
 	{

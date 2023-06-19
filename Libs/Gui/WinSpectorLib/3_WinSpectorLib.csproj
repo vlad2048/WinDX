@@ -6,21 +6,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="NewFolder\**" />
-	  <EmbeddedResource Remove="NewFolder\**" />
-	  <None Remove="NewFolder\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\ControlSystem\2_ControlSystem.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Logic\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="PowWinForms" Version="0.0.27" />
+		<PackageReference Include="PowWinForms" Version="0.0.32" />
 	</ItemGroup>
 
 	<ItemGroup>

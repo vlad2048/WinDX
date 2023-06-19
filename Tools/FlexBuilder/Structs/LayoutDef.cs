@@ -4,7 +4,7 @@ using PowBasics.Geom;
 
 namespace FlexBuilder.Structs;
 
-record LayoutDef(
+sealed record LayoutDef(
 	FreeSz WinSize,
 	Node Root
 )

@@ -1,6 +1,7 @@
 ﻿using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
+using System.Text.Json.Serialization;
 using static LayoutSystem.Flex.LayStrats.WrapUtils;
 
 namespace LayoutSystem.Flex.LayStrats;
@@ -18,6 +19,8 @@ namespace LayoutSystem.Flex.LayStrats;
 public sealed class WrapStrat : IStrat
 {
 	public Dir MainDir { get; }
+
+	[JsonIgnore]
 	public Dir ElseDir => MainDir.Neg();
 
 	public WrapStrat(Dir mainDir)

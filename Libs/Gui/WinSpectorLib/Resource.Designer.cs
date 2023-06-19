@@ -79,5 +79,15 @@ namespace _3_WinSpectorLib {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ToolBtn_OpenFlexBuilder {
+            get {
+                object obj = ResourceManager.GetObject("ToolBtn_OpenFlexBuilder", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

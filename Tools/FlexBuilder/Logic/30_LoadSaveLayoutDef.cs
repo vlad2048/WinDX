@@ -5,6 +5,7 @@ using LayoutSystem.Utils.JsonUtils;
 using PowMaybe;
 using PowMaybeErr;
 using PowRxVar;
+using PowWinForms.Utils;
 
 namespace FlexBuilder.Logic;
 
@@ -13,7 +14,8 @@ static partial class Setup
 	public static IDisposable LoadSaveLayoutDef(
 		MainWin ui,
 		IFullRwMayBndVar<LayoutDef> layout,
-		UserPrefs userPrefs
+		UserPrefs userPrefs,
+		Maybe<StartupFile> mayStartupFile
 	)
 	{
 		var d = new Disp();
@@ -60,9 +62,17 @@ static partial class Setup
 			userPrefs.Save();
 		}
 
-
-		if (userPrefs.OpenFile != null && File.Exists(userPrefs.OpenFile))
-			LoadFile(userPrefs.OpenFile);
+		if (mayStartupFile.IsSome(out var startupFile))
+		{
+			LoadFile(startupFile.Filename);
+			if (startupFile.DeleteAfterOpen)
+				File.Delete(startupFile.Filename);
+		}
+		else
+		{
+			if (userPrefs.OpenFile != null && File.Exists(userPrefs.OpenFile))
+				LoadFile(userPrefs.OpenFile);
+		}
 
 
 		//ui.statusStrip.AddVar("Layout", layout.Select(e => e.IsSome())).D(d);
@@ -76,7 +86,7 @@ static partial class Setup
 			openedFilename.ToUnit(),
 			isModified.ToUnit()
 		)
-			.ObserveOnUIThread()
+			.ObserveOnWinFormsUIThread()
 			.Subscribe(_ =>
 			{
 				ui.saveToolStripMenuItem.Enabled = layout.V.IsSome() && isModified.V;

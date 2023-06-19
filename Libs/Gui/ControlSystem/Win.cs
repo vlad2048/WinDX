@@ -4,6 +4,7 @@ using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
+using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
 using RenderLib;
@@ -24,9 +25,9 @@ public class Win : Ctrl
 	public Win(Action<WinOpt>? optFun = null)
 	{
 		var opt = WinOpt.Build(optFun);
-		var sysWin = WinUtils.MakeWin(opt);
-		//this.D(sysWin.D);		// this throws an Exception when disposing
-		sysWin.D(D);
+		var sysWin = WinUtils.MakeWin(opt).D(D);
+		this.D(sysWin.D);
+
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
@@ -35,6 +36,7 @@ public class Win : Ctrl
 		{
 			using var d = new Disp();
 			var mixRoot = WinUtils.BuildTree(treeEvtSig, treeEvtObs, this);
+			WinUtils.AssignWinToCtrls(this, mixRoot);
 			var mixLayout = WinUtils.SolveTree(this, mixRoot, sysWin.ClientR.V.Size);
 			G.WinMan.SetWinLayout(mixLayout);
 			var gfx = WinUtils.BuildGfxWithRMap(mixLayout.RMap, treeEvtObs, renderer).D(d);
@@ -88,6 +90,17 @@ file static class WinUtils
 	}
 
 
+	public static void AssignWinToCtrls(
+		Win win,
+		ReconstructedTree<IMixNode> reconstructedTree
+	) =>
+		reconstructedTree.Root
+			.Select(e => e.V)
+			.OfType<CtrlNode>()
+			.SelectToArray(e => e.Ctrl)
+			.ForEach(ctrl => ctrl.WinRW.V = May.Some(win));
+
+
 	public static MixLayout SolveTree(
 		Win win,
 		ReconstructedTree<IMixNode> reconstructedTree,
@@ -98,12 +111,14 @@ file static class WinUtils
 
 		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
 		var flexRoot = stFlexRoot.Map(e => e.Flex);
-		var layout = FlexSolver.Solve(flexRoot, FreeSzMaker.FromSz(winSz));
+		var freeSz = FreeSzMaker.FromSz(winSz);
+		var layout = FlexSolver.Solve(flexRoot, freeSz);
 
 		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
 
 		return new MixLayout(
 			win,
+			freeSz,
 			mixRoot,
 			layout.RMap.MapKeys(flex2st),
 			layout.WarningMap.MapKeys(flex2st),
@@ -142,7 +157,6 @@ file static class WinUtils
 		var gfx = renderer.GetGfx().D(d);
 		treeEvtObs.WhenPush.OfType<StFlexNode, NodeState>(e => e.State).Subscribe(st =>
 		{
-			//gfx.R = rMap[st];
 			gfx.R = rMap.TryGetValue(st, out var r) switch
 			{
 				true => r,

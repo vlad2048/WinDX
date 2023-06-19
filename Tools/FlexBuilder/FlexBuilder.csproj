@@ -11,8 +11,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowRxVar.Maybe" Version="0.0.34" />
-		<PackageReference Include="PowWinForms" Version="0.0.27" />
+		<PackageReference Include="PowRxVar.Maybe" Version="0.0.38" />
+		<PackageReference Include="PowWinForms" Version="0.0.32" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -34,10 +34,6 @@
 			<Generator>ResXFileCodeGenerator</Generator>
 			<LastGenOutput>Resource.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Properties\" />
 	</ItemGroup>
 
 </Project>
