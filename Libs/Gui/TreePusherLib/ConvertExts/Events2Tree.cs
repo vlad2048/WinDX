@@ -29,14 +29,14 @@ public static class Events2Tree
 
 		evtObs.WhenPush.Subscribe(args =>
 		{
-			using var _ = Nst.Log($"ToTree.WhenPush {args}");
+			//using var _ = Nst.Log($"ToTree.WhenPush {args}");
 			stack.ActOnCurAndPush(() => Nod.Make(args), (_cur, _new) => _cur?.AddChild(_new));
 			onPush(args);
 		}).D(d);
 
 		evtObs.WhenPop.Subscribe(args =>
 		{
-			using var _ = Nst.Log($"ToTree.WhenPop {args}");
+			//using var _ = Nst.Log($"ToTree.WhenPop {args}");
 			var top = stack.Pop();
 			if (top.V!.Equals(args)) return;	// Happy path
 

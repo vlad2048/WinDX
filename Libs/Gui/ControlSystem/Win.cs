@@ -1,4 +1,6 @@
-﻿using ControlSystem.Logic.PopLogic;
+﻿using System.Diagnostics;
+using System.Reactive.Linq;
+using ControlSystem.Logic.PopLogic;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using LayoutSystem.Flex;
@@ -33,6 +35,42 @@ public class Win : Ctrl
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
+
+
+		SlaveWin[]? slaveWins = null;
+		const int SlaveCnt = 2560;
+
+		sysWin.WhenMsg.WhenKEYDOWN().Where(e => e.Key == VirtualKey.D1).Subscribe(_ =>
+		{
+			slaveWins = new SlaveWin[SlaveCnt];
+			var sw = Stopwatch.StartNew();
+			for (var i = 0; i < SlaveCnt; i++)
+				slaveWins[i] = new SlaveWin(sysWin.Handle).D(D);
+			L($"Init time: {sw.Elapsed.TotalMilliseconds:F3}ms");
+		}).D(D);
+
+		sysWin.WhenMsg.WhenKEYDOWN().Where(e => e.Key == VirtualKey.D2).Subscribe(_ =>
+		{
+			if (slaveWins == null) return;
+
+			var sw = Stopwatch.StartNew();
+			for (var i = 0; i < SlaveCnt; i++)
+				User32Methods.ShowWindow(slaveWins[i].Handle, ShowWindowCommands.SW_SHOW);
+			L($"Show time: {sw.Elapsed.TotalMilliseconds:F3}ms");
+
+		}).D(D);
+
+		sysWin.WhenMsg.WhenKEYDOWN().Where(e => e.Key == VirtualKey.D3).Subscribe(_ =>
+		{
+			if (slaveWins == null) return;
+
+			var sw = Stopwatch.StartNew();
+			for (var i = 0; i < SlaveCnt; i++)
+				slaveWins[i].Dispose();
+			L($"Dispose time: {sw.Elapsed.TotalMilliseconds:F3}ms");
+			slaveWins = null;
+
+		}).D(D);
 
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{

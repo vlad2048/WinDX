@@ -22,4 +22,20 @@ public static class WinClasses
 		}
 	));
 	public static string MainWindow => mainWindow.Value;
+	
+	/*private static readonly Lazy<string> slaveWindow = new(() => RegisterClassUtils.Register(
+		"SlaveWindow",
+		new RegisterClassParams
+		{
+			Styles =
+				WindowClassStyles.CS_HREDRAW |
+				WindowClassStyles.CS_VREDRAW |
+				WindowClassStyles.CS_DBLCLKS |
+				0
+			,
+			WinProc = SysWin.WndProc,
+			BackgroundBrush = Gdi32Helpers.GetStockObject(StockObject.BLACK_BRUSH),
+		}
+	));
+	public static string SlaveWindow => slaveWindow.Value;*/
 }

@@ -16,7 +16,8 @@ namespace ControlSystem.Logic.PopLogic;
 sealed record LayoutPartition(
 	MixNode Root,
 	IReadOnlyDictionary<NodeState, R> RMap,
-	HashSet<Ctrl> CtrlSet
+	HashSet<Ctrl> CtrlSet,
+	object Id
 );
 
 
@@ -43,7 +44,8 @@ static class PopSplitter
 			return new LayoutPartition(
 				partitionExtended,
 				partitionRMap,
-				enabledCtrls
+				enabledCtrls,
+				(object?)stateStart ?? ((CtrlNode)partitionExtended.V).Ctrl
 			);
 		});
 
