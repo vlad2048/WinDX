@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using FlexBuilder.Structs;
 using FlexBuilder.Utils.Exts;
 using LayoutSystem.Flex.Structs;
+using LayoutSystem.StructsShared;
 using PowBasics.ColorCode;
 using PowBasics.Geom;
 using PowMaybe;

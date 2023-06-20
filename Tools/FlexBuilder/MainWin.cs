@@ -3,6 +3,7 @@ using FlexBuilder.Logic;
 using FlexBuilder.Structs;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Flex;
+using LayoutSystem.StructsShared;
 using PowMaybe;
 using PowRxVar;
 using PowWinForms;

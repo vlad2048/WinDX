@@ -7,6 +7,8 @@ global using Node = TNod<LayoutSystem.Flex.FlexNode>;
 
 using System.Runtime.CompilerServices;
 [assembly:InternalsVisibleTo("LayoutSystem.Tests")]
+[assembly:InternalsVisibleTo("3_WinSpectorLib")]
+[assembly:InternalsVisibleTo("FlexBuilder")]
 
 namespace LayoutSystem;
 

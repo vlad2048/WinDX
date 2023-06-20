@@ -1,6 +1,6 @@
 ﻿using System.Reactive.Linq;
 using FlexBuilder.Structs;
-using FlexBuilder.Utils.Exts;
+using LayoutSystem.StructsShared;
 using LayoutSystem.Utils.JsonUtils;
 using PowMaybe;
 using PowMaybeErr;

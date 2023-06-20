@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
-using LayoutSystem.Flex.Structs;
+using LayoutSystem.StructsShared;
 using LayoutSystem.Utils.JsonUtils;
 using PowMaybe;
 using PowRxVar;
@@ -14,12 +14,6 @@ namespace WinSpectorLib.Logic;
 
 static partial class Setup
 {
-	// TODO: share this record with FlexBuilder
-	private sealed record LayoutDef(
-		FreeSz WinSize,
-		Node Root
-	);
-
 	public static IDisposable OpenInFlexBuilder(WinSpectorWin ui, IRoMayVar<MixLayout> selLayout)
 	{
 		var d = new Disp();
