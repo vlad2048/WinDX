@@ -1,7 +1,9 @@
-﻿using ControlSystem.Structs;
+﻿using ControlSystem.Logic.PopLogic;
+using ControlSystem.Structs;
 using ControlSystem.Utils;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
+using Logging;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
@@ -35,12 +37,15 @@ public class Win : Ctrl
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
-			var mixRoot = WinUtils.BuildTree(treeEvtSig, treeEvtObs, this);
+			WinUtils.BuildTree(out var mixRoot, treeEvtSig, treeEvtObs, this);
 			WinUtils.AssignWinToCtrls(this, mixRoot);
-			var mixLayout = WinUtils.SolveTree(this, mixRoot, sysWin.ClientR.V.Size);
+			WinUtils.SolveTree(out var mixLayout, this, mixRoot, sysWin.ClientR.V.Size);
 			G.WinMan.SetWinLayout(mixLayout);
-			var gfx = WinUtils.BuildGfxWithRMap(mixLayout.RMap, treeEvtObs, renderer).D(d);
-			WinUtils.Render(gfx, treeEvtSig, this).D(d);
+
+			var (mainPartition, slavePartitions) = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
+
+			//WinUtils.BuildGfxWithRMap(out var gfx, mixLayout.RMap, treeEvtObs, renderer).D(d);
+			//WinUtils.Render(gfx, treeEvtSig, this).D(d);
 		}).D(D);
 	}
 
@@ -51,6 +56,47 @@ public class Win : Ctrl
 
 file static class WinUtils
 {
+	/*
+	public static IDisposable RenderSimple(
+		MixLayout layout,
+		ITreeEvtObs<IMixNode> treeEvtObs,
+		ITreeEvtSig<IMixNode> treeEvtSig,
+		IRenderWinCtx renderer,
+		Win win
+	)
+	{
+		var d = new Disp();
+		var gfx = renderer.GetGfx().D(d);
+		var pusher = new TreePusher<IMixNode>(treeEvtSig);
+		var renderArgs = new RenderArgs(gfx, pusher).D(d);
+
+		treeEvtObs.WhenPush.OfType<CtrlNode, Ctrl>(e => e.Ctrl).Subscribe(ctrl =>
+		{
+			ctrl.SignalRender(renderArgs);
+		}).D(d);
+
+		treeEvtObs.WhenPush.OfType<StFlexNode, NodeState>(e => e.State).Subscribe(st =>
+		{
+			gfx.R = layout.RMap.TryGetValue(st, out var r) switch
+			{
+				true => r,
+				false => R.Empty
+			};
+		}).D(d);
+
+
+		using (renderArgs.Ctrl(win))
+		{
+
+		}
+
+
+		return d;
+	}
+	*/
+
+
+
 	private const int DEFAULT = (int)CreateWindowFlags.CW_USEDEFAULT;
 
 	public static SysWin MakeWin(WinOpt opt)
@@ -71,7 +117,9 @@ file static class WinUtils
 	}
 
 
-	public static ReconstructedTree<IMixNode> BuildTree(
+
+	public static void BuildTree(
+		out ReconstructedTree<IMixNode> reconstructedTree,
 		ITreeEvtSig<IMixNode> treeEvtSig,
 		ITreeEvtObs<IMixNode> treeEvtObs,
 		Ctrl rootCtrl
@@ -79,14 +127,20 @@ file static class WinUtils
 	{
 		using var d = new Disp();
 		var gfx = new Dummy_Gfx().D(d);
-		var renderArgs = new RenderArgs(gfx, treeEvtSig).D(d);
-		var reconstructedTree = treeEvtObs.ToTree(() =>
-		{
-			using (renderArgs.Ctrl(rootCtrl))
+		var pusher = new TreePusher<IMixNode>(treeEvtSig);
+		var renderArgs = new RenderArgs(gfx, pusher).D(d);
+		reconstructedTree = treeEvtObs.ToTree(
+			mixNode =>
 			{
+				if (mixNode is not CtrlNode { Ctrl: var ctrl }) return;
+				//using var __ = Nst.Log($"WhenPush->SignalRender {ctrl.GetType().Name}");
+				ctrl.SignalRender(renderArgs);
+			},
+			() =>
+			{
+				using (renderArgs.Ctrl(rootCtrl)) { }
 			}
-		});
-		return reconstructedTree;
+		);
 	}
 
 
@@ -101,7 +155,8 @@ file static class WinUtils
 			.ForEach(ctrl => ctrl.WinRW.V = May.Some(win));
 
 
-	public static MixLayout SolveTree(
+	public static void SolveTree(
+		out MixLayout mixLayout,
 		Win win,
 		ReconstructedTree<IMixNode> reconstructedTree,
 		Sz winSz
@@ -116,7 +171,7 @@ file static class WinUtils
 
 		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
 
-		return new MixLayout(
+		mixLayout = new MixLayout(
 			win,
 			freeSz,
 			mixRoot,
@@ -147,23 +202,44 @@ file static class WinUtils
 		return ((CtrlNode)nod.V).Ctrl;
 	}
 
-	public static (IGfx, IDisposable) BuildGfxWithRMap(
+	/*
+	public static IDisposable BuildGfxForPopSubTree(
+		out IGfx gfx,
+		PopSubTree tree,
+		ITreeEvtObs<IMixNode> treeEvtObs,
+		IRenderWinCtx renderer
+	)
+	{
+		var d = new Disp();
+		gfx = renderer.GetGfx().D(d);
+		var gfx_ = gfx;
+
+
+
+		return d;
+	}
+
+
+	
+	public static IDisposable BuildGfxWithRMap(
+		out IGfx gfx,
 		IReadOnlyDictionary<NodeState, R> rMap,
 		ITreeEvtObs<IMixNode> treeEvtObs,
 		IRenderWinCtx renderer
 	)
 	{
 		var d = new Disp();
-		var gfx = renderer.GetGfx().D(d);
+		gfx = renderer.GetGfx().D(d);
+		var gfx_ = gfx;
 		treeEvtObs.WhenPush.OfType<StFlexNode, NodeState>(e => e.State).Subscribe(st =>
 		{
-			gfx.R = rMap.TryGetValue(st, out var r) switch
+			gfx_.R = rMap.TryGetValue(st, out var r) switch
 			{
 				true => r,
 				false => R.Empty
 			};
 		}).D(d);
-		return (gfx, d);
+		return d;
 	}
 
 
@@ -180,4 +256,5 @@ file static class WinUtils
 		}
 		return d;
 	}
+	*/
 }

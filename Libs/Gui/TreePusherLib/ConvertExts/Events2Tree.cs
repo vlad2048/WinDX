@@ -1,4 +1,5 @@
-﻿using PowBasics.CollectionsExt;
+﻿using Logging;
+using PowBasics.CollectionsExt;
 using PowRxVar;
 
 namespace TreePusherLib;
@@ -15,7 +16,11 @@ public sealed record ReconstructedTree<T>(
 
 public static class Events2Tree
 {
-	public static ReconstructedTree<T> ToTree<T>(this ITreeEvtObs<T> evtObs, Action runAction)
+	public static ReconstructedTree<T> ToTree<T>(
+		this ITreeEvtObs<T> evtObs,
+		Action<T> onPush,
+		Action runAction
+	)
 	{
 		using var d = new Disp();
 
@@ -24,11 +29,14 @@ public static class Events2Tree
 
 		evtObs.WhenPush.Subscribe(args =>
 		{
+			using var _ = Nst.Log($"ToTree.WhenPush {args}");
 			stack.ActOnCurAndPush(() => Nod.Make(args), (_cur, _new) => _cur?.AddChild(_new));
+			onPush(args);
 		}).D(d);
 
 		evtObs.WhenPop.Subscribe(args =>
 		{
+			using var _ = Nst.Log($"ToTree.WhenPop {args}");
 			var top = stack.Pop();
 			if (top.V!.Equals(args)) return;	// Happy path
 

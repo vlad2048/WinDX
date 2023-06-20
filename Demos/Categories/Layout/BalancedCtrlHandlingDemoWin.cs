@@ -9,9 +9,9 @@ using RenderLib.Structs;
 
 namespace Demos.Categories.Layout;
 
-sealed class UnbalancedCtrlHandlingDemoWin : Win
+sealed class BalancedCtrlHandlingDemoWin : Win
 {
-	public UnbalancedCtrlHandlingDemoWin() : base(opt => opt.R = new R(-600, 64, 500, 400))
+	public BalancedCtrlHandlingDemoWin() : base(opt => opt.R = new R(-600, 64, 500, 400))
 	{
 		var nodeRoot = new NodeState().D(D);
 		var nodeFit = new NodeState().D(D);
@@ -72,7 +72,7 @@ sealed class UnbalancedCtrlHandlingDemoWin : Win
 				using (r.Flex(nodeRoot, Vec.Fix(110, 170), Strats.Fill))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C2Brush1);
-					r.Flex(nodeFil, Vec.Fit, Strats.Fill, Mg.Mk(10));
+					using (r.Flex(nodeFil, Vec.Fit, Strats.Fill, Mg.Mk(10)))
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.C2Brush2);
 						using (r.Ctrl(c3))

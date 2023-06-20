@@ -2,6 +2,98 @@
 
 static class TreeExts
 {
+	/// <summary>
+	///
+	///    ┌──n1
+	///    │
+	///C1──┤
+	///    │      ┌──C2
+	///    └──n2──┤      ┌──n4──n5──n6
+	///           └──n3──┤
+	///                  └──C3──n7──C4──n8
+	///
+	/// predicate = node == C*
+	/// 
+	/// if node = n3 returns C1──n2──n3 along with a pointer to n3 in the new tree
+	/// if node = C3 returns C3         along with a pointer to C3 in the new (single node) tree
+	/// 
+	/// </summary>
+	public static (TNod<T> root, TNod<T> child) ExtendUpAndIncluding<T>(this TNod<T> node, Func<T, bool> predicate)
+	{
+		var childOrig = node;
+		var child = Nod.Make(node.V);
+		var root = child;
+		while (!predicate(root.V))
+		{
+			var prev = root;
+			if (childOrig.Parent == null) throw new ArgumentException("Failed to extend up");
+			root = Nod.Make(childOrig.Parent.V, prev);
+			childOrig = childOrig.Parent;
+		}
+		return (root, child);
+	}
+
+
+	/// <summary>
+	///
+	///    ┌──n1
+	///    │
+	///C1──┤
+	///    │      ┌──C2
+	///    └──n2──┤      ┌──n4──n5──n6
+	///           └──n3──┤
+	///                  └──C3──n7──C4──n8
+	///
+	/// predicate = node == C*
+	/// 
+	/// - if node = n2 returns
+	///   --------------------
+	///        ┌──⬤
+	///    n2──┤      ┌──n4──n5──n6
+	///        └──n3──┤ 
+	///               └──⬤
+	///   along with the boundary [C2, C3]
+	///
+	/// - if node = C3 (ie: predicate(node) == true)
+	///   ------------------------------------------
+	///   throw an Exception 
+	/// 
+	/// </summary>
+	public static (TNod<T> root, TNod<T>[] boundary) ExtendDownToAndExcluding<T>(this TNod<T> node, Func<T, bool> predicate)
+	{
+		var boundary = new List<TNod<T>>();
+
+		var curOrig = node;
+		var cur = Nod.Make(node.V);
+		var root = cur;
+
+		void Rec(TNod<T> nOrig, TNod<T> n)
+		{
+			foreach (var childOrig in nOrig.Children)
+			{
+				if (predicate(childOrig.V))
+				{
+					boundary.Add(childOrig);
+				}
+				else
+				{
+					var child = Nod.Make(childOrig.V);
+					n.AddChild(child);
+					Rec(childOrig, child);
+				}
+			}
+		}
+
+		Rec(curOrig, cur);
+
+		return (
+			root,
+			boundary.ToArray()
+		);
+	}
+
+
+
 	public static TNod<U> OfTypeTree<T, U>(this TNod<T> root) where U : T
 	{
 		if (root.V is U) throw new ArgumentException();

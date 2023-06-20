@@ -6,8 +6,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="PowBasics" Version="0.0.15" />
-		<PackageReference Include="PowRxVar.Maybe" Version="0.0.38" />
-		<PackageReference Include="PowTrees" Version="0.0.24" />
+		<PackageReference Include="PowRxVar.Maybe" Version="0.0.40" />
+		<PackageReference Include="PowTrees" Version="0.0.26" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Base\Logging\1_Logging.csproj" />
 	</ItemGroup>
 
 </Project>

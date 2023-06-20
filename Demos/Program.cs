@@ -5,6 +5,7 @@ using Demos.Structs;
 using PowRxVar;
 using PowWinForms;
 using Structs;
+using SysWinLib;
 using WinSpectorLib;
 
 namespace Demos;
@@ -15,7 +16,7 @@ class Program
 	{
 		//VarDbg.BreakpointOnDispAlloc(21);
 
-		using (var d = new Disp())
+		/*using (var d = new Disp())
 		{
 			var userPrefs = new UserPrefs().Track();
 			Setup.InitConsole(userPrefs).D(d);
@@ -31,8 +32,12 @@ class Program
 			WinSpector.RunInternal(
 				new DemoNfo("SysWin", Wrap(SysWinDemo.Run)),
 				new DemoNfo("UnbalancedCtrlHandling", Wrap(() => new UnbalancedCtrlHandlingDemoWin())),
+				new DemoNfo("BalancedCtrlHandling", Wrap(() => new BalancedCtrlHandlingDemoWin())),
 				new DemoNfo("PopNode", Wrap(() => new PopNodeDemoWin()))
 			);
+		}*/
+		using (var win = new PopNodeDemoWin()) {
+			App.Run();
 		}
 
 		VarDbg.CheckForUndisposedDisps(true);

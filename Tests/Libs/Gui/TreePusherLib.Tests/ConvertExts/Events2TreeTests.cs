@@ -14,20 +14,23 @@ sealed class Events2TreeTests : RxTest
 		var (evtSig, evtObs) = TreeEvents<int>.Make().D(d);
 		var pusher = new TreePusher<int>(evtSig);
 
-		evtObs.ToTree(() =>
-		{
-			using (pusher.Push(3))
+		evtObs.ToTree(
+			_ => { },
+			() =>
 			{
-				using (pusher.Push(5)) ;
-				using (pusher.Push(7))
+				using (pusher.Push(3))
 				{
-					using (pusher.Push(9)) ;
-					using (pusher.Push(11)) ;
-				}
+					using (pusher.Push(5)) ;
+					using (pusher.Push(7))
+					{
+						using (pusher.Push(9)) ;
+						using (pusher.Push(11)) ;
+					}
 
-				using (pusher.Push(17)) ;
+					using (pusher.Push(17)) ;
+				}
 			}
-		})
+		)
 			.ShouldBeSameReconstructedTree(
 				N(3,
 					N(5),
@@ -49,7 +52,9 @@ sealed class Events2TreeTests : RxTest
 		var (evtSig, evtObs) = TreeEvents<int>.Make().D(d);
 		var pusher = new TreePusher<int>(evtSig);
 
-		evtObs.ToTree(() =>
+		evtObs.ToTree(
+			_ => { },
+			() =>
 			{
 				using (pusher.Push(3))
 				{
@@ -62,7 +67,8 @@ sealed class Events2TreeTests : RxTest
 
 					using (pusher.Push(17)) ;
 				}
-			})
+			}
+		)
 			.ShouldBeSameReconstructedTree(
 				N(3,
 					N(5),
@@ -82,7 +88,9 @@ sealed class Events2TreeTests : RxTest
 		var (evtSig, evtObs) = TreeEvents<int>.Make().D(d);
 		var pusher = new TreePusher<int>(evtSig);
 
-		evtObs.ToTree(() =>
+		evtObs.ToTree(
+			_ => { },
+			() =>
 			{
 				using (pusher.Push(3))
 				{
@@ -92,7 +100,8 @@ sealed class Events2TreeTests : RxTest
 					using (pusher.Push(11)) ;
 					using (pusher.Push(17)) ;
 				}
-			})
+			}
+		)
 			.ShouldBeSameReconstructedTree(
 				N(3),
 				(3, 7)
@@ -109,7 +118,9 @@ sealed class Events2TreeTests : RxTest
 		var pusher = new TreePusher<int>(evtSig);
 
 		// TODO: understand why the expected data looks/is wrong
-		evtObs.ToTree(() =>
+		evtObs.ToTree(
+			_ => { },
+			() =>
 			{
 				using (pusher.Push(3))
 				{
@@ -119,7 +130,8 @@ sealed class Events2TreeTests : RxTest
 					pusher.Push(11);
 					using (pusher.Push(17)) ;
 				}
-			})
+			}
+		)
 			.ShouldBeSameReconstructedTree(
 				N(3),
 				(3, 7)

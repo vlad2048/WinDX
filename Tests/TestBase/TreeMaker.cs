@@ -37,4 +37,11 @@ public static class TreeLogger
 		L(s);
 		L(pad);
 	}
+
+	/*public static void LTitleSmall(string s)
+	{
+		var pad = new string('-', s.Length);
+		L(s);
+		L(pad);
+	}*/
 }

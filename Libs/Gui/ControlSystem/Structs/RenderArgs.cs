@@ -8,6 +8,49 @@ using TreePusherLib;
 
 namespace ControlSystem.Structs;
 
+
+public sealed class RenderArgs : IDisposable
+{
+	private readonly Disp d = new();
+	public void Dispose() => d.Dispose();
+
+	//private readonly MixNodeTreePusher pusher;
+	private readonly TreePusher<IMixNode> pusher;
+
+	public IGfx Gfx { get; }
+
+	internal RenderArgs(IGfx gfx, TreePusher<IMixNode> pusher)
+	{
+		Gfx = gfx;
+		this.pusher = pusher;
+	}
+
+	public IDisposable Flex(
+		NodeState state,
+		DimVec dim,
+		IStrat strat,
+		Marg? marg = null
+	) =>
+		pusher.Push(new StFlexNode(
+			state,
+			new FlexNode(
+				dim,
+				strat,
+				marg ?? Mg.Zero
+			)
+		));
+
+	public IDisposable Ctrl(
+		Ctrl ctrl
+	) =>
+		pusher.Push(new CtrlNode(
+			ctrl
+		));
+}
+
+
+
+/*
 public sealed class RenderArgs : IDisposable
 {
 	private readonly Disp d = new();
@@ -46,3 +89,4 @@ public sealed class RenderArgs : IDisposable
 			ctrl
 		));
 }
+*/

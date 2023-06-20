@@ -10,7 +10,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowWinForms" Version="0.0.33" />
+		<PackageReference Include="PowWinForms" Version="0.0.35" />
 	</ItemGroup>
 
 	<ItemGroup>

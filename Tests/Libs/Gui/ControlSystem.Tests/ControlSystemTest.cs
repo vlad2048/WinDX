@@ -2,7 +2,7 @@
 
 namespace ControlSystem.Tests;
 
-public class ControlSystemTest : RxTest
+class ControlSystemTest : RxTest
 {
 	[SetUp]
 	public new void Setup() => G.ReinitForTests();
