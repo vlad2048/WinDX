@@ -26,51 +26,19 @@ namespace ControlSystem;
 
 public class Win : Ctrl
 {
+	private readonly SysWin sysWin;
+	private readonly SlaveMan slaveMan;
+
 	public Win(Action<WinOpt>? optFun = null)
 	{
 		var opt = WinOpt.Build(optFun);
-		var sysWin = WinUtils.MakeWin(opt).D(D);
+		sysWin = WinUtils.MakeWin(opt).D(D);
+		slaveMan = new SlaveMan(sysWin).D(D);
 		this.D(sysWin.D);
 
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
-
-
-		SlaveWin[]? slaveWins = null;
-		const int SlaveCnt = 2560;
-
-		sysWin.WhenMsg.WhenKEYDOWN().Where(e => e.Key == VirtualKey.D1).Subscribe(_ =>
-		{
-			slaveWins = new SlaveWin[SlaveCnt];
-			var sw = Stopwatch.StartNew();
-			for (var i = 0; i < SlaveCnt; i++)
-				slaveWins[i] = new SlaveWin(sysWin.Handle).D(D);
-			L($"Init time: {sw.Elapsed.TotalMilliseconds:F3}ms");
-		}).D(D);
-
-		sysWin.WhenMsg.WhenKEYDOWN().Where(e => e.Key == VirtualKey.D2).Subscribe(_ =>
-		{
-			if (slaveWins == null) return;
-
-			var sw = Stopwatch.StartNew();
-			for (var i = 0; i < SlaveCnt; i++)
-				User32Methods.ShowWindow(slaveWins[i].Handle, ShowWindowCommands.SW_SHOW);
-			L($"Show time: {sw.Elapsed.TotalMilliseconds:F3}ms");
-
-		}).D(D);
-
-		sysWin.WhenMsg.WhenKEYDOWN().Where(e => e.Key == VirtualKey.D3).Subscribe(_ =>
-		{
-			if (slaveWins == null) return;
-
-			var sw = Stopwatch.StartNew();
-			for (var i = 0; i < SlaveCnt; i++)
-				slaveWins[i].Dispose();
-			L($"Dispose time: {sw.Elapsed.TotalMilliseconds:F3}ms");
-			slaveWins = null;
-
-		}).D(D);
 
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
@@ -80,82 +48,66 @@ public class Win : Ctrl
 			WinUtils.SolveTree(out var mixLayout, this, mixRoot, sysWin.ClientR.V.Size);
 			G.WinMan.SetWinLayout(mixLayout);
 
-			var (mainPartition, slavePartitions) = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
+			var (partition, subPartitions) = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
 
-			//WinUtils.BuildGfxWithRMap(out var gfx, mixLayout.RMap, treeEvtObs, renderer).D(d);
-			//WinUtils.Render(gfx, treeEvtSig, this).D(d);
+			RenderUtils.RenderTree(
+				partition,
+				renderer,
+				treeEvtSig,
+				treeEvtObs
+			);
+
+			slaveMan.ShowSubPartitions(subPartitions);
+
 		}).D(D);
 	}
 
 	public override string ToString() => GetType().Name;
+
+	public void Invalidate() => sysWin.Invalidate();
+}
+
+
+
+static class RenderUtils
+{
+	public static void RenderTree(
+		Partition partition,
+		IRenderWinCtx renderer,
+		ITreeEvtSig<IMixNode> treeEvtSig,
+		ITreeEvtObs<IMixNode> treeEvtObs
+	)
+	{
+		using var d = new Disp();
+		var gfx = renderer.GetGfx().D(d);
+		var pusher = new TreePusher<IMixNode>(treeEvtSig);
+		var renderArgs = new RenderArgs(gfx, pusher).D(d);
+
+		var reconstructedTree = treeEvtObs.ToTree(
+			mixNode =>
+			{
+				switch (mixNode)
+				{
+					case CtrlNode { Ctrl: var ctrl } when partition.CtrlSet.Contains(ctrl):
+						ctrl.SignalRender(renderArgs);
+						break;
+					case StFlexNode { State: var state }:
+						gfx.R = partition.RMap.GetValueOrDefault(state, R.Empty);
+						break;
+				}
+			},
+			() =>
+			{
+				using (renderArgs.Ctrl(partition.RootCtrl)) { }
+			}
+		);
+	}
 }
 
 
 
 file static class WinUtils
 {
-	/*
-	public static IDisposable RenderSimple(
-		MixLayout layout,
-		ITreeEvtObs<IMixNode> treeEvtObs,
-		ITreeEvtSig<IMixNode> treeEvtSig,
-		IRenderWinCtx renderer,
-		Win win
-	)
-	{
-		var d = new Disp();
-		var gfx = renderer.GetGfx().D(d);
-		var pusher = new TreePusher<IMixNode>(treeEvtSig);
-		var renderArgs = new RenderArgs(gfx, pusher).D(d);
-
-		treeEvtObs.WhenPush.OfType<CtrlNode, Ctrl>(e => e.Ctrl).Subscribe(ctrl =>
-		{
-			ctrl.SignalRender(renderArgs);
-		}).D(d);
-
-		treeEvtObs.WhenPush.OfType<StFlexNode, NodeState>(e => e.State).Subscribe(st =>
-		{
-			gfx.R = layout.RMap.TryGetValue(st, out var r) switch
-			{
-				true => r,
-				false => R.Empty
-			};
-		}).D(d);
-
-
-		using (renderArgs.Ctrl(win))
-		{
-
-		}
-
-
-		return d;
-	}
-	*/
-
-
-
-	private const int DEFAULT = (int)CreateWindowFlags.CW_USEDEFAULT;
-
-	public static SysWin MakeWin(WinOpt opt)
-	{
-		var win = new SysWin(e =>
-		{
-			e.CreateWindowParams = new CreateWindowParams
-			{
-				Name = opt.Title,
-				X = opt.Pos?.X ?? DEFAULT,
-				Y = opt.Pos?.Y ?? DEFAULT,
-				Width = opt.Size?.Width ?? DEFAULT,
-				Height = opt.Size?.Height ?? DEFAULT,
-			};
-		});
-		win.Init();
-		return win;
-	}
-
-
-
 	public static void BuildTree(
 		out ReconstructedTree<IMixNode> reconstructedTree,
 		ITreeEvtSig<IMixNode> treeEvtSig,
@@ -171,7 +123,6 @@ file static class WinUtils
 			mixNode =>
 			{
 				if (mixNode is not CtrlNode { Ctrl: var ctrl }) return;
-				//using var __ = Nst.Log($"WhenPush->SignalRender {ctrl.GetType().Name}");
 				ctrl.SignalRender(renderArgs);
 			},
 			() =>
@@ -180,6 +131,7 @@ file static class WinUtils
 			}
 		);
 	}
+
 
 
 	public static void AssignWinToCtrls(
@@ -240,59 +192,25 @@ file static class WinUtils
 		return ((CtrlNode)nod.V).Ctrl;
 	}
 
-	/*
-	public static IDisposable BuildGfxForPopSubTree(
-		out IGfx gfx,
-		PopSubTree tree,
-		ITreeEvtObs<IMixNode> treeEvtObs,
-		IRenderWinCtx renderer
-	)
+
+
+
+	private const int DEFAULT = (int)CreateWindowFlags.CW_USEDEFAULT;
+
+	public static SysWin MakeWin(WinOpt opt)
 	{
-		var d = new Disp();
-		gfx = renderer.GetGfx().D(d);
-		var gfx_ = gfx;
-
-
-
-		return d;
-	}
-
-
-	
-	public static IDisposable BuildGfxWithRMap(
-		out IGfx gfx,
-		IReadOnlyDictionary<NodeState, R> rMap,
-		ITreeEvtObs<IMixNode> treeEvtObs,
-		IRenderWinCtx renderer
-	)
-	{
-		var d = new Disp();
-		gfx = renderer.GetGfx().D(d);
-		var gfx_ = gfx;
-		treeEvtObs.WhenPush.OfType<StFlexNode, NodeState>(e => e.State).Subscribe(st =>
+		var win = new SysWin(e =>
 		{
-			gfx_.R = rMap.TryGetValue(st, out var r) switch
+			e.CreateWindowParams = new CreateWindowParams
 			{
-				true => r,
-				false => R.Empty
+				Name = opt.Title,
+				X = opt.Pos?.X ?? DEFAULT,
+				Y = opt.Pos?.Y ?? DEFAULT,
+				Width = opt.Size?.Width ?? DEFAULT,
+				Height = opt.Size?.Height ?? DEFAULT,
 			};
-		}).D(d);
-		return d;
+		});
+		win.Init();
+		return win;
 	}
-
-
-	public static IDisposable Render(
-		IGfx gfx,
-		ITreeEvtSig<IMixNode> treeEvtSig,
-		Ctrl rootCtrl
-	)
-	{
-		var d = new Disp();
-		var renderArgs = new RenderArgs(gfx, treeEvtSig).D(d);
-		using (renderArgs.Ctrl(rootCtrl))
-		{
-		}
-		return d;
-	}
-	*/
 }

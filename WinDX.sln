@@ -18,7 +18,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1_LayoutSystem", "Libs\Gui\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EE6EF8DF-6182-4F66-820B-A2E6979DFBCF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LayoutSystem.Tests", "Tests\Libs\Gui\LayoutSystem.Tests\LayoutSystem.Tests.csproj", "{48DE74A9-B365-49DA-A2B3-4B6853838CC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1_LayoutSystem.Tests", "Tests\Libs\Gui\LayoutSystem.Tests\1_LayoutSystem.Tests.csproj", "{48DE74A9-B365-49DA-A2B3-4B6853838CC5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{9B377444-21F2-4EF8-8428-16167EBB40A7}"
 EndProject
@@ -46,13 +46,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EventsMonitor", "Tools\Even
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1_TreePusherLib", "Libs\Gui\TreePusherLib\1_TreePusherLib.csproj", "{CDD9F2D8-1DC6-481F-B5CE-004A06C59531}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TreePusherLib.Tests", "Tests\Libs\Gui\TreePusherLib.Tests\TreePusherLib.Tests.csproj", "{D3380F18-6035-4012-9F28-EA3983C21FA4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1_TreePusherLib.Tests", "Tests\Libs\Gui\TreePusherLib.Tests\1_TreePusherLib.Tests.csproj", "{D3380F18-6035-4012-9F28-EA3983C21FA4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBase", "Tests\TestBase\TestBase.csproj", "{8A7E5754-0E76-4DD1-AAC0-69E5A4192688}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleDemo", "Play\SimpleDemo\SimpleDemo.csproj", "{B4FB4E7D-EC90-4BD6-94C8-740BC35D5199}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlSystem.Tests", "Tests\Libs\Gui\ControlSystem.Tests\ControlSystem.Tests.csproj", "{36BD078C-D417-43C4-B4D8-3D4A0F63D454}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "2_ControlSystem.Tests", "Tests\Libs\Gui\ControlSystem.Tests\2_ControlSystem.Tests.csproj", "{36BD078C-D417-43C4-B4D8-3D4A0F63D454}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "3_WinSpectorLib", "Libs\Gui\WinSpectorLib\3_WinSpectorLib.csproj", "{5FE3F4E1-7771-44FB-865E-1B26E1BA7845}"
 EndProject
@@ -62,7 +62,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SysWinDemo", "Play\SysWinDe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demos", "Demos\Demos.csproj", "{DC9D5C0A-BCA3-4CEB-B0BE-CF290365C973}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1_Logging", "Libs\Base\Logging\1_Logging.csproj", "{B909147B-C169-454C-9000-036FB802BD81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1_Logging", "Libs\Base\Logging\1_Logging.csproj", "{B909147B-C169-454C-9000-036FB802BD81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -91,7 +91,7 @@ sealed class PopSplitterTests : RxTest
 	                    └──C3──<p3>──C4──n5
 	==============================================
 
-	Partition[0]
+	Partition[0] (root)
 	------------
 	    ┌──n1
 	C1──┤      ┌──C2
@@ -104,7 +104,7 @@ sealed class PopSplitterTests : RxTest
 	           └──<p1>──┤
 	                    └──⬤
 
-	Partition[1]
+	Partition[1] (<p1>)
 	------------
 	                    ┌──n3──⬤
 	              <p1>──┤
@@ -116,7 +116,7 @@ sealed class PopSplitterTests : RxTest
 	           └──<p1>──┤
 	                    └──C3──<p3>──⬤
 
-	Partition[2]
+	Partition[2] (<p2>)
 	------------
 	                           <p2>──n4
 	--extend-->
@@ -126,7 +126,7 @@ sealed class PopSplitterTests : RxTest
 	           └──<p1>──┤
 	                    └──⬤
 
-	Partition[3]
+	Partition[3] (<p3>)
 	------------
 	                           <p3>──C4──n5
 	--extend-->
@@ -211,10 +211,10 @@ sealed class PopSplitterTests : RxTest
 		CheckLayoutPartitions(
 			PopSplitter.Split(tree, rMap),
 
-			Cb(c1, T,
+			Cb(c1,
 				Nb(n1, T),
 				Nb(n2, T,
-					Cb(c2, T),
+					Cb(c2),
 					NPopb(p1, F,
 						Nb(n3, F,
 							NPopb(p2, F,
@@ -225,7 +225,7 @@ sealed class PopSplitterTests : RxTest
 				)
 			),
 
-			Cb(c1, F,
+			Cb(c1,
 				Nb(n1, F),
 				Nb(n2, F,
 					NPopb(p1, T,
@@ -234,14 +234,14 @@ sealed class PopSplitterTests : RxTest
 								Nb(n4, F)
 							)
 						),
-						Cb(c3, F,
+						Cb(c3,
 							NPopb(p3, F)
 						)
 					)
 				)
 			),
 
-			Cb(c1, F,
+			Cb(c1,
 				Nb(n1, F),
 				Nb(n2, F,
 					NPopb(p1, F,
@@ -254,9 +254,9 @@ sealed class PopSplitterTests : RxTest
 				)
 			),
 
-			Cb(c3, F,
+			Cb(c3,
 				NPopb(p3, T,
-					Cb(c4, T,
+					Cb(c4,
 						Nb(n5, T)
 					)
 				)
@@ -268,10 +268,11 @@ sealed class PopSplitterTests : RxTest
 
 
 	private void CheckLayoutPartitions(
-		LayoutPartition[] actLayoutPartitionsWithMaps,
+		(Partition, SubPartition[]) actLayoutPartitionsWithMapsSplit,
 		params TNod<MixOnOff>[] expLayoutPartitions
 	)
 	{
+		var actLayoutPartitionsWithMaps = actLayoutPartitionsWithMapsSplit.Item2.Prepend(actLayoutPartitionsWithMapsSplit.Item1).ToArray();
 		var actLayoutPartitions = actLayoutPartitionsWithMaps.SelectToArray(ConvertLayoutPartition);
 		LogLayoutPartitions(expLayoutPartitions, "Expected");
 		LogLayoutPartitions(actLayoutPartitions, "Actual");
@@ -286,13 +287,13 @@ sealed class PopSplitterTests : RxTest
 		}
 	}
 
-	private static TNod<MixOnOff> ConvertLayoutPartition(LayoutPartition layoutPartition) =>
-		layoutPartition.Root.Map(node => new MixOnOff(
+	private static TNod<MixOnOff> ConvertLayoutPartition(Partition partition) =>
+		partition.Root.Map(node => new MixOnOff(
 			node,
 			node switch
 			{
-				StFlexNode { State: var state } => layoutPartition.RMap.ContainsKey(state),
-				CtrlNode { Ctrl: var ctrl } => layoutPartition.CtrlSet.Contains(ctrl),
+				StFlexNode { State: var state } => partition.RMap.ContainsKey(state),
+				CtrlNode => true,
 				_ => false
 			}
 		));
@@ -553,7 +554,7 @@ sealed class PopSplitterTests : RxTest
 		bool Enabled
 	);
 
-	private static TNod<MixOnOff> Cb(Ctrl ctrl, bool on, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new CtrlNode(ctrl), on), kids);
+	private static TNod<MixOnOff> Cb(Ctrl ctrl, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new CtrlNode(ctrl), true), kids);
 	private static TNod<MixOnOff> Nb(NodeState nodeState, bool on, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new StFlexNode(nodeState, new FlexNode(Vec.Fil, Strats.Fill, Mg.Zero)), on), kids);
 	private static TNod<MixOnOff> NPopb(NodeState nodeState, bool on, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new StFlexNode(nodeState, new FlexNode(Vec.Fil, Strats.Pop, Mg.Zero)), on), kids);
 

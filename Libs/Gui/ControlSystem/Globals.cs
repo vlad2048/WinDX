@@ -11,7 +11,7 @@ using ControlSystem.Singletons.WinMan_;
 using PowRxVar;
 
 [assembly:InternalsVisibleTo("3_WinSpectorLib")]
-[assembly:InternalsVisibleTo("ControlSystem.Tests")]
+[assembly:InternalsVisibleTo("2_ControlSystem.Tests")]
 
 namespace ControlSystem;
 

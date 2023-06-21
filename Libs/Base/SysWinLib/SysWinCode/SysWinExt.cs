@@ -16,6 +16,8 @@ public enum RType
 
 public static class SysWinExt
 {
+	public static void Invalidate(this SysWin win) => User32Methods.InvalidateRect(win.Handle, nint.Zero, false);
+
 	public static R GetR(this SysWin win, RType type)
 	{
 		Rectangle r;

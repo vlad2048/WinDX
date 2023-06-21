@@ -25,7 +25,7 @@ static class SysWinDemo
 				X = -300,
 				Y = 250,
 				Width = 256,
-				Height = 256,
+				Height = 128,
 			};
 		});
 
@@ -41,11 +41,18 @@ static class SysWinDemo
 			win.Dispose();
 		});
 
+		win.WhenMsg.WhenKEYDOWN().Where(e => e.Key == VirtualKey.D3).Subscribe(_ =>
+		{
+			L("-> sysWin.SetR()");
+			var r = new R(-280, 200, 250, 120);
+			win.SetR(r, 0);
+		});
+
 		win.WhenMsg.WhenPAINT().Subscribe(e =>
 		{
 			using var gfx = Graphics.FromHwnd(e.Hwnd);
-			var r1 = new R(0, 0, 128, 256);
-			var r2 = new R(128, 0, 128, 256);
+			var r1 = new R(0, 0, 128, 128);
+			var r2 = new R(128, 0, 128, 128);
 			gfx.FillRectangle(brush1, r1.ToDrawRect());
 			gfx.FillRectangle(brush2, r2.ToDrawRect());
 		});

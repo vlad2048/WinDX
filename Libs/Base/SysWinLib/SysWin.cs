@@ -58,19 +58,24 @@ public sealed class SysWin : ISysWin
 		isMainWindow = isFirst;
 		isFirst = false;
 		whenMsg = new Subject<IPacket>().D(D);
+
+		// flagging WM_WINDOWPOSCHANGED as handled (not calling the default windowproc) means we won't receive WM_SIZE & WM_MOVE messages
+		// (but we're not doing that here)
+
+		// This observation was made with our custom NonClientArea
+		// =======================================================
+		// RType.Client				: not quite right 240x217 (instead of 256x256)
+		// RType.Win				: correct 256x256
+		// RType.WinWithGripAreas	: correct 256x256
+
 		ClientR = Var.Make(
 			R.Empty,
 			Obs.Merge(
-				// This observation was made with our custom NonClientArea
-				// =======================================================
-				// this is just so other code doesn't get ClientR=Empty in WM_CREATE.
-				// RType.Client				: not quite right 240x217 (instead of 256x256)
-				// RType.Win				: correct 256x256
-				// RType.WinWithGripAreas	: correct 256x256
+				// hooking to WM_CREATE is just so other code doesn't get ClientR=Empty in WM_CREATE.
 				WhenMsg.WhenCREATE().Select(_ => this.GetR(RType.WinWithGripAreas).WithZeroPos()),
 				WhenMsg.WhenWINDOWPOSCHANGED().Select(e => new R(Pt.Empty, new Sz(e.Position.Width, e.Position.Height)))
 			)
-		).D(D); // flagging it as handled (not calling the default windowproc) means we won't receive WM_SIZE & WM_MOVE messages
+		).D(D);
 		ScreenPt = Var.Make(
 			Pt.Empty,
 			WhenMsg.WhenWINDOWPOSCHANGED().Select(e => new Pt(e.Position.X, e.Position.Y))

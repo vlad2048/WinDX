@@ -6,7 +6,7 @@ global using Vec = LayoutSystem.Flex.Structs.DimVecMaker;
 global using Node = TNod<LayoutSystem.Flex.FlexNode>;
 
 using System.Runtime.CompilerServices;
-[assembly:InternalsVisibleTo("LayoutSystem.Tests")]
+[assembly:InternalsVisibleTo("1_LayoutSystem.Tests")]
 [assembly:InternalsVisibleTo("3_WinSpectorLib")]
 [assembly:InternalsVisibleTo("FlexBuilder")]
 

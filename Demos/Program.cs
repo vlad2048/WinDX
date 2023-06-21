@@ -16,7 +16,7 @@ class Program
 	{
 		//VarDbg.BreakpointOnDispAlloc(21);
 
-		/*using (var d = new Disp())
+		using (var d = new Disp())
 		{
 			var userPrefs = new UserPrefs().Track();
 			Setup.InitConsole(userPrefs).D(d);
@@ -35,10 +35,11 @@ class Program
 				new DemoNfo("BalancedCtrlHandling", Wrap(() => new BalancedCtrlHandlingDemoWin())),
 				new DemoNfo("PopNode", Wrap(() => new PopNodeDemoWin()))
 			);
-		}*/
-		using (var win = new PopNodeDemoWin()) {
-			App.Run();
 		}
+
+		
+		//using (SysWinDemo.Run()) App.Run();
+
 
 		VarDbg.CheckForUndisposedDisps(true);
 	}

@@ -38,6 +38,7 @@ partial class WinSpectorWin
 		layoutGroupBox = new GroupBox();
 		demosGroupBox = new GroupBox();
 		demosList = new BrightIdeasSoftware.ObjectListView();
+		redrawWindowBtn = new Button();
 		((System.ComponentModel.ISupportInitialize)layoutTree).BeginInit();
 		toolStrip1.SuspendLayout();
 		windowsGroupBox.SuspendLayout();
@@ -96,6 +97,7 @@ partial class WinSpectorWin
 		// 
 		// windowsGroupBox
 		// 
+		windowsGroupBox.Controls.Add(redrawWindowBtn);
 		windowsGroupBox.Controls.Add(unselectWindowBtn);
 		windowsGroupBox.Controls.Add(winList);
 		windowsGroupBox.Location = new Point(12, 28);
@@ -147,6 +149,15 @@ partial class WinSpectorWin
 		demosList.TabIndex = 0;
 		demosList.View = View.Details;
 		// 
+		// redrawWindowBtn
+		// 
+		redrawWindowBtn.Location = new Point(6, 121);
+		redrawWindowBtn.Name = "redrawWindowBtn";
+		redrawWindowBtn.Size = new Size(75, 23);
+		redrawWindowBtn.TabIndex = 2;
+		redrawWindowBtn.Text = "Redraw";
+		redrawWindowBtn.UseVisualStyleBackColor = true;
+		// 
 		// WinSpectorWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
@@ -182,4 +193,5 @@ partial class WinSpectorWin
 	private Button unselectWindowBtn;
 	public GroupBox demosGroupBox;
 	public BrightIdeasSoftware.ObjectListView demosList;
+	public Button redrawWindowBtn;
 }

@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using DynamicData;
 using PowBasics.CollectionsExt;
 using PowWinForms.Utils;
+using WinSpectorLib.Utils;
 
 namespace WinSpectorLib.Logic;
 
@@ -17,6 +18,8 @@ static partial class Setup
 		var d = new Disp();
 		ListBoxSourceListViewer.View(out var selWin, G.WinMan.Wins, ui.winList).D(d);
 		selLayout = GetSelWinLayout(selWin).D(d);
+		ui.redrawWindowBtn.EnableWhenSome(selWin).D(d);
+		ui.redrawWindowBtn.Events().Click.Subscribe(_ => selWin.V.Ensure().Invalidate()).D(d);
 		return d;
 	}
 

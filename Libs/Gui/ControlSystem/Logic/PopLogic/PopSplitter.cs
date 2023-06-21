@@ -11,94 +11,115 @@ namespace ControlSystem.Logic.PopLogic;
 /// <summary>
 /// The Root will always be a Ctrl
 /// The On/Off status of the nodes is encoded into the keys present in RMap
-/// And CtrlSet contains the controls for which we'll call Render()
+/// CtrlSet are all the Ctrls contained in Root (these will be the ones we call Render for)
 /// </summary>
-sealed record LayoutPartition(
+record Partition(
+	MixNode Root,
+	IReadOnlyDictionary<NodeState, R> RMap,
+	HashSet<Ctrl> CtrlSet
+)
+{
+	public Ctrl RootCtrl => ((CtrlNode)Root.V).Ctrl;
+}
+
+sealed record SubPartition(
 	MixNode Root,
 	IReadOnlyDictionary<NodeState, R> RMap,
 	HashSet<Ctrl> CtrlSet,
-	object Id
-);
+	NodeState Id
+) : Partition(Root, RMap, CtrlSet);
 
 
 static class PopSplitter
 {
-	public static (LayoutPartition, LayoutPartition[]) Split(MixNode root, IReadOnlyDictionary<NodeState, R> rMap)
+	public static (Partition, SubPartition[]) Split(MixNode root, IReadOnlyDictionary<NodeState, R> rMap)
 	{
 		var backMap = root.ToDictionary(e => e.V);
-		var partitions = root.PartitionPopNodes();
-		var layoutPartitions = partitions.SelectToArray((partition, partitionIdx) =>
-		{
-			NodeState? stateStart = partitionIdx switch
+		var parts = root
+			.PartitionPopNodes()
+			.SelectToArray((partition, partitionIdx) =>
 			{
-				0 => null,
-				_ => ((StFlexNode)partition.V).State
-			};
-			var partitionExtended = partition
-				.ExtendToCtrlUp(backMap)
-				.ExtendToCtrlDown(backMap);
-			var (enabledStates, enabledCtrls) = partitionExtended.GetEnabledStatesAndCtrls(stateStart);
-			var partitionRMap = rMap
-				.Where(t => enabledStates.Contains(t.Key))
-				.ToDictionary(e => e.Key, e => e.Value);
-			return new LayoutPartition(
-				partitionExtended,
-				partitionRMap,
-				enabledCtrls,
-				(object?)stateStart ?? ((CtrlNode)partitionExtended.V).Ctrl
-			);
-		});
+				NodeState? stateStart = partitionIdx switch
+				{
+					0 => null,
+					_ => ((StFlexNode)partition.V).State
+				};
+				var partitionExtended = partition
+					.ExtendToCtrlUp(backMap)
+					.ExtendToCtrlDown(backMap);
+				var enabledStates = partitionExtended.GetEnabledStates(stateStart);
+				var partitionRMap = rMap
+					.Where(t => enabledStates.Contains(t.Key))
+					.ToDictionary(e => e.Key, e => e.Value);
+				var ctrlSet = partitionExtended.Select(e => e.V).OfType<CtrlNode>().ToHashSet(e => e.Ctrl);
+				return (
+					partitionExtended,
+					partitionRMap,
+					ctrlSet,
+					stateStart
+				);
+			});
+
 
 		return (
-			layoutPartitions[0],
-			layoutPartitions.Skip(1).ToArray()
+			new Partition(
+				parts[0].partitionExtended,
+				parts[0].partitionRMap,
+				parts[0].ctrlSet
+			),
+			parts.Skip(1).SelectToArray(part => new SubPartition(
+				part.partitionExtended,
+				part.partitionRMap,
+				part.ctrlSet,
+				part.stateStart ?? throw new ArgumentException("A subpartition should have an associated NodeState")
+			))
 		);
 	}
 
-	private static (HashSet<NodeState>, HashSet<Ctrl>) GetEnabledStatesAndCtrls(this MixNode root, NodeState? stateStart)
+	private enum Status
+	{
+		NotStarted,
+		Started,
+		Finished
+	}
+
+	private static HashSet<NodeState> GetEnabledStates(this MixNode root, NodeState? stateStart)
 	{
 		var nodeSet = new HashSet<NodeState>();
-		var ctrlSet = new HashSet<Ctrl>();
-		var isEnabled = stateStart == null;
+		
 
-		void Rec(MixNode node)
+		void Rec(MixNode node, Status status_)
 		{
-			switch (node.V)
+			status_ = node.V switch
 			{
-				case StFlexNode { State: var state }:
-					switch (isEnabled)
+				StFlexNode { State: var state } =>
+					status_ switch
 					{
-						case true:
-							if (node.V.IsPop())
-								isEnabled = false;
-							break;
+						Status.Started when node.V.IsPop() => Status.Finished,
+						Status.NotStarted when state == stateStart => Status.Started,
+						_ => status_
+					},
+				_ => status_
+			};
 
-						case false:
-							if (state == stateStart)
-								isEnabled = true;
-							break;
-					}
+			if (status_ == Status.Started && node.V is StFlexNode { State: var state_ })
+				nodeSet.Add(state_);
 
-					if (isEnabled)
-					{
-						nodeSet.Add(state);
-					}
-
-					break;
-
-				case CtrlNode { Ctrl: var ctrl }:
-					if (isEnabled)
-						ctrlSet.Add(ctrl);
-					break;
-			}
+			if (status_ == Status.Finished)
+				return;
 
 			foreach (var kid in node.Children)
-				Rec(kid);
+				Rec(kid, status_);
 		}
 
-		Rec(root);
+		var status = stateStart switch
+		{
+			null => Status.Started,
+			not null => Status.NotStarted
+		};
+		Rec(root, status);
 
-		return (nodeSet, ctrlSet);
+		return nodeSet;
 	}
 
 	internal static MixNode ExtendToCtrlUp(this MixNode rootPart, IReadOnlyDictionary<IMixNode, MixNode> backMap)
