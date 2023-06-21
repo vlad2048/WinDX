@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Libs\Gui\WinSpectorLib\3_WinSpectorLib.csproj" />
+		<ProjectReference Include="..\..\Libs\Gui\WinSpectorLib\4_WinSpectorLib.csproj" />
 	</ItemGroup>
 
 </Project>

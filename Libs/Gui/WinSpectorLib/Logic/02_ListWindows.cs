@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using DynamicData;
 using PowBasics.CollectionsExt;
 using PowWinForms.Utils;
+using WinFormsTooling.Utils.Exts;
 using WinSpectorLib.Utils;
 
 namespace WinSpectorLib.Logic;

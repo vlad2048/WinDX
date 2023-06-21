@@ -29,10 +29,21 @@ sealed record SubPartition(
 	NodeState Id
 ) : Partition(Root, RMap, CtrlSet);
 
+/// <summary>
+/// Contains the layout partitions
+/// </summary>
+/// <param name="MainPartition">Partition associated with the main window</param>
+/// <param name="SubPartitions">Partition associated with the popup windows</param>
+/// <param name="ParentMapping">Mapping from the SubPartitions indices to the SubPartitions indices (or null to reference the main window)</param>
+sealed record PartitionSet(
+	Partition MainPartition,
+	SubPartition[] SubPartitions,
+	IReadOnlyDictionary<int, int?> ParentMapping
+);
 
 static class PopSplitter
 {
-	public static (Partition, SubPartition[]) Split(MixNode root, IReadOnlyDictionary<NodeState, R> rMap)
+	public static PartitionSet Split(MixNode root, IReadOnlyDictionary<NodeState, R> rMap)
 	{
 		var backMap = root.ToDictionary(e => e.V);
 		var parts = root
@@ -61,7 +72,7 @@ static class PopSplitter
 			});
 
 
-		return (
+		return new PartitionSet(
 			new Partition(
 				parts[0].partitionExtended,
 				parts[0].partitionRMap,
@@ -72,9 +83,31 @@ static class PopSplitter
 				part.partitionRMap,
 				part.ctrlSet,
 				part.stateStart ?? throw new ArgumentException("A subpartition should have an associated NodeState")
-			))
+			)),
+			root.GetParentMapping()
 		);
 	}
+
+
+	private static IReadOnlyDictionary<int, int?> GetParentMapping(this MixNode root)
+	{
+		var map = new Dictionary<int, int?>();
+		var curIdx = 0;
+		void Rec(MixNode node, int? parentIdx)
+		{
+			if (node.IsPop())
+			{
+				map[curIdx] = parentIdx;
+				parentIdx = curIdx;
+				curIdx++;
+			}
+			foreach (var kid in node.Children)
+				Rec(kid, parentIdx);
+		}
+		Rec(root, null);
+		return map;
+	}
+
 
 	private enum Status
 	{
@@ -192,9 +225,11 @@ static class PopSplitter
 	
 
 
+	private static bool IsPop(this MixNode node) => node.V.IsPop();
+	private static bool IsCtrl(this MixNode node) => node.V is CtrlNode;
+
 	private static bool IsPop(this IMixNode node) => node is StFlexNode { Flex.Strat: FillStrat { Spec: PopSpec } };
 	//private static bool IsCtrl(this IMixNode node) => node is CtrlNode;
-	private static bool IsCtrl(this MixNode node) => node.V is CtrlNode;
 
 
 	private static void EnqueueRange<T>(this Queue<T> queue, IEnumerable<T> source)

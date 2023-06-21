@@ -1,5 +1,4 @@
-﻿using _3_WinSpectorLib;
-using BrightIdeasSoftware;
+﻿using BrightIdeasSoftware;
 using ControlSystem.Structs;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
@@ -17,10 +16,14 @@ static partial class Setup
 	{
 		var d = new Disp();
 		var ctrl = ui.layoutTree;
-
 		PrepareTree(ctrl, selLayout);
-
 		ctrl.SetRoot(selLayout.Map2(e => e.MixRoot)).D(d);
+
+		var selNode = VarMay.Make<MixNode>().D(d);
+		var hovNode = VarMay.Make<MixNode>().D(d);
+		ctrl.PipeSelectedNodeInto(selNode).D(d);
+		ctrl.PipeHoveredNodeInto(hovNode).D(d);
+
 
 		return d;
 	}

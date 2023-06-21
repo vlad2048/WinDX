@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
+		<RootNamespace>ControlSystem</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -20,7 +21,6 @@
 	<ItemGroup>
 		<Folder Include="Logic\PopLogic\" />
 		<Folder Include="Singletons\WinMan_\" />
-		<Folder Include="Utils\" />
 	</ItemGroup>
 
 </Project>

@@ -81,7 +81,7 @@ partial class WinSpectorWin
 		// openFlexBuilderToolBtn
 		// 
 		openFlexBuilderToolBtn.DisplayStyle = ToolStripItemDisplayStyle.Image;
-		openFlexBuilderToolBtn.Image = _3_WinSpectorLib.Resource.ToolBtn_OpenFlexBuilder;
+		openFlexBuilderToolBtn.Image = WinSpectorLib.Resource.ToolBtn_OpenFlexBuilder;
 		openFlexBuilderToolBtn.ImageTransparentColor = Color.Magenta;
 		openFlexBuilderToolBtn.Name = "openFlexBuilderToolBtn";
 		openFlexBuilderToolBtn.Size = new Size(23, 22);

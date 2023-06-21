@@ -268,11 +268,11 @@ sealed class PopSplitterTests : RxTest
 
 
 	private void CheckLayoutPartitions(
-		(Partition, SubPartition[]) actLayoutPartitionsWithMapsSplit,
+		PartitionSet actPartitionSet,
 		params TNod<MixOnOff>[] expLayoutPartitions
 	)
 	{
-		var actLayoutPartitionsWithMaps = actLayoutPartitionsWithMapsSplit.Item2.Prepend(actLayoutPartitionsWithMapsSplit.Item1).ToArray();
+		var actLayoutPartitionsWithMaps = actPartitionSet.SubPartitions.Prepend(actPartitionSet.MainPartition).ToArray();
 		var actLayoutPartitions = actLayoutPartitionsWithMaps.SelectToArray(ConvertLayoutPartition);
 		LogLayoutPartitions(expLayoutPartitions, "Expected");
 		LogLayoutPartitions(actLayoutPartitions, "Actual");

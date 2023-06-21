@@ -1,5 +1,4 @@
-﻿using System.Reactive.Linq;
-using PowMaybe;
+﻿using PowMaybe;
 using PowRxVar;
 
 namespace FlexBuilder.Utils.Exts;
@@ -11,9 +10,6 @@ static class RxUIExts
 
 	public static IDisposable SubscribeToNone<T>(this IObservable<Maybe<T>> obs, Action action) =>
 		obs.WhenNone().Subscribe(_ => action());
-
-	public static IDisposable EnableWhenSome<T>(this Control ctrl, IObservable<Maybe<T>> obsMay) => obsMay.Subscribe(may => ctrl.Enabled = may.IsSome());
-	public static IDisposable EnableWhenSome<T>(this ToolStripItem ctrl, IObservable<Maybe<T>> obsMay) => obsMay.Subscribe(may => ctrl.Enabled = may.IsSome());
 
 	
 	public static IDisposable EditInner<T>(

@@ -18,18 +18,29 @@ class SlaveMan : IDisposable
 		map = new Dictionary<NodeState, SlaveWin>().D(d);
 	}
 
-	public void ShowSubPartitions(SubPartition[] layouts)
+	public void ShowSubPartitions(SubPartition[] layouts, IReadOnlyDictionary<int, int?> parentMapping, nint mainWinHandle)
 	{
-		foreach (var layout in layouts)
+		var handles = new List<nint>();
+
+		for (var layoutIdx = 0; layoutIdx < layouts.Length; layoutIdx++)
 		{
+			var layout = layouts[layoutIdx];
 			if (!map.TryGetValue(layout.Id, out var slaveWin))
 			{
-				slaveWin = map[layout.Id] = new SlaveWin(parentWin, layout);
+				var parentIdx = parentMapping[layoutIdx];
+				var winParentHandle = parentIdx switch
+				{
+					null => mainWinHandle,
+					not null => handles[parentIdx.Value]
+				};
+				slaveWin = map[layout.Id] = new SlaveWin(layout, parentWin, winParentHandle);
 			}
 			else
 			{
 				slaveWin.Invalidate();
 			}
+
+			handles.Add(slaveWin.Handle);
 		}
 	}
 }

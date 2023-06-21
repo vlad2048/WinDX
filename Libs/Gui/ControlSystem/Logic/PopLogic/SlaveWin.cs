@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using ControlSystem.Structs;
+using ControlSystem.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
@@ -7,7 +8,6 @@ using RenderLib;
 using RenderLib.Structs;
 using SysWinLib;
 using SysWinLib.Structs;
-using TreePusherLib;
 using WinAPI.User32;
 using WinAPI.Windows;
 
@@ -20,11 +20,13 @@ sealed class SlaveWin : Ctrl
 	private readonly IRwVar<R> layoutR;
 	private SubPartition layout;
 
-	public SlaveWin(SysWin parentWin, SubPartition layoutUnoffset)
+	public nint Handle => sysWin.Handle;
+
+	public SlaveWin(SubPartition layoutUnoffset, SysWin parentWin, nint winParentHandle)
 	{
 		(layout, var layR) = layoutUnoffset.SplitOffset();
 		layoutR = Var.Make(layR).D(D);
-		sysWin = SlaveWinUtils.MakeWin(parentWin, layoutR.V).D(D);
+		sysWin = SlaveWinUtils.MakeWin(layoutR.V, parentWin, winParentHandle).D(D);
 		this.D(sysWin.D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
@@ -39,7 +41,10 @@ sealed class SlaveWin : Ctrl
 				sysWin.SetR(r, 0);
 			}).D(D);
 
-		sysWin.WhenMsg.WhenPAINT().Subscribe(_ => RenderUtils.RenderTree(layout, renderer)).D(D);
+		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
+		{
+			RenderUtils.RenderTree(layout, renderer);
+		}).D(D);
 	}
 
 	public void SetLayout(SubPartition layout_) => (layout, layoutR.V) = layout_.SplitOffset();
@@ -52,7 +57,7 @@ file static class SlaveWinUtils
 {
 	private const int DEFAULT = (int)CreateWindowFlags.CW_USEDEFAULT;
 
-	public static SysWin MakeWin(SysWin parentWin, R layoutR)
+	public static SysWin MakeWin(R layoutR, SysWin parentWin, nint winParentHandle)
 	{
 		var win = new SysWin(e =>
 		{
@@ -78,7 +83,7 @@ file static class SlaveWinUtils
 					WindowExStyles.WS_EX_NOACTIVATE |
 					0,
 
-				Parent = parentWin.Handle,
+				Parent = winParentHandle,
 			};
 		});
 		win.Init();

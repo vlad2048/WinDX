@@ -99,7 +99,7 @@ static partial class Setup
 					(true, true, false) => $" - [{Path.GetFileName(name)}]",
 					(true, true, true) => $" - [{Path.GetFileName(name)} *]",
 				};
-				ui.Text = $"Layout Debugger{titleSuffix}";
+				ui.Text = $"Flex Builder{titleSuffix}";
 			}).D(d);
 
 		ui.newToolStripMenuItem.Events().Click.Subscribe(_ =>

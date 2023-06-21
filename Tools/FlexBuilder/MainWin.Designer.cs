@@ -436,7 +436,7 @@ partial class MainWin
 		MinimumSize = new Size(781, 614);
 		Name = "MainWin";
 		SizeGripStyle = SizeGripStyle.Hide;
-		Text = "Layout Debugger";
+		Text = "Flex Builder";
 		((System.ComponentModel.ISupportInitialize)layoutTree).EndInit();
 		layoutTreeContextMenu.ResumeLayout(false);
 		menuStrip.ResumeLayout(false);

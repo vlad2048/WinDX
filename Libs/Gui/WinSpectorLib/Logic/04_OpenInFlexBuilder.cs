@@ -7,7 +7,7 @@ using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
 using Structs;
-using WinSpectorLib.Utils;
+using WinFormsTooling.Utils.Exts;
 using Environment = System.Environment;
 
 namespace WinSpectorLib.Logic;

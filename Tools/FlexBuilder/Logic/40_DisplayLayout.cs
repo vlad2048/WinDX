@@ -16,6 +16,7 @@ using SysWinLib.Structs;
 using WinAPI.User32;
 using WinAPI.Utils.Exts;
 using WinAPI.Windows;
+using WinFormsTooling.Utils.Exts;
 using Color = System.Drawing.Color;
 
 namespace FlexBuilder.Logic;

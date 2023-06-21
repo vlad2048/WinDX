@@ -3,6 +3,7 @@ using System.Reactive.Linq;
 using ControlSystem.Logic.PopLogic;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
+using ControlSystem.WinSpectorLogic;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using Logging;
@@ -12,7 +13,6 @@ using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
 using RenderLib;
-using RenderLib.Renderers;
 using RenderLib.Renderers.Dummy;
 using Structs;
 using SysWinLib;
@@ -27,14 +27,21 @@ namespace ControlSystem;
 public class Win : Ctrl
 {
 	private readonly SysWin sysWin;
-	private readonly SlaveMan slaveMan;
+
+	internal SpectorWinDrawState SpectorWinDrawState { get; }
 
 	public Win(Action<WinOpt>? optFun = null)
 	{
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
-		slaveMan = new SlaveMan(sysWin).D(D);
 		this.D(sysWin.D);
+		var slaveMan = new SlaveMan(sysWin).D(D);
+
+		SpectorWinDrawState = new SpectorWinDrawState().D(D);
+		SpectorWinDrawState.WhenChanged.Subscribe(_ =>
+		{
+			Invalidate();
+		}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
@@ -42,16 +49,16 @@ public class Win : Ctrl
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
-			WinUtils.BuildTree(out var mixRoot, this);
-			WinUtils.AssignWinToCtrls(this, mixRoot);
-			WinUtils.SolveTree(out var mixLayout, this, mixRoot, sysWin.ClientR.V.Size);
+			WinUtils.BuildTree(out var reconstructedTree, this);
+			WinUtils.AssignWinToCtrls(this, reconstructedTree);
+			WinUtils.SolveTree(out var mixLayout, this, reconstructedTree, sysWin.ClientR.V.Size);
 			G.WinMan.SetWinLayout(mixLayout);
 
-			var (partition, subPartitions) = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
+			var (partition, subPartitions, parentMapping) = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
 
 			RenderUtils.RenderTree(partition, renderer);
 
-			slaveMan.ShowSubPartitions(subPartitions);
+			slaveMan.ShowSubPartitions(subPartitions, parentMapping, sysWin.Handle);
 
 		}).D(D);
 	}
@@ -60,44 +67,6 @@ public class Win : Ctrl
 
 	public void Invalidate() => sysWin.Invalidate();
 }
-
-
-
-static class RenderUtils
-{
-	public static void RenderTree(
-		Partition partition,
-		IRenderWinCtx renderer
-	)
-	{
-		using var d = new Disp();
-		var gfx = renderer.GetGfx().D(d);
-		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
-		var pusher = new TreePusher<IMixNode>(treeEvtSig);
-		var renderArgs = new RenderArgs(gfx, pusher).D(d);
-
-		var reconstructedTree = treeEvtObs.ToTree(
-			mixNode =>
-			{
-				switch (mixNode)
-				{
-					case CtrlNode { Ctrl: var ctrl } when partition.CtrlSet.Contains(ctrl):
-						ctrl.SignalRender(renderArgs);
-						break;
-					case StFlexNode { State: var state }:
-						gfx.R = partition.RMap.GetValueOrDefault(state, R.Empty);
-						break;
-				}
-			},
-			() =>
-			{
-				using (renderArgs.Ctrl(partition.RootCtrl)) { }
-			}
-		);
-	}
-}
-
-
 
 file static class WinUtils
 {

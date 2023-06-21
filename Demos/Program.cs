@@ -33,7 +33,8 @@ class Program
 				new DemoNfo("SysWin", Wrap(SysWinDemo.Run)),
 				new DemoNfo("UnbalancedCtrlHandling", Wrap(() => new UnbalancedCtrlHandlingDemoWin())),
 				new DemoNfo("BalancedCtrlHandling", Wrap(() => new BalancedCtrlHandlingDemoWin())),
-				new DemoNfo("PopNode", Wrap(() => new PopNodeDemoWin()))
+				new DemoNfo("PopNode", Wrap(() => new PopNodeDemoWin())),
+				new DemoNfo("PopNodeComplex", Wrap(() => new PopNodeComplexDemoWin()))
 			);
 		}
 

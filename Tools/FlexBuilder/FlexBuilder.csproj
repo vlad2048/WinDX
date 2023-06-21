@@ -11,14 +11,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowRxVar.Maybe" Version="0.0.40" />
-		<PackageReference Include="PowWinForms" Version="0.0.35" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<ProjectReference Include="..\..\Libs\Base\RenderLib\3_RenderLib.csproj" />
 		<ProjectReference Include="..\..\Libs\Base\SysWinLib\3_SysWinLib.csproj" />
 		<ProjectReference Include="..\..\Libs\Gui\LayoutSystem\1_LayoutSystem.csproj" />
+		<ProjectReference Include="..\..\Libs\Gui\WinFormsTooling\3_WinFormsTooling.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
