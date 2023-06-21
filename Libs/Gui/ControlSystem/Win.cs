@@ -36,26 +36,20 @@ public class Win : Ctrl
 		slaveMan = new SlaveMan(sysWin).D(D);
 		this.D(sysWin.D);
 
-		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
 
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
-			WinUtils.BuildTree(out var mixRoot, treeEvtSig, treeEvtObs, this);
+			WinUtils.BuildTree(out var mixRoot, this);
 			WinUtils.AssignWinToCtrls(this, mixRoot);
 			WinUtils.SolveTree(out var mixLayout, this, mixRoot, sysWin.ClientR.V.Size);
 			G.WinMan.SetWinLayout(mixLayout);
 
 			var (partition, subPartitions) = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
 
-			RenderUtils.RenderTree(
-				partition,
-				renderer,
-				treeEvtSig,
-				treeEvtObs
-			);
+			RenderUtils.RenderTree(partition, renderer);
 
 			slaveMan.ShowSubPartitions(subPartitions);
 
@@ -73,13 +67,12 @@ static class RenderUtils
 {
 	public static void RenderTree(
 		Partition partition,
-		IRenderWinCtx renderer,
-		ITreeEvtSig<IMixNode> treeEvtSig,
-		ITreeEvtObs<IMixNode> treeEvtObs
+		IRenderWinCtx renderer
 	)
 	{
 		using var d = new Disp();
 		var gfx = renderer.GetGfx().D(d);
+		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
 		var pusher = new TreePusher<IMixNode>(treeEvtSig);
 		var renderArgs = new RenderArgs(gfx, pusher).D(d);
 
@@ -110,13 +103,12 @@ file static class WinUtils
 {
 	public static void BuildTree(
 		out ReconstructedTree<IMixNode> reconstructedTree,
-		ITreeEvtSig<IMixNode> treeEvtSig,
-		ITreeEvtObs<IMixNode> treeEvtObs,
 		Ctrl rootCtrl
 	)
 	{
 		using var d = new Disp();
 		var gfx = new Dummy_Gfx().D(d);
+		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
 		var pusher = new TreePusher<IMixNode>(treeEvtSig);
 		var renderArgs = new RenderArgs(gfx, pusher).D(d);
 		reconstructedTree = treeEvtObs.ToTree(

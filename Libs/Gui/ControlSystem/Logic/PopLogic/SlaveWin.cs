@@ -27,7 +27,6 @@ sealed class SlaveWin : Ctrl
 		sysWin = SlaveWinUtils.MakeWin(parentWin, layoutR.V).D(D);
 		this.D(sysWin.D);
 
-		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(D);
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 
 		Obs.Merge(
@@ -40,15 +39,7 @@ sealed class SlaveWin : Ctrl
 				sysWin.SetR(r, 0);
 			}).D(D);
 
-		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
-		{
-			RenderUtils.RenderTree(
-				layout,
-				renderer,
-				treeEvtSig,
-				treeEvtObs
-			);
-		}).D(D);
+		sysWin.WhenMsg.WhenPAINT().Subscribe(_ => RenderUtils.RenderTree(layout, renderer)).D(D);
 	}
 
 	public void SetLayout(SubPartition layout_) => (layout, layoutR.V) = layout_.SplitOffset();
