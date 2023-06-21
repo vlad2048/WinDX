@@ -39,7 +39,7 @@ class Program
 		}
 
 		
-		//using (SysWinDemo.Run()) App.Run();
+		//using (new PopNodeComplexDemoWin()) App.Run();
 
 
 		VarDbg.CheckForUndisposedDisps(true);

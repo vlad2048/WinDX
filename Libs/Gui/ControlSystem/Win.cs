@@ -1,9 +1,12 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using ControlSystem.Logic.PopLogic;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
+using ControlSystem.WinSpectorLogic.Structs;
+using ControlSystem.WinSpectorLogic.Utils;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using Logging;
@@ -28,7 +31,7 @@ public class Win : Ctrl
 {
 	private readonly SysWin sysWin;
 
-	internal SpectorWinDrawState SpectorWinDrawState { get; }
+	internal SpectorWinDrawState SpectorDrawState { get; }
 
 	public Win(Action<WinOpt>? optFun = null)
 	{
@@ -37,28 +40,38 @@ public class Win : Ctrl
 		this.D(sysWin.D);
 		var slaveMan = new SlaveMan(sysWin).D(D);
 
-		SpectorWinDrawState = new SpectorWinDrawState().D(D);
-		SpectorWinDrawState.WhenChanged.Subscribe(_ =>
+		var canSkipLayout = new TimedFlag();
+		SpectorDrawState = new SpectorWinDrawState().D(D);
+		SpectorDrawState.WhenChanged.Subscribe(_ =>
 		{
+			canSkipLayout.Set();
 			Invalidate();
 		}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
 
+		PartitionSet? partitionSet = null;
+
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
-			WinUtils.BuildTree(out var reconstructedTree, this);
-			WinUtils.AssignWinToCtrls(this, reconstructedTree);
-			WinUtils.SolveTree(out var mixLayout, this, reconstructedTree, sysWin.ClientR.V.Size);
-			G.WinMan.SetWinLayout(mixLayout);
+			var gfx = renderer.GetGfx().D(d);
 
-			var (partition, subPartitions, parentMapping) = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
+			if (canSkipLayout.IsNotSet())
+			{
+				WinUtils.BuildTree(out var reconstructedTree, this);
+				WinUtils.AssignWinToCtrls(this, reconstructedTree);
+				WinUtils.SolveTree(out var mixLayout, this, reconstructedTree, sysWin.ClientR.V.Size);
+				G.WinMan.SetWinLayout(mixLayout);
+				partitionSet = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
+			}
+			if (partitionSet == null) return;
 
-			RenderUtils.RenderTree(partition, renderer);
-
-			slaveMan.ShowSubPartitions(subPartitions, parentMapping, sysWin.Handle);
+			var (partition, subPartitions, parentMapping) = partitionSet;
+			RenderUtils.RenderTree(partition, gfx);
+			slaveMan.ShowSubPartitions(subPartitions, parentMapping, sysWin.Handle, SpectorDrawState);
+			SpectorWinRenderUtils.Render(SpectorDrawState, partition, gfx);
 
 		}).D(D);
 	}

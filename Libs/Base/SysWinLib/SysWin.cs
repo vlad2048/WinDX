@@ -87,6 +87,7 @@ public sealed class SysWin : ISysWin
 
 		this.SetupCustomNCAreaIFN(opt);
 		this.GenerateMouseLeaveMessagesIFN(opt);
+		WhenMsg.WhenERASEBKGND().Subscribe(e => e.MarkAsHandled()).D(D);
 	}
 
 	public void Init()

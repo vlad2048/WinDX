@@ -1,9 +1,11 @@
 ﻿using BrightIdeasSoftware;
 using ControlSystem.Structs;
+using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowMaybe;
 using PowRxVar;
+using PowTrees.Algorithms;
 using PowWinForms.Utils;
 using WinSpectorLib.Utils;
 
@@ -11,18 +13,60 @@ namespace WinSpectorLib.Logic;
 
 static partial class Setup
 {
+	private sealed record MixNodeWithNfo(
+		IMixNode Node,
+		int? PopIndex
+	);
+
+	private static IReadOnlyDictionary<IMixNode, int?> GetPopMapping(this MixNode root)
+	{
+		var map = new Dictionary<IMixNode, int?>();
+		//int? idx = null;
+
+		var cnt = 0;
+
+		void Rec(MixNode node, int? idx)
+		{
+			if (node.IsPop())
+				idx = cnt++;
+			map[node.V] = idx;
+			foreach (var kid in node.Children)
+				Rec(kid, idx);
+		}
+		Rec(root, null);
+		return map;
+	}
+
+	private static bool IsPop(this MixNode node) => node.V is StFlexNode { Flex.Strat: FillStrat { Spec: PopSpec } };
+
+	private static TNod<MixNodeWithNfo> AddNfoToTree(this MixNode root)
+	{
+		var map = root.GetPopMapping();
+		return root.Map(e => new MixNodeWithNfo(e, map[e]));
+	}
+
+
 	public static IDisposable ViewLayout(WinSpectorWin ui, IRoMayVar<MixLayout> selLayout)
 	{
 		var d = new Disp();
 		var ctrl = ui.layoutTree;
 		PrepareTree(ctrl, selLayout);
-		ctrl.SetRoot(selLayout.Map2(e => e.MixRoot)).D(d);
+		ctrl.SetRoot(selLayout.Map2(e => e.MixRoot.AddNfoToTree())).D(d);
 
-		var selNode = VarMay.Make<MixNode>().D(d);
-		var hovNode = VarMay.Make<MixNode>().D(d);
-		ctrl.PipeSelectedNodeInto(selNode).D(d);
-		ctrl.PipeHoveredNodeInto(hovNode).D(d);
+		var selNodeNfo = VarMay.Make<TNod<MixNodeWithNfo>>().D(d);
+		var hovNodeNfo = VarMay.Make<TNod<MixNodeWithNfo>>().D(d);
+		ctrl.PipeSelectedNodeInto(selNodeNfo).D(d);
+		ctrl.PipeHoveredNodeInto(hovNodeNfo).D(d);
+		var selNode = selNodeNfo.SelectVarMay(e => e.Map(f => f.Node));
+		var hovNode = hovNodeNfo.SelectVarMay(e => e.Map(f => f.Node));
 
+		Obs.Merge(selNode, hovNode).Subscribe(_ =>
+		{
+			if (selLayout.V.IsNone(out var lay)) return;
+			var win = lay.Win;
+			win.SpectorDrawState.SelNode.V = selNode.V;
+			win.SpectorDrawState.HovNode.V = hovNode.V;
+		}).D(d);
 
 		return d;
 	}
@@ -42,19 +86,33 @@ static partial class Setup
 		var warningIcon = Resource.LayoutTree_Warning;
 		var errorIcon = Resource.LayoutTree_Error;
 
-		ctrl.SetupForNodeType<IMixNode>();
+		ctrl.SetupForNodeType<MixNodeWithNfo>();
 
-
-		ctrl.AddTextColumn<IMixNode>(ColumnName.Node, null, nod => nod.V switch
+		Image? GetImage(TNod<MixNodeWithNfo> nod) => nod.V.PopIndex.HasValue switch
 		{
-			CtrlNode {Ctrl: var c} => c.GetType().Name,
-			StFlexNode {Flex: var flex} => $"{flex}",
-			_ => "_",
+			true => Consts.GetPopIcon(nod.V.PopIndex.Value),
+			false => null
+		};
+
+		ctrl.AddTextColumnWithImage<MixNodeWithNfo>(ColumnName.Node, null, nod => nod.V.Node switch
+		{
+			CtrlNode {Ctrl: var c} => (
+				c.GetType().Name,
+				GetImage(nod)
+			),
+			StFlexNode {Flex: var flex} => (
+				$"{flex}",
+				GetImage(nod)
+			),
+			_ => (
+				"_",
+				null
+			)
 		});
 
-		ctrl.AddTextColumnWithColorAndTooltip<IMixNode>(ColumnName.Width, 80, nod =>
+		ctrl.AddTextColumnWithColorAndTooltip<MixNodeWithNfo>(ColumnName.Width, 80, nod =>
 		{
-			if (nod.V is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
+			if (nod.V.Node is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
 			var warn = layout.GetDimWarningForColumn(nodState, WarningDir.Horz);
 			return warn switch
 			{
@@ -75,9 +133,9 @@ static partial class Setup
 			};
 		});
 
-		ctrl.AddTextColumnWithColorAndTooltip<IMixNode>(ColumnName.Height, 80, nod =>
+		ctrl.AddTextColumnWithColorAndTooltip<MixNodeWithNfo>(ColumnName.Height, 80, nod =>
 		{
-			if (nod.V is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
+			if (nod.V.Node is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
 			var warn = layout.GetDimWarningForColumn(nodState, WarningDir.Vert);
 			return warn switch
 			{
@@ -98,19 +156,19 @@ static partial class Setup
 			};
 		});
 
-		ctrl.AddTextColumn<IMixNode>(ColumnName.R, 100, nod =>
+		ctrl.AddTextColumn<MixNodeWithNfo>(ColumnName.R, 100, nod =>
 		{
-			if (nod.V is not StFlexNode { State: var nodState }) return "_";
+			if (nod.V.Node is not StFlexNode { State: var nodState }) return "_";
 			if (layout.V.IsNone(out var lay)) return "_";
 			var r = lay.RMap[nodState];
 			return $"{r}";
 		});
 
-		ctrl.AddImageColumnWithTooltip<IMixNode>(ColumnName.Warnings, 65, nod =>
+		ctrl.AddImageColumnWithTooltip<MixNodeWithNfo>(ColumnName.Warnings, 65, nod =>
 		{
 			if (layout.V.IsNone(out var lay)) return (null, null);
 
-			switch (nod.V)
+			switch (nod.V.Node)
 			{
 				case StFlexNode { State: var nodState }:
 					var warn = lay.WarningMap.GetDimWarningForColumn(nodState, WarningDir.Horz | WarningDir.Vert);
@@ -159,4 +217,21 @@ static partial class Setup
 			true => lay.WarningMap.GetDimWarningForColumn(nodState, colDir),
 			false => null
 		};
+}
+
+
+file static class Consts
+{
+	public static Bitmap GetPopIcon(int idx) => PopIcons[idx % PopIcons.Length];
+
+	private static readonly Bitmap[] PopIcons =
+	{
+		Resource.LayoutTree_Pop0,
+		Resource.LayoutTree_Pop1,
+		Resource.LayoutTree_Pop2,
+		Resource.LayoutTree_Pop3,
+		Resource.LayoutTree_Pop4,
+		Resource.LayoutTree_Pop5,
+		Resource.LayoutTree_Pop6,
+	};
 }

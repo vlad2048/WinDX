@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
+using ControlSystem.WinSpectorLogic;
+using ControlSystem.WinSpectorLogic.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
@@ -15,14 +17,18 @@ namespace ControlSystem.Logic.PopLogic;
 
 sealed class SlaveWin : Ctrl
 {
-	private static readonly BrushDef brush = new SolidBrushDef(Color.DodgerBlue);
 	private readonly SysWin sysWin;
 	private readonly IRwVar<R> layoutR;
 	private SubPartition layout;
 
 	public nint Handle => sysWin.Handle;
 
-	public SlaveWin(SubPartition layoutUnoffset, SysWin parentWin, nint winParentHandle)
+	public SlaveWin(
+		SubPartition layoutUnoffset,
+		SysWin parentWin,
+		nint winParentHandle,
+		SpectorWinDrawState spectorDrawState
+	)
 	{
 		(layout, var layR) = layoutUnoffset.SplitOffset();
 		layoutR = Var.Make(layR).D(D);
@@ -43,7 +49,10 @@ sealed class SlaveWin : Ctrl
 
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
-			RenderUtils.RenderTree(layout, renderer);
+			using var d = new Disp();
+			var gfx = renderer.GetGfx().D(d);
+			RenderUtils.RenderTree(layout, gfx);
+			SpectorWinRenderUtils.Render(spectorDrawState, layout, gfx);
 		}).D(D);
 	}
 

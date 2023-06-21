@@ -73,6 +73,76 @@ namespace WinSpectorLib {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap LayoutTree_Pop0 {
+            get {
+                object obj = ResourceManager.GetObject("LayoutTree_Pop0", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LayoutTree_Pop1 {
+            get {
+                object obj = ResourceManager.GetObject("LayoutTree_Pop1", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LayoutTree_Pop2 {
+            get {
+                object obj = ResourceManager.GetObject("LayoutTree_Pop2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LayoutTree_Pop3 {
+            get {
+                object obj = ResourceManager.GetObject("LayoutTree_Pop3", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LayoutTree_Pop4 {
+            get {
+                object obj = ResourceManager.GetObject("LayoutTree_Pop4", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LayoutTree_Pop5 {
+            get {
+                object obj = ResourceManager.GetObject("LayoutTree_Pop5", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LayoutTree_Pop6 {
+            get {
+                object obj = ResourceManager.GetObject("LayoutTree_Pop6", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap LayoutTree_Warning {
             get {
                 object obj = ResourceManager.GetObject("LayoutTree_Warning", resourceCulture);

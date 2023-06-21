@@ -121,6 +121,27 @@
   <data name="LayoutTree_Error" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\LayoutTree_Error.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="LayoutTree_Pop0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\LayoutTree_Pop0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LayoutTree_Pop1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\LayoutTree_Pop1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LayoutTree_Pop2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\LayoutTree_Pop2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LayoutTree_Pop3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\LayoutTree_Pop3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LayoutTree_Pop4" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\LayoutTree_Pop4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LayoutTree_Pop5" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\LayoutTree_Pop5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="LayoutTree_Pop6" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\LayoutTree_Pop6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="LayoutTree_Warning" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\LayoutTree_Warning.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

@@ -12,11 +12,10 @@ static class RenderUtils
 {
     public static void RenderTree(
         Partition partition,
-        IRenderWinCtx renderer
+        IGfx gfx
     )
     {
         using var d = new Disp();
-        var gfx = renderer.GetGfx().D(d);
         var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
         var pusher = new TreePusher<IMixNode>(treeEvtSig);
         var renderArgs = new RenderArgs(gfx, pusher).D(d);

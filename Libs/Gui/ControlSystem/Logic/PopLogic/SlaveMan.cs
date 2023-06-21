@@ -1,4 +1,5 @@
 ﻿using ControlSystem.Structs;
+using ControlSystem.WinSpectorLogic;
 using PowRxVar;
 using SysWinLib;
 
@@ -18,7 +19,12 @@ class SlaveMan : IDisposable
 		map = new Dictionary<NodeState, SlaveWin>().D(d);
 	}
 
-	public void ShowSubPartitions(SubPartition[] layouts, IReadOnlyDictionary<int, int?> parentMapping, nint mainWinHandle)
+	public void ShowSubPartitions(
+		SubPartition[] layouts,
+		IReadOnlyDictionary<int, int?> parentMapping,
+		nint mainWinHandle,
+		SpectorWinDrawState spectorDrawState
+	)
 	{
 		var handles = new List<nint>();
 
@@ -33,7 +39,12 @@ class SlaveMan : IDisposable
 					null => mainWinHandle,
 					not null => handles[parentIdx.Value]
 				};
-				slaveWin = map[layout.Id] = new SlaveWin(layout, parentWin, winParentHandle);
+				slaveWin = map[layout.Id] = new SlaveWin(
+					layout,
+					parentWin,
+					winParentHandle,
+					spectorDrawState
+				);
 			}
 			else
 			{
