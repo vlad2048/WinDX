@@ -5,7 +5,6 @@ using PowBasics.CollectionsExt;
 using PowMaybe;
 using PowRxVar;
 using PowWinForms.Utils;
-using Structs;
 using WinSpectorLib.Utils;
 
 namespace WinSpectorLib.Logic;

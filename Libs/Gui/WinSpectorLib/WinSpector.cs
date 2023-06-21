@@ -1,5 +1,5 @@
 ﻿using PowWinForms;
-using Structs;
+using WinSpectorLib.Structs;
 
 namespace WinSpectorLib;
 

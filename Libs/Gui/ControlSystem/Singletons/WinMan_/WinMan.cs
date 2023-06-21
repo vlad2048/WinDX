@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Disposables;
+using ControlSystem.Structs;
 using DynamicData;
 using PowRxVar;
-using Structs;
 
 namespace ControlSystem.Singletons.WinMan_;
 

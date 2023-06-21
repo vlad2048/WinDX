@@ -4,8 +4,8 @@ using DynamicData;
 using PowMaybe;
 using PowRxVar;
 using PowWinForms;
-using Structs;
 using WinSpectorLib.Logic;
+using WinSpectorLib.Structs;
 
 namespace WinSpectorLib;
 

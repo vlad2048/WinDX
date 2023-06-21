@@ -1,8 +1,7 @@
-﻿using Logging;
-using PowBasics.CollectionsExt;
+﻿using PowBasics.CollectionsExt;
 using PowRxVar;
 
-namespace TreePusherLib;
+namespace TreePusherLib.ConvertExts;
 
 public sealed record IncompleteNodeNfo<T>(
 	TNod<T> ParentNod,

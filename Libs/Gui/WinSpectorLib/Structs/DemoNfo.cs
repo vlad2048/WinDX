@@ -1,6 +1,4 @@
-﻿using ControlSystem;
-
-namespace Structs;
+﻿namespace WinSpectorLib.Structs;
 
 record DemoNfo(
     string Name,

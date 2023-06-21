@@ -4,9 +4,9 @@ using Demos.Logic;
 using Demos.Structs;
 using PowRxVar;
 using PowWinForms;
-using Structs;
 using SysWinLib;
 using WinSpectorLib;
+using WinSpectorLib.Structs;
 
 namespace Demos;
 

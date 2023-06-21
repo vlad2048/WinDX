@@ -14,10 +14,10 @@ using PowRxVar;
 using PowTrees.Algorithms;
 using RenderLib;
 using RenderLib.Renderers.Dummy;
-using Structs;
 using SysWinLib;
 using SysWinLib.Structs;
 using TreePusherLib;
+using TreePusherLib.ConvertExts;
 using WinAPI.User32;
 using WinAPI.Windows;
 

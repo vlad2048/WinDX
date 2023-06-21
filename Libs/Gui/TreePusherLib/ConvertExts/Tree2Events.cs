@@ -1,4 +1,4 @@
-﻿namespace TreePusherLib;
+﻿namespace TreePusherLib.ConvertExts;
 
 public static class Tree2Events
 {

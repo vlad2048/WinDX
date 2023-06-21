@@ -1,9 +1,7 @@
-﻿using ControlSystem;
-using ControlSystem.Structs;
-using LayoutSystem.Flex.Structs;
+﻿using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
 
-namespace Structs;
+namespace ControlSystem.Structs;
 
 
 sealed record MixLayout(

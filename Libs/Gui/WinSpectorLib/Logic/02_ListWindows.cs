@@ -2,8 +2,8 @@
 using PowMaybe;
 using PowRxVar;
 using PowWinForms.ListBoxSourceListViewing;
-using Structs;
 using System.Reactive.Linq;
+using ControlSystem.Structs;
 using DynamicData;
 using PowBasics.CollectionsExt;
 using PowWinForms.Utils;

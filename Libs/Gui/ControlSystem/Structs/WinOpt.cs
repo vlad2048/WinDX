@@ -1,6 +1,6 @@
 ﻿using PowBasics.Geom;
 
-namespace Structs;
+namespace ControlSystem.Structs;
 
 public sealed class WinOpt
 {
