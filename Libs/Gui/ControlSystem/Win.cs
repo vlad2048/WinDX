@@ -185,19 +185,14 @@ file static class WinUtils
 	{
 		(
 			from partition in partitionSet.Partitions
-			from nod in partition.Root
-			where nod.V is CtrlNode
-			let ctrl = ((CtrlNode)nod.V).Ctrl
+			from ctrl in partition.CtrlSet
 			select ctrl
 		)
 			.ForEach(ctrl => ctrl.WinSrc.V = May.Some(win));
 
 		(
 			from partition in partitionSet.Partitions
-			from nod in partition.Root
-			where nod.V is StFlexNode
-			let nodeState = ((StFlexNode)nod.V).State
-			where partition.RMap.ContainsKey(nodeState)
+			from nodeState in partition.AllNodeStates
 			select (nodeState, r: partition.RMap[nodeState])
 		)
 			.ForEach(t => t.nodeState.RSrc.V = t.r);

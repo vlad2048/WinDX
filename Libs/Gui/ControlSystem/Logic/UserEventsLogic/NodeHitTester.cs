@@ -15,11 +15,7 @@ static class NodeHitTester
 		Pt pt,
 		Partition layout
 	) =>
-		layout.Root
-			.Select(e => e.V)
-			.OfType<StFlexNode>()
-			.Select(e => e.State)
-			.Where(layout.RMap.ContainsKey)
+		layout.AllNodeStates
 			.Where(state => layout.RMap[state].Contains(pt))
 			.Reverse()
 			.FirstOrMaybe();
