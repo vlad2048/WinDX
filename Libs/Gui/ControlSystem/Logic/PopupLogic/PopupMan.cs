@@ -1,6 +1,7 @@
 ﻿using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
+using PowBasics.CollectionsExt;
 using PowRxVar;
 using SysWinLib;
 using IWin = ControlSystem.IWinUserEventsSupport;
@@ -31,6 +32,8 @@ sealed class PopupMan : IDisposable
 		this.spectorDrawState = spectorDrawState;
 		map = new Dictionary<NodeState, PopupWin>().D(d);
 	}
+
+	public void InvalidatePopups() => map.Values.ForEach(e => e.Invalidate());
 
 	public IWin GetWin(NodeState? nodeState) => nodeState switch
 	{

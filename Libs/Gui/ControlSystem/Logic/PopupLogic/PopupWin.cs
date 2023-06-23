@@ -30,7 +30,7 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 	// IWinUserEventsSupport
 	// =====================
 	public IUIEvt Evt { get; }
-	public Maybe<NodeState> HitFun(Pt pt) => NodeHitTester.FindNodeAtMouseCoordinates(pt, subPartition);
+	public Maybe<NodeState> HitFun(Pt pt) => subPartition.FindNodeAtMouseCoordinates(pt);
 
 
 	public PopupWin(

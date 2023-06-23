@@ -9,7 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="PowBasics" Version="0.0.16" />
 		<PackageReference Include="PowBasics.Geom" Version="0.0.16" />
-		<PackageReference Include="PowRxVar" Version="0.0.40" />
+		<PackageReference Include="PowRxVar" Version="0.0.41" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -36,7 +36,7 @@ public interface IWinUserEventsSupport
 public class Win : Ctrl, IWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
-	private PartitionSet partitionSet = null!;
+	private PartitionSet partitionSet = PartitionSet.Empty;
 
 	internal SpectorWinDrawState SpectorDrawState { get; }
 	internal IRoVar<R> ClientR => sysWin.ClientR;
@@ -45,7 +45,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 	// IWinUserEventsSupport
 	// =====================
 	public IUIEvt Evt { get; }
-	public Maybe<NodeState> HitFun(Pt pt) => NodeHitTester.FindNodeAtMouseCoordinates(pt, partitionSet.MainPartition);
+	public Maybe<NodeState> HitFun(Pt pt) => partitionSet.MainPartition.FindNodeAtMouseCoordinates(pt);
 
 	public override string ToString() => GetType().Name;
 	public void Invalidate() => sysWin.Invalidate();
@@ -59,13 +59,14 @@ public class Win : Ctrl, IWinUserEventsSupport
 		Evt = UserEventGenerator.MakeForWin(sysWin);
 		SpectorDrawState = new SpectorWinDrawState().D(D);
 		var popupMan = new PopupMan(this, sysWin, SpectorDrawState).D(D);
-		var eventDispatcher = new WinNodeEventDispatcher(this).D(D);
+		var eventDispatcher = new EventDispatcher().D(D);
 
 		var canSkipLayout = new TimedFlag();
 		SpectorDrawState.WhenChanged.Subscribe(_ =>
 		{
 			canSkipLayout.Set();
 			Invalidate();
+			popupMan.InvalidatePopups();
 		}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
@@ -91,19 +92,11 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 				G.WinMan.SetWinLayout(mixLayout);
 			}
-			//if (partitionSet == null!) return;
 
 			// Render
 			// ======
 			RenderUtils.RenderTree(partitionSet.MainPartition, gfx);
-			//var boundSubPartitions = popupMan.ShowSubPartitions(subPartitions, parentMapping);
 			SpectorWinRenderUtils.Render(SpectorDrawState, partitionSet.MainPartition, gfx);
-
-			// Track Events
-			// ============
-			//eventDispatcher.Update(mainPartition, boundSubPartitions);
-
-
 
 		}).D(D);
 	}

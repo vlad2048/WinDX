@@ -5,6 +5,8 @@ using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
+using PowMaybe;
+using PowRxVar;
 
 namespace ControlSystem.Logic.PopupLogic;
 
@@ -37,6 +39,7 @@ record Partition(
 )
 {
 	public Ctrl RootCtrl => ((CtrlNode)Root.V).Ctrl;
+
 	public NodeState[] AllNodeStates =>
 		(
 			from node in Root
@@ -46,6 +49,22 @@ record Partition(
 			select state
 		)
 		.ToArray();
+
+	public Maybe<NodeState> FindNodeAtMouseCoordinates(Pt pt) =>
+		AllNodeStates
+			.Where(state => RMap[state].Contains(pt))
+			.Reverse()
+			.FirstOrMaybe();
+
+
+	private static readonly Ctrl emptyCtrl = new Ctrl().DisposeOnProgramExit();
+
+	public static readonly Partition Empty = new(
+		null,
+		Nod.Make<IMixNode>(new CtrlNode(emptyCtrl)),
+		new Dictionary<NodeState, R>(),
+		new HashSet<Ctrl>{emptyCtrl}
+	);
 }
 
 
@@ -68,6 +87,11 @@ sealed record PartitionSet(
 {
 	public Partition MainPartition => Partitions[0];
 	public Partition[] SubPartitions => Partitions.Skip(1).ToArray();
+
+	public static readonly PartitionSet Empty = new(
+		new [] { Partition.Empty },
+		new Dictionary<NodeState, NodeState?>()
+	);
 }
 
 static class PopupSplitter

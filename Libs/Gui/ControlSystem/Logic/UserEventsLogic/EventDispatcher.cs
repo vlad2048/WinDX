@@ -5,12 +5,13 @@ using DynamicData;
 using PowBasics.CollectionsExt;
 using PowRxVar;
 using UserEvents.Converters;
+using UserEvents.Utils;
 using IWin = ControlSystem.IWinUserEventsSupport;
 
 namespace ControlSystem.Logic.UserEventsLogic;
 
 
-public sealed class NodeTracker : IDisposable
+sealed class NodeTracker : IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -41,21 +42,19 @@ public sealed class NodeTracker : IDisposable
 }
 
 
-sealed class WinNodeEventDispatcher : IDisposable
+sealed class EventDispatcher : IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
-	private readonly IWin mainWin;
 	private readonly ISourceCache<NodeTracker, IWin> winsSrc;
 	private readonly IObservableCache<NodeTracker, IWin> wins;
 
-	public WinNodeEventDispatcher(IWin mainWin)
+	public EventDispatcher()
 	{
-		this.mainWin = mainWin;
 		winsSrc = new SourceCache<NodeTracker, IWin>(e => e.Win).D(d);
 		wins = winsSrc.AsObservableCache().D(d);
-		winsSrc.Connect().DisposeMany();
+		winsSrc.Connect().DisposeMany().MakeHot(d);
 	}
 
 	public void DispatchNodeEvents(PartitionSet partitionSet, Func<NodeState?, IWin> winFun)
@@ -105,7 +104,7 @@ sealed class WinNodeEventDispatcher : IDisposable
 
 static class WinNodeEventDispatcherExts
 {
-	public static PartitionSet DispatchNodeEvents(this PartitionSet partitionSet, WinNodeEventDispatcher eventDispatcher, Func<NodeState?, IWin> winFun)
+	public static PartitionSet DispatchNodeEvents(this PartitionSet partitionSet, EventDispatcher eventDispatcher, Func<NodeState?, IWin> winFun)
 	{
 		eventDispatcher.DispatchNodeEvents(partitionSet, winFun);
 		return partitionSet;
