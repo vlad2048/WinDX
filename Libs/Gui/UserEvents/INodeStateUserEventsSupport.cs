@@ -4,8 +4,8 @@ using UserEvents.Structs;
 
 namespace UserEvents;
 
-public interface INodeState
+public interface INodeStateUserEventsSupport
 {
-	R R { get; }
+	IRoVar<R> R { get; }
 	IRwVar<IUIEvt> EvtSrc { get; }
 }

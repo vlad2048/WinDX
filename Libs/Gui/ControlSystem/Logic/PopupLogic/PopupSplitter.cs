@@ -1,52 +1,81 @@
-﻿using ControlSystem.Structs;
+﻿using System.Diagnostics.CodeAnalysis;
+using ControlSystem.Structs;
 using ControlSystem.Utils;
 using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 
-namespace ControlSystem.Logic.PopLogic;
+namespace ControlSystem.Logic.PopupLogic;
+
 
 
 /// <summary>
-/// The Root will always be a Ctrl
-/// The On/Off status of the nodes is encoded into the keys present in RMap
-/// CtrlSet are all the Ctrls contained in Root (these will be the ones we call Render for)
+/// Represents a partition of the layout to be displayed on the main window or child popup window
 /// </summary>
+/// <param name="Id">
+/// ● null for the main window partition <br/>
+/// ● The NodeState of the Pop node for a popup window partition
+/// </param>
+/// <param name="Root">
+/// Tree root <br/>
+/// ● Always a Ctrl <br/>
+/// ● This is the Ctrl that gets renderered to trigger the tree rendering
+/// </param>
+/// <param name="RMap">
+/// ● The keys represents which nodes logically belong in this partition <br/>
+/// ● The values are the rectangles from the layout
+/// </param>
+/// <param name="CtrlSet">
+/// The set of all the Ctrls contained in Root (these will be the ones we call Render for)
+/// </param>
 record Partition(
+	NodeState? Id,
 	MixNode Root,
 	IReadOnlyDictionary<NodeState, R> RMap,
 	HashSet<Ctrl> CtrlSet
 )
 {
 	public Ctrl RootCtrl => ((CtrlNode)Root.V).Ctrl;
+	public NodeState[] AllNodeStates =>
+		(
+			from node in Root
+			where node.V is StFlexNode
+			let state = ((StFlexNode)node.V).State
+			where RMap.ContainsKey(state)
+			select state
+		)
+		.ToArray();
 }
 
-sealed record SubPartition(
-	MixNode Root,
-	IReadOnlyDictionary<NodeState, R> RMap,
-	HashSet<Ctrl> CtrlSet,
-	NodeState Id
-) : Partition(Root, RMap, CtrlSet);
+
 
 /// <summary>
-/// Contains the layout partitions
+/// Contains all the layout partitions across the main window and the popup windows
 /// </summary>
-/// <param name="MainPartition">Partition associated with the main window</param>
-/// <param name="SubPartitions">Partition associated with the popup windows</param>
-/// <param name="ParentMapping">Mapping from the SubPartitions indices to the SubPartitions indices (or null to reference the main window)</param>
+/// <param name="Partitions">
+/// Partitions: <br/>
+/// ● The first one is associated with the main window <br/>
+/// ● The subsequent ones are associated with the popup windows
+/// </param>
+/// <param name="ParentMapping">
+/// Mapping from the Partitions Ids (NodeState) to the Partitions Ids (NodeState) (or null to reference the main window)
+/// </param>
 sealed record PartitionSet(
-	Partition MainPartition,
-	SubPartition[] SubPartitions,
-	IReadOnlyDictionary<int, int?> ParentMapping
-);
+	Partition[] Partitions,
+	IReadOnlyDictionary<NodeState, NodeState?> ParentMapping
+)
+{
+	public Partition MainPartition => Partitions[0];
+	public Partition[] SubPartitions => Partitions.Skip(1).ToArray();
+}
 
-static class PopSplitter
+static class PopupSplitter
 {
 	public static PartitionSet Split(MixNode root, IReadOnlyDictionary<NodeState, R> rMap)
 	{
 		var backMap = root.ToDictionary(e => e.V);
-		var parts = root
+		var partitions = root
 			.PartitionPopNodes()
 			.SelectToArray((partition, partitionIdx) =>
 			{
@@ -63,46 +92,34 @@ static class PopSplitter
 					.Where(t => enabledStates.Contains(t.Key))
 					.ToDictionary(e => e.Key, e => e.Value);
 				var ctrlSet = partitionExtended.Select(e => e.V).OfType<CtrlNode>().ToHashSet(e => e.Ctrl);
-				return (
+				return new Partition(
+					stateStart,
 					partitionExtended,
 					partitionRMap,
-					ctrlSet,
-					stateStart
+					ctrlSet
 				);
 			});
 
 
 		return new PartitionSet(
-			new Partition(
-				parts[0].partitionExtended,
-				parts[0].partitionRMap,
-				parts[0].ctrlSet
-			),
-			parts.Skip(1).SelectToArray(part => new SubPartition(
-				part.partitionExtended,
-				part.partitionRMap,
-				part.ctrlSet,
-				part.stateStart ?? throw new ArgumentException("A subpartition should have an associated NodeState")
-			)),
+			partitions,
 			root.GetParentMapping()
 		);
 	}
 
 
-	private static IReadOnlyDictionary<int, int?> GetParentMapping(this MixNode root)
+	private static IReadOnlyDictionary<NodeState, NodeState?> GetParentMapping(this MixNode root)
 	{
-		var map = new Dictionary<int, int?>();
-		var curIdx = 0;
-		void Rec(MixNode node, int? parentIdx)
+		var map = new Dictionary<NodeState, NodeState?>();
+		void Rec(MixNode node, NodeState? parentNodeState)
 		{
-			if (node.IsPop())
+			if (node.IsPop(out var nodeState))
 			{
-				map[curIdx] = parentIdx;
-				parentIdx = curIdx;
-				curIdx++;
+				map[nodeState] = parentNodeState;
+				parentNodeState = nodeState;
 			}
 			foreach (var kid in node.Children)
-				Rec(kid, parentIdx);
+				Rec(kid, parentNodeState);
 		}
 		Rec(root, null);
 		return map;
@@ -222,10 +239,20 @@ static class PopSplitter
 
 		return list.ToArray();
 	}
-	
 
 
-	private static bool IsPop(this MixNode node) => node.V.IsPop();
+
+	private static bool IsPop(this MixNode node, [NotNullWhen(true)] out NodeState? nodeState)
+	{
+		if (node.V is StFlexNode { State: var nodeState_, Flex.Strat: FillStrat { Spec: PopSpec } })
+		{
+			nodeState = nodeState_;
+			return true;
+		}
+		nodeState = null;
+		return false;
+	}
+
 	private static bool IsCtrl(this MixNode node) => node.V is CtrlNode;
 
 	private static bool IsPop(this IMixNode node) => node is StFlexNode { Flex.Strat: FillStrat { Spec: PopSpec } };

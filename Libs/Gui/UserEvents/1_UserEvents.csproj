@@ -6,6 +6,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Folder Include="Generators\" />
+		<Folder Include="Converters\" />
 		<Folder Include="Utils\" />
 	</ItemGroup>
 

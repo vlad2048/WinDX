@@ -1,39 +1,51 @@
-﻿using System.Drawing;
+﻿using ControlSystem.Logic.UserEventsLogic;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
+using PowMaybe;
 using PowRxVar;
 using RenderLib;
-using RenderLib.Structs;
 using SysWinLib;
 using SysWinLib.Structs;
+using UserEvents.Generators;
+using UserEvents.Structs;
+using UserEvents.Utils;
 using WinAPI.User32;
 using WinAPI.Windows;
 
-namespace ControlSystem.Logic.PopLogic;
+namespace ControlSystem.Logic.PopupLogic;
 
-sealed class SlaveWin : Ctrl
+sealed class PopupWin : Ctrl, IWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
 	private readonly IRwVar<R> layoutR;
-	private SubPartition layout;
+	private Partition subPartition;
+	private Partition subPartitionRebased;
 
 	public nint Handle => sysWin.Handle;
 
-	public SlaveWin(
-		SubPartition layoutUnoffset,
+	// IWinUserEventsSupport
+	// =====================
+	public IUIEvt Evt { get; }
+	public Maybe<NodeState> HitFun(Pt pt) => NodeHitTester.FindNodeAtMouseCoordinates(pt, subPartition);
+
+
+	public PopupWin(
+		Partition subPartition,
 		SysWin parentWin,
 		nint winParentHandle,
 		SpectorWinDrawState spectorDrawState
 	)
 	{
-		(layout, var layR) = layoutUnoffset.SplitOffset();
+		this.subPartition = subPartition;
+		(subPartitionRebased, var layR) = subPartition.SplitOffset();
 		layoutR = Var.Make(layR).D(D);
-		sysWin = SlaveWinUtils.MakeWin(layoutR.V, parentWin, winParentHandle).D(D);
+		sysWin = PopupWinUtils.MakeWin(layoutR.V, parentWin, winParentHandle).D(D);
 		this.D(sysWin.D);
+		Evt = UserEventGenerator.MakeForWin(sysWin).Translate(() => layoutR.V.Pos);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 
@@ -51,20 +63,24 @@ sealed class SlaveWin : Ctrl
 		{
 			using var d = new Disp();
 			var gfx = renderer.GetGfx().D(d);
-			RenderUtils.RenderTree(layout, gfx);
-			SpectorWinRenderUtils.Render(spectorDrawState, layout, gfx);
+			RenderUtils.RenderTree(subPartitionRebased, gfx);
+			SpectorWinRenderUtils.Render(spectorDrawState, subPartitionRebased, gfx);
 		}).D(D);
 	}
 
-	public void SetLayout(SubPartition layout_) => (layout, layoutR.V) = layout_.SplitOffset();
+	public void SetLayout(Partition subPartition_)
+	{
+		subPartition = subPartition_;
+		(subPartitionRebased, layoutR.V) = subPartition_.SplitOffset();
+	}
 
 	public void Invalidate() => sysWin.Invalidate();
 }
 
 
-file static class SlaveWinUtils
+file static class PopupWinUtils
 {
-	private const int DEFAULT = (int)CreateWindowFlags.CW_USEDEFAULT;
+	//private const int DEFAULT = (int)CreateWindowFlags.CW_USEDEFAULT;
 
 	public static SysWin MakeWin(R layoutR, SysWin parentWin, nint winParentHandle)
 	{
@@ -72,7 +88,7 @@ file static class SlaveWinUtils
 		{
 			e.CreateWindowParams = new CreateWindowParams
 			{
-				Name = "Slave",
+				Name = "Popup",
 				X = parentWin.ScreenPt.V.X + layoutR.X,
 				Y = parentWin.ScreenPt.V.Y + layoutR.Y,
 				Width = layoutR.Width,
@@ -99,9 +115,9 @@ file static class SlaveWinUtils
 		return win;
 	}
 
-	public static (SubPartition, R) SplitOffset(this SubPartition part)
+	public static (Partition, R) SplitOffset(this Partition part)
 	{
-		var r = part.RMap[part.Id];
+		var r = part.RMap[part.Id ?? throw new ArgumentException("Should not be null for a subpartition")];
 		return (
 			part with { RMap = part.RMap.MapValues(e => e - r.Pos) },
 			r

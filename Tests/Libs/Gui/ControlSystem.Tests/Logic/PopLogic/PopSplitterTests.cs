@@ -1,4 +1,4 @@
-﻿using ControlSystem.Logic.PopLogic;
+﻿using ControlSystem.Logic.PopupLogic;
 using ControlSystem.Structs;
 using LayoutSystem.Flex;
 using LayoutSystem.Utils;
@@ -209,7 +209,7 @@ sealed class PopSplitterTests : RxTest
 		const bool F = false;
 
 		CheckLayoutPartitions(
-			PopSplitter.Split(tree, rMap),
+			PopupSplitter.Split(tree, rMap),
 
 			Cb(c1,
 				Nb(n1, T),

@@ -5,9 +5,9 @@ using UserEvents.Structs;
 
 namespace UserEvents.Utils;
 
-static class UserEvtTransforms
+public static class UserEvtTransforms
 {
-	public static IUIEvt Map(
+	internal static IUIEvt Map(
 		this IUIEvt uiEvt,
 		Func<IObservable<IUserEvt>, IObservable<IUserEvt>> mapFun
 	)
@@ -26,7 +26,7 @@ static class UserEvtTransforms
 		);
 
 
-	public static IUIEvt MakeHot(
+	internal static IUIEvt MakeHot(
 		this IUIEvt uiEvt,
 		IRoDispBase d
 	)

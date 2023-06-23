@@ -2,8 +2,9 @@
 using PowRxVar;
 using TestBase;
 using TreePusherLib.ConvertExts;
-
 // ReSharper disable EmptyEmbeddedStatement
+#pragma warning disable CS0642
+
 
 namespace TreePusherLib.Tests.ConvertExts;
 

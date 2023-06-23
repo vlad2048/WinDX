@@ -1,8 +1,7 @@
 ﻿using System.Reactive.Linq;
-using EventsMonitor.Structs;
-using PowMaybe;
 using PowRxVar;
 using PowWinForms;
+using UserEvents.Generators;
 using UserEvents.Structs;
 using UserEvents.Utils;
 
@@ -21,7 +20,7 @@ sealed partial class DXEventDisplayer : UserControl
 
 		var topD = new Disp();
 		isEmpty = Var.Make(true).D(topD);
-		(evtSrc, var evt) = UserEvtGenerator.MakeWithSource().D(topD);
+		(evtSrc, var evt) = UserEventGenerator.MakeWithSource().D(topD);
 
 		this.InitRX(d =>
 		{

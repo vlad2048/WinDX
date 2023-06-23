@@ -1,10 +1,9 @@
 using System.Reactive.Linq;
-using PowBasics.Geom;
 using PowRxVar;
 using PowWinForms;
 using SysWinLib;
 using SysWinLib.Structs;
-using UserEvents.Utils;
+using UserEvents.Generators;
 using WinAPI.User32;
 
 namespace EventsMonitor;
@@ -15,48 +14,58 @@ sealed partial class MainWin : Form
 	{
 		InitializeComponent();
 
-		this.InitRX(d =>
-		{
+		this.InitRX(d => {
 			formEventDisplayer.SetTrackedControl(this);
-			ctrlEventDisplayer.SetTrackedControl(basicControl);
+			ctrlEventDisplayer1.SetTrackedControl(basicControl1);
+			ctrlEventDisplayer2.SetTrackedControl(basicControl2);
 
 			this.Events().KeyDown
 				.Where(e => e.KeyCode == Keys.C)
-				.Subscribe(_ =>
-				{
+				.Subscribe(_ => {
 					formEventDisplayer.Clear();
-					ctrlEventDisplayer.Clear();
+					ctrlEventDisplayer1.Clear();
+					ctrlEventDisplayer2.Clear();
 					dxFormEventDisplayer.Clear();
 				}).D(d);
 
 
 			this.Events().KeyDown
 				.Where(e => e.KeyCode == Keys.R)
-				.Subscribe(_ =>
-				{
-					Controls.Remove(basicControl);
+				.Subscribe(_ => {
+					Controls.Remove(basicControl1);
 				}).D(d);
 
 
 			this.Events().KeyDown
 				.Where(e => e.KeyCode == Keys.A)
-				.Subscribe(_ =>
-				{
-					Controls.Add(basicControl);
+				.Subscribe(_ => {
+					Controls.Add(basicControl1);
 				}).D(d);
 
 
 			this.Events().KeyDown
 				.Where(e => e.KeyCode == Keys.D)
+				.Subscribe(_ => {
+					basicControl1.Dispose();
+				}).D(d);
+
+			var y1 = basicControl2.Top;
+			var y2 = y1 - 50;
+
+
+			this.Events().KeyDown
+				.Where(e => e.KeyCode == Keys.T)
 				.Subscribe(_ =>
 				{
-					basicControl.Dispose();
+					var yPrev = basicControl2.Top;
+					var yNext = yPrev == y1 ? y2 : y1;
+					basicControl2.Top = yNext;
 				}).D(d);
 
 
 			var win = MakeWindow().D(d);
 			win.Init();
-			var winEvt = UserEvtGenerator.MakeForWin(win);
+			var winEvt = UserEventGenerator.MakeForWin(win);
 			dxFormEventDisplayer.SetTrackedEvtSrc(winEvt);
 		});
 	}

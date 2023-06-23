@@ -1,5 +1,6 @@
 ﻿using Demos.Categories.Base;
 using Demos.Categories.Layout;
+using Demos.Categories.UserEvents;
 using Demos.Logic;
 using Demos.Structs;
 using PowRxVar;
@@ -34,7 +35,8 @@ class Program
 				new DemoNfo("UnbalancedCtrlHandling", Wrap(() => new UnbalancedCtrlHandlingDemoWin())),
 				new DemoNfo("BalancedCtrlHandling", Wrap(() => new BalancedCtrlHandlingDemoWin())),
 				new DemoNfo("PopNode", Wrap(() => new PopNodeDemoWin())),
-				new DemoNfo("PopNodeComplex", Wrap(() => new PopNodeComplexDemoWin()))
+				new DemoNfo("PopNodeComplex", Wrap(() => new PopNodeComplexDemoWin())),
+				new DemoNfo("UserEvents", Wrap(() => new UserEventsDemoWin()))
 			);
 		}
 

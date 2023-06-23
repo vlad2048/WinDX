@@ -1,7 +1,5 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Reactive.Linq;
-using ControlSystem.Logic.PopLogic;
+﻿using ControlSystem.Logic.PopupLogic;
+using ControlSystem.Logic.UserEventsLogic;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
@@ -9,7 +7,6 @@ using ControlSystem.WinSpectorLogic.Structs;
 using ControlSystem.WinSpectorLogic.Utils;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
-using Logging;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
@@ -21,27 +18,50 @@ using SysWinLib;
 using SysWinLib.Structs;
 using TreePusherLib;
 using TreePusherLib.ConvertExts;
+using UserEvents.Generators;
+using UserEvents.Structs;
 using WinAPI.User32;
 using WinAPI.Windows;
 
 namespace ControlSystem;
 
 
-public class Win : Ctrl
+public interface IWinUserEventsSupport
+{
+	IUIEvt Evt { get; }
+	Maybe<NodeState> HitFun(Pt pt);
+}
+
+
+public class Win : Ctrl, IWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
+	private PartitionSet partitionSet = null!;
 
 	internal SpectorWinDrawState SpectorDrawState { get; }
+	internal IRoVar<R> ClientR => sysWin.ClientR;
+	internal IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
+
+	// IWinUserEventsSupport
+	// =====================
+	public IUIEvt Evt { get; }
+	public Maybe<NodeState> HitFun(Pt pt) => NodeHitTester.FindNodeAtMouseCoordinates(pt, partitionSet.MainPartition);
+
+	public override string ToString() => GetType().Name;
+	public void Invalidate() => sysWin.Invalidate();
+
 
 	public Win(Action<WinOpt>? optFun = null)
 	{
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
-		var slaveMan = new SlaveMan(sysWin).D(D);
+		Evt = UserEventGenerator.MakeForWin(sysWin);
+		SpectorDrawState = new SpectorWinDrawState().D(D);
+		var popupMan = new PopupMan(this, sysWin, SpectorDrawState).D(D);
+		var eventDispatcher = new WinNodeEventDispatcher(this).D(D);
 
 		var canSkipLayout = new TimedFlag();
-		SpectorDrawState = new SpectorWinDrawState().D(D);
 		SpectorDrawState.WhenChanged.Subscribe(_ =>
 		{
 			canSkipLayout.Set();
@@ -51,113 +71,145 @@ public class Win : Ctrl
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
 
-		PartitionSet? partitionSet = null;
-
+		
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
 			var gfx = renderer.GetGfx().D(d);
 
+			// Layout
+			// ======
 			if (canSkipLayout.IsNotSet())
 			{
-				WinUtils.BuildTree(out var reconstructedTree, this);
-				WinUtils.AssignWinToCtrls(this, reconstructedTree);
-				WinUtils.SolveTree(out var mixLayout, this, reconstructedTree, sysWin.ClientR.V.Size);
-				G.WinMan.SetWinLayout(mixLayout);
-				partitionSet = PopSplitter.Split(mixLayout.MixRoot, mixLayout.RMap);
-			}
-			if (partitionSet == null) return;
+				partitionSet = this
+					.BuildTree()
+					.SolveTree(this, out var mixLayout)
+					.SplitPopups()
+					.CreatePopups(popupMan)
+					.DispatchNodeEvents(eventDispatcher, popupMan.GetWin)
+					.Assign_CtrlWins_and_NodeRs(this);
 
-			var (partition, subPartitions, parentMapping) = partitionSet;
-			RenderUtils.RenderTree(partition, gfx);
-			slaveMan.ShowSubPartitions(subPartitions, parentMapping, sysWin.Handle, SpectorDrawState);
-			SpectorWinRenderUtils.Render(SpectorDrawState, partition, gfx);
+				G.WinMan.SetWinLayout(mixLayout);
+			}
+			//if (partitionSet == null!) return;
+
+			// Render
+			// ======
+			RenderUtils.RenderTree(partitionSet.MainPartition, gfx);
+			//var boundSubPartitions = popupMan.ShowSubPartitions(subPartitions, parentMapping);
+			SpectorWinRenderUtils.Render(SpectorDrawState, partitionSet.MainPartition, gfx);
+
+			// Track Events
+			// ============
+			//eventDispatcher.Update(mainPartition, boundSubPartitions);
+
+
 
 		}).D(D);
 	}
-
-	public override string ToString() => GetType().Name;
-
-	public void Invalidate() => sysWin.Invalidate();
 }
+
 
 file static class WinUtils
 {
-	public static void BuildTree(
-		out ReconstructedTree<IMixNode> reconstructedTree,
-		Ctrl rootCtrl
-	)
+	public static ReconstructedTree<IMixNode> BuildTree(this Ctrl rootCtrl)
 	{
 		using var d = new Disp();
 		var gfx = new Dummy_Gfx().D(d);
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
 		var pusher = new TreePusher<IMixNode>(treeEvtSig);
 		var renderArgs = new RenderArgs(gfx, pusher).D(d);
-		reconstructedTree = treeEvtObs.ToTree(
-			mixNode =>
-			{
-				if (mixNode is not CtrlNode { Ctrl: var ctrl }) return;
-				ctrl.SignalRender(renderArgs);
-			},
-			() =>
-			{
-				using (renderArgs.Ctrl(rootCtrl)) { }
-			}
-		);
+		return
+			treeEvtObs.ToTree(
+				mixNode =>
+				{
+					if (mixNode is not CtrlNode { Ctrl: var ctrl }) return;
+					ctrl.SignalRender(renderArgs);
+				},
+				() =>
+				{
+					using (renderArgs.Ctrl(rootCtrl)) { }
+				}
+			);
 	}
 
 
-
-	public static void AssignWinToCtrls(
+	public static MixLayout SolveTree(
+		this ReconstructedTree<IMixNode> tree,
 		Win win,
-		ReconstructedTree<IMixNode> reconstructedTree
-	) =>
-		reconstructedTree.Root
-			.Select(e => e.V)
-			.OfType<CtrlNode>()
-			.SelectToArray(e => e.Ctrl)
-			.ForEach(ctrl => ctrl.WinRW.V = May.Some(win));
-
-
-	public static void SolveTree(
-		out MixLayout mixLayout,
-		Win win,
-		ReconstructedTree<IMixNode> reconstructedTree,
-		Sz winSz
+		out MixLayout mixLayout
 	)
 	{
-		var mixRoot = reconstructedTree.Root;
+		var mixRoot = tree.Root;
 
 		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
 		var flexRoot = stFlexRoot.Map(e => e.Flex);
-		var freeSz = FreeSzMaker.FromSz(winSz);
+		var freeSz = FreeSzMaker.FromSz(win.ClientR.V.Size);
 		var layout = FlexSolver.Solve(flexRoot, freeSz);
 
 		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
 
-		mixLayout = new MixLayout(
-			win,
-			freeSz,
-			mixRoot,
-			layout.RMap.MapKeys(flex2st),
-			layout.WarningMap.MapKeys(flex2st),
+		return mixLayout =
+			new MixLayout(
+				win,
+				freeSz,
+				mixRoot,
+				layout.RMap.MapKeys(flex2st),
+				layout.WarningMap.MapKeys(flex2st),
 
-			reconstructedTree.IncompleteNodes
-				.GroupBy(e => e.ParentNod)
-				.Select(e => e.First())
-				.ToDictionary(
-					e => e.ParentNod.FindCtrlContaining(),
-					e => e.ChildNode
-				),
+				tree.IncompleteNodes
+					.GroupBy(e => e.ParentNod)
+					.Select(e => e.First())
+					.ToDictionary(
+						e => e.ParentNod.FindCtrlContaining(),
+						e => e.ChildNode
+					),
 
-			mixRoot
-				.Where(e => e.V is CtrlNode)
-				.ToDictionary(
-					e => ((CtrlNode)e.V).Ctrl,
-					e => e
-				)
-		);
+				mixRoot
+					.Where(e => e.V is CtrlNode)
+					.ToDictionary(
+						e => ((CtrlNode)e.V).Ctrl,
+						e => e
+					)
+			);
 	}
+
+	public static PartitionSet SplitPopups(
+		this MixLayout layout
+	)
+		=> PopupSplitter.Split(layout.MixRoot, layout.RMap);
+
+	
+
+	public static PartitionSet Assign_CtrlWins_and_NodeRs(this PartitionSet partitionSet, Win win)
+	{
+		(
+			from partition in partitionSet.Partitions
+			from nod in partition.Root
+			where nod.V is CtrlNode
+			let ctrl = ((CtrlNode)nod.V).Ctrl
+			select ctrl
+		)
+			.ForEach(ctrl => ctrl.WinSrc.V = May.Some(win));
+
+		(
+			from partition in partitionSet.Partitions
+			from nod in partition.Root
+			where nod.V is StFlexNode
+			let nodeState = ((StFlexNode)nod.V).State
+			where partition.RMap.ContainsKey(nodeState)
+			select (nodeState, r: partition.RMap[nodeState])
+		)
+			.ForEach(t => t.nodeState.RSrc.V = t.r);
+
+		return partitionSet;
+	}
+
+
+
+
+
+
 
 	private static Ctrl FindCtrlContaining(this MixNode nod)
 	{

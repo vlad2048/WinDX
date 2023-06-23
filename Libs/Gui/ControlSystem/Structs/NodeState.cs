@@ -1,34 +1,54 @@
 ﻿using PowBasics.Geom;
 using PowRxVar;
 using UserEvents;
+using UserEvents.Generators;
 using UserEvents.Structs;
-using UserEvents.Utils;
 
 namespace ControlSystem.Structs;
 
-public sealed class NodeState : INodeState, IDisposable
+public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
 
-	// **********
-	// * Public *
-	// **********
-	public R R { get; set; } = R.Empty;
+	// ************
+	// * Internal *
+	// ************
+	/// <summary>
+	/// Source for R
+	/// </summary>
+	internal IRwVar<R> RSrc { get; }
 
 	/// <summary>
-	/// Translated window events (+ generated MouseEnter/MouseLeave)
-	/// assigned by the HitTesting logic
+	/// Source for Evt. <br/>
+	/// ● Assigned by the HitTesting logic. <br/>
+	/// ● It should be internal, but we can't as it's accessed from the UserEvents project through the INodeStateUserEventsSupport interface. <br/>
 	/// </summary>
 	public IRwVar<IUIEvt> EvtSrc { get; }
 
+
+	// **********
+	// * Public *
+	// **********
+	/// <summary>
+	/// Rectangle in main window coordinates where the node is drawn. <br/>
+	/// ● Assigned during the window layout (PAINT event). <br/>
+	/// ● For nodes in Popup windows, refers to the original rectangle relative to the main window. <br/>
+	/// </summary>
+	public IRoVar<R> R => RSrc.ToReadOnly();
+
+
+	/// <summary>
+	/// Translated window events (+ generated MouseEnter/MouseLeave). <br/>
+	/// </summary>
 	public IUIEvt Evt { get; }
 
 
 	public NodeState()
 	{
-		(EvtSrc, Evt) = UserEvtGenerator.MakeWithSource().D(d);
+		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(d);
+		(EvtSrc, Evt) = UserEventGenerator.MakeWithSource().D(d);
 	}
 }
 

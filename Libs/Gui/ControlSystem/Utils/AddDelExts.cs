@@ -1,0 +1,26 @@
+﻿using DynamicData;
+using PowBasics.CollectionsExt;
+
+namespace ControlSystem.Utils;
+
+static class AddDelExts
+{
+	public static (T[] adds, K[] dels) GetAddDels<T, K, V>(this IReadOnlyDictionary<K, V> map, T[] arr, Func<T, K> projFun) where K : notnull
+	{
+		var keys = arr.SelectToArray(projFun);
+		return (
+			arr.WhereNotToArray(e => map.ContainsKey(projFun(e))),
+			map.Keys.WhereNotToArray(keys.Contains)
+		);
+	}
+
+	public static (T[] adds, T[] dels) GetAddDels<T>(this IObservableList<T> list, T[] arr) => (
+		arr.WhereNotToArray(list.Items.Contains),
+		arr.WhereToArray(list.Items.Contains)
+	);
+
+	public static (K[] adds, K[] dels) GetAddDels<K, V>(this IObservableCache<V, K> cache, K[] arr) where K : notnull => (
+		arr.WhereToArray(e => !cache.Lookup(e).HasValue),
+		cache.Keys.WhereNotToArray(arr.Contains)
+	);
+}

@@ -31,7 +31,7 @@ public class Ctrl : IDisposable
 	// ************
 	// * Internal *
 	// ************
-	internal IRwVar<Maybe<Win>> WinRW { get; }
+	internal IRwVar<Maybe<Win>> WinSrc { get; }
 
 	internal void SignalRender(RenderArgs e) => whenRender.OnNext(e);
 
@@ -42,12 +42,12 @@ public class Ctrl : IDisposable
 	/// <summary>
 	/// Points to the window this Ctrl is attached to
 	/// </summary>
-	public IRoVar<Maybe<Win>> Win => WinRW.ToReadOnly();
+	public IRoVar<Maybe<Win>> Win => WinSrc.ToReadOnly();
 
 
 	public Ctrl()
 	{
-		WinRW = Var.Make(May.None<Win>()).D(D);
+		WinSrc = Var.Make(May.None<Win>()).D(D);
 		whenRender = new Subject<RenderArgs>().D(D);
 	}
 }

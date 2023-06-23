@@ -19,7 +19,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Logic\PopLogic\" />
 		<Folder Include="Singletons\WinMan_\" />
 		<Folder Include="WinSpectorLogic\Utils\" />
 	</ItemGroup>
