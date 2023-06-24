@@ -3,7 +3,6 @@ using ControlSystem.WinSpectorLogic;
 using PowBasics.CollectionsExt;
 using PowRxVar;
 using SysWinLib;
-using UserEvents;
 using IWin = UserEvents.IWinUserEventsSupport;
 using INode = UserEvents.INodeStateUserEventsSupport;
 
@@ -12,7 +11,7 @@ namespace ControlSystem.Logic.PopupLogic;
 
 sealed record BoundPartition(
 	Partition Partition,
-	IWinUserEventsSupport Win
+	IWin Win
 );
 
 
@@ -36,7 +35,7 @@ sealed class PopupMan : IDisposable
 
 	public void InvalidatePopups() => map.Values.ForEach(e => e.Invalidate());
 
-	public IWinUserEventsSupport GetWin(INode? nodeState) => nodeState switch
+	public IWin GetWin(INode? nodeState) => nodeState switch
 	{
 		null => parentWin,
 		not null => map[nodeState]

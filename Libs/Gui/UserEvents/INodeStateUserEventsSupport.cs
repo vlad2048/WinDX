@@ -6,6 +6,7 @@ namespace UserEvents;
 
 public interface INodeStateUserEventsSupport
 {
+	Disp D { get; }
 	IRoVar<R> R { get; }
 	IObservable<IUserEvt> Evt { get; }
 	void DispatchEvt(IUserEvt evt);

@@ -8,8 +8,8 @@ namespace UserEvents.Tests.TestSupport.Utils;
 
 sealed class TNode : INode, IDisposable
 {
-    private readonly Disp d = new();
-    public void Dispose() => d.Dispose();
+    public Disp D { get; } = new();
+    public void Dispose() => D.Dispose();
 
     private readonly string name;
     private readonly ISubject<IUserEvt> whenEvt;
@@ -25,8 +25,8 @@ sealed class TNode : INode, IDisposable
     {
 	    this.name = name;
         Depth = depth;
-        RSrc = Var.Make(r).D(d);
-        whenEvt = new Subject<IUserEvt>().D(d);
+        RSrc = Var.Make(r).D(D);
+        whenEvt = new Subject<IUserEvt>().D(D);
     }
 
     public override string ToString() => name;

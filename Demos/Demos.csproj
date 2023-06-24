@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 		<Folder Include="Categories\Base\" />
+		<Folder Include="Categories\Ownership\" />
 		<Folder Include="Structs\" />
 	</ItemGroup>
 

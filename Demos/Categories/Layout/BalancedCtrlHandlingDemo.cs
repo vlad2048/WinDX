@@ -9,9 +9,9 @@ using RenderLib.Structs;
 
 namespace Demos.Categories.Layout;
 
-sealed class BalancedCtrlHandlingDemoWin : Win
+sealed class BalancedCtrlHandlingDemo : Win
 {
-	public BalancedCtrlHandlingDemoWin() : base(opt => opt.R = new R(-600, 64, 500, 400))
+	public BalancedCtrlHandlingDemo() : base(opt => opt.R = new R(-600, 64, 500, 400))
 	{
 		var nodeRoot = new NodeState().D(D);
 		var nodeFit = new NodeState().D(D);
@@ -19,10 +19,10 @@ sealed class BalancedCtrlHandlingDemoWin : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(nodeRoot, Vec.Fix(400, 350), Strats.Fill))
+			using (r.Flex(nodeRoot, Vec.Fix(400, 350), Fill))
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.WinBrush1);
-				using (r.Flex(nodeFit, Vec.Fit, Strats.Fill, Mg.Mk(30)))
+				using (r.Flex(nodeFit, Vec.Fit, Fill, Mg.Mk(30)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.WinBrush2);
 					using (r.Ctrl(c1))
@@ -44,10 +44,10 @@ sealed class BalancedCtrlHandlingDemoWin : Win
 
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nodeRoot, Vec.Fix(180, 250), Strats.Fill))
+				using (r.Flex(nodeRoot, Vec.Fix(180, 250), Fill))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C1Brush1);
-					using (r.Flex(nodeFil, Vec.Fit, Strats.Fill, Mg.Mk(20)))
+					using (r.Flex(nodeFil, Vec.Fit, Fill, Mg.Mk(20)))
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.C1Brush2);
 						using (r.Ctrl(c2))
@@ -69,10 +69,10 @@ sealed class BalancedCtrlHandlingDemoWin : Win
 
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nodeRoot, Vec.Fix(110, 170), Strats.Fill))
+				using (r.Flex(nodeRoot, Vec.Fix(110, 170), Fill))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C2Brush1);
-					using (r.Flex(nodeFil, Vec.Fit, Strats.Fill, Mg.Mk(10)))
+					using (r.Flex(nodeFil, Vec.Fit, Fill, Mg.Mk(10)))
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.C2Brush2);
 						using (r.Ctrl(c3))
@@ -93,10 +93,10 @@ sealed class BalancedCtrlHandlingDemoWin : Win
 
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nodeRoot, Vec.Fix(60, 80), Strats.Fill))
+				using (r.Flex(nodeRoot, Vec.Fix(60, 80), Fill))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C3Brush1);
-					using (r.Flex(nodeFil, Vec.Fil, Strats.Fill, Mg.Mk(5)))
+					using (r.Flex(nodeFil, Vec.Fil, Fill, Mg.Mk(5)))
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.C3Brush2);
 					}

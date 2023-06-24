@@ -165,6 +165,15 @@ public static class UserEventConverter
 
 
 
-	private static void Send<N>(this N node, IUserEvt evt) where N : INodeStateUserEventsSupport => node.DispatchEvt(evt.TranslateMouse(-node.R.V.Pos));
-	private static void Send<N>(this IRoMayVar<N> node, IUserEvt evt) where N : INodeStateUserEventsSupport => node.V.Ensure().DispatchEvt(evt.TranslateMouse(-node.V.Ensure().R.V.Pos));
+	private static void Send<N>(this IRoMayVar<N> node, IUserEvt evt) where N : INodeStateUserEventsSupport
+	{
+		var v = node.V.Ensure();
+		v.Send(evt);
+	}
+
+	private static void Send<N>(this N node, IUserEvt evt) where N : INodeStateUserEventsSupport
+	{
+		if (node.D.IsDisposed) return;
+		node.DispatchEvt(evt.TranslateMouse(-node.R.V.Pos));
+	}
 }

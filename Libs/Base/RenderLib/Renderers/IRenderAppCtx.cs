@@ -28,3 +28,4 @@ public interface IGfx : IDisposable
 	void DrawR(R r, PenDef pen);
 	void DrawLine(Pt a, Pt b, PenDef penDef);
 }
+

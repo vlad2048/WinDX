@@ -10,9 +10,9 @@ using RenderLib.Structs;
 
 namespace Demos.Categories.Layout;
 
-sealed class PopNodeDemoWin : Win
+sealed class PopNodeDemo : Win
 {
-	public PopNodeDemoWin() : base(opt => opt.R = new R(-300, 50, 150, 200))
+	public PopNodeDemo() : base(opt => opt.R = new R(-300, 50, 150, 200))
 	{
 		var nodeRoot = new NodeState().D(D);
 		var nodeFill1 = new NodeState().D(D);
@@ -21,18 +21,18 @@ sealed class PopNodeDemoWin : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(nodeRoot, Vec.Fil, Strats.Stack(Dir.Vert, Align.Start)))
+			using (r.Flex(nodeRoot, Vec.Fil, Stack(Dir.Vert, Align.Start)))
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.BrushRoot);
-				using (r.Flex(nodeFill1, Vec.Fix(120, 75), Strats.Fill))
+				using (r.Flex(nodeFill1, Vec.Fix(120, 75), Fill))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill1);
 				}
-				using (r.Flex(nodePop, Vec.Fix(250, 50), Strats.Pop))
+				using (r.Flex(nodePop, Vec.Fix(250, 50), Pop))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushPop);
 				}
-				using (r.Flex(nodeFill2, Vec.Fix(80, 100), Strats.Fill))
+				using (r.Flex(nodeFill2, Vec.Fix(80, 100), Fill))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill2);
 				}

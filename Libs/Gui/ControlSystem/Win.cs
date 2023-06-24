@@ -1,4 +1,7 @@
-﻿using ControlSystem.Logic.PopupLogic;
+﻿using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using ControlSystem.Logic.PopupLogic;
 using ControlSystem.Logic.UserEventsLogic;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
@@ -30,7 +33,10 @@ namespace ControlSystem;
 public class Win : Ctrl, IWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
+	private readonly PopupMan popupMan;
+	private readonly ISubject<Unit> whenInvalidate;
 	private PartitionSet partitionSet = PartitionSet.Empty;
+	private IObservable<Unit> WhenInvalidate => whenInvalidate.AsObservable();
 
 	internal SpectorWinDrawState SpectorDrawState { get; }
 	internal IRoVar<R> ClientR => sysWin.ClientR;
@@ -42,17 +48,24 @@ public class Win : Ctrl, IWinUserEventsSupport
 	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => partitionSet.MainPartition.FindNodeAtMouseCoordinates(pt);
 
 	public override string ToString() => GetType().Name;
-	public void Invalidate() => sysWin.Invalidate();
+	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
+	private void InvalidateInternal()
+	{
+		sysWin.Invalidate();
+		popupMan.InvalidatePopups();
+	}
+	public nint Handle => sysWin.Handle;
 
 
 	public Win(Action<WinOpt>? optFun = null)
 	{
+		whenInvalidate = new Subject<Unit>().D(D);
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
 		Evt = UserEventGenerator.MakeForWin(sysWin);
 		SpectorDrawState = new SpectorWinDrawState().D(D);
-		var popupMan = new PopupMan(this, sysWin, SpectorDrawState).D(D);
+		popupMan = new PopupMan(this, sysWin, SpectorDrawState).D(D);
 		var eventDispatcher = new WinEventDispatcher().D(D);
 
 		var canSkipLayout = new TimedFlag();
@@ -60,13 +73,18 @@ public class Win : Ctrl, IWinUserEventsSupport
 		{
 			canSkipLayout.Set();
 			Invalidate();
-			popupMan.InvalidatePopups();
 		}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
 
 		//Evt.Subscribe(e => L($"[Win] - {e}")).D(D);
+
+		WhenInvalidate
+			.Subscribe(_ =>
+			{
+				InvalidateInternal();
+			}).D(D);
 
 		
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
@@ -113,6 +131,8 @@ file static class WinUtils
 				mixNode =>
 				{
 					if (mixNode is not CtrlNode { Ctrl: var ctrl }) return;
+					if (ctrl.D.IsDisposed)
+						throw new ObjectDisposedException(ctrl.GetType().Name, "Cannot render a disposed Ctrl");
 					ctrl.SignalRender(renderArgs);
 				},
 				() =>
@@ -218,6 +238,8 @@ file static class WinUtils
 				Y = opt.Pos?.Y ?? DEFAULT,
 				Width = opt.Size?.Width ?? DEFAULT,
 				Height = opt.Size?.Height ?? DEFAULT,
+				Styles = opt.Styles,
+				ExStyles = opt.ExStyles,
 			};
 		});
 		win.Init();

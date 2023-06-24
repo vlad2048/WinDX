@@ -88,7 +88,16 @@ sealed record PartitionSet(
 )
 {
 	public Partition MainPartition => Partitions[0];
+	
 	public Partition[] SubPartitions => Partitions.Skip(1).ToArray();
+
+	public Ctrl[] AllCtrls => (
+		from partition in Partitions
+		from ctrl in partition.CtrlSet
+		select ctrl
+	)
+		.Distinct()
+		.ToArray();
 
 	public static readonly PartitionSet Empty = new(
 		new [] { Partition.Empty },

@@ -2,6 +2,8 @@
 using System.Reactive.Subjects;
 using ControlSystem.Structs;
 using PowRxVar;
+using RenderLib.Renderers;
+using RenderLib.Structs;
 
 namespace ControlSystem;
 
@@ -50,3 +52,14 @@ public class Ctrl : IDisposable
 		whenRender = new Subject<RenderArgs>().D(D);
 	}
 }
+
+
+
+
+public static class IGfxExt
+{
+	public static void FillR(this IGfx gfx, BrushDef brush) => gfx.FillR(gfx.R, brush);
+	public static void DrawR(this IGfx gfx, PenDef pen) => gfx.DrawR(gfx.R, pen);
+}
+
+

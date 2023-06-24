@@ -10,8 +10,8 @@ namespace ControlSystem.Structs;
 
 public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 {
-	private readonly Disp d = new();
-	public void Dispose() => d.Dispose();
+	public Disp D { get; } = new();
+	public void Dispose() => D.Dispose();
 
 	private readonly ISubject<IUserEvt> whenEvt;
 
@@ -49,8 +49,8 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 
 	public NodeState()
 	{
-		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(d);
-		whenEvt = new Subject<IUserEvt>().D(d);
+		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(D);
+		whenEvt = new Subject<IUserEvt>().D(D);
 	}
 }
 
