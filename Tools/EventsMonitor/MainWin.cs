@@ -1,10 +1,6 @@
 using System.Reactive.Linq;
 using PowRxVar;
 using PowWinForms;
-using SysWinLib;
-using SysWinLib.Structs;
-using UserEvents.Generators;
-using WinAPI.User32;
 
 namespace EventsMonitor;
 
@@ -25,7 +21,6 @@ sealed partial class MainWin : Form
 					formEventDisplayer.Clear();
 					ctrlEventDisplayer1.Clear();
 					ctrlEventDisplayer2.Clear();
-					dxFormEventDisplayer.Clear();
 				}).D(d);
 
 
@@ -55,31 +50,11 @@ sealed partial class MainWin : Form
 
 			this.Events().KeyDown
 				.Where(e => e.KeyCode == Keys.T)
-				.Subscribe(_ =>
-				{
+				.Subscribe(_ => {
 					var yPrev = basicControl2.Top;
 					var yNext = yPrev == y1 ? y2 : y1;
 					basicControl2.Top = yNext;
 				}).D(d);
-
-
-			var win = MakeWindow().D(d);
-			win.Init();
-			var winEvt = UserEventGenerator.MakeForWin(win);
-			dxFormEventDisplayer.SetTrackedEvtSrc(winEvt);
 		});
 	}
-
-
-	private static SysWin MakeWindow() => new(opt => {
-		opt.CreateWindowParams = new CreateWindowParams {
-			Name = "Main Win",
-			Styles = WindowStyles.WS_OVERLAPPEDWINDOW | WindowStyles.WS_VISIBLE,
-			X = -300,
-			Y = 20,
-			Width = 256,
-			Height = 256,
-			ControlStyles = (uint)ControlStyles.OptimizedDoubleBuffer
-		};
-	});
 }

@@ -6,6 +6,6 @@ namespace UserEvents;
 
 public interface IWinUserEventsSupport
 {
-	IUIEvt Evt { get; }
+	IObservable<IUserEvt> Evt { get; }
 	Maybe<INodeStateUserEventsSupport> HitFun(Pt pt);
 }

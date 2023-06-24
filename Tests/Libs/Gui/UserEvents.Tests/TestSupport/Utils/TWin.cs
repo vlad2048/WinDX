@@ -12,10 +12,10 @@ sealed class TWin : IWin
 
 	// IWin
 	// ====
-	public IUIEvt Evt { get; }
+	public IObservable<IUserEvt> Evt { get; }
 	public Maybe<INode> HitFun(Pt pt) => Nodes.FirstOrMaybe(e => e.R.V.Contains(pt)).Select(e => (INode)e);
 
-	public TWin(IUIEvt evt)
+	public TWin(IObservable<IUserEvt> evt)
 	{
 		Evt = evt;
 	}

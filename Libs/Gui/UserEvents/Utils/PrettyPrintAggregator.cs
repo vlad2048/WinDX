@@ -22,7 +22,62 @@ public static class PrettyPrintAggregator
 
 	private static readonly TimeSpan Delay = TimeSpan.FromSeconds(1);
 
-	public static IObservable<IPrettyUserEvt> Transform(IUIEvt uiEvt) => Obs.Create<IPrettyUserEvt>(obs =>
+	public static IObservable<IPrettyUserEvt> Transform(IObservable<IUserEvt> uiEvt) => Obs.Create<IPrettyUserEvt>(obs =>
+	{
+		var d = new Disp();
+
+		var isInMouseMove = false;
+		var lastMsgTime = DateTime.MaxValue;
+		DateTime T() => DateTime.Now;
+
+		void CheckDelay()
+		{
+			var time = DateTime.Now;
+			var isDelay = time - lastMsgTime >= Delay;
+			lastMsgTime = time;
+			if (isDelay)
+			{
+				obs.OnNext(new DelayPrettyUserEvt(T()));
+				isInMouseMove = false;
+			}
+		}
+
+		var updateIdx = 0;
+		void OnUpdate() => updateIdx++;
+		void OnNonUpdate() => updateIdx = 0;
+
+		uiEvt.Where(e => e is not MouseMoveUserEvt).Subscribe(e =>
+		{
+			isInMouseMove = false;
+			CheckDelay();
+			OnNonUpdate();
+			obs.OnNext(new NormalPrettyUserEvt(T(), e));
+		}).D(d);
+
+		uiEvt.OfType<MouseMoveUserEvt>().Subscribe(e =>
+		{
+			CheckDelay();
+
+			if (!isInMouseMove)
+			{
+				OnNonUpdate();
+				obs.OnNext(new MouseMovePrettyUserEvt(T(), e));
+				isInMouseMove = true;
+			}
+			else
+			{
+				OnUpdate();
+				obs.OnNext(new MouseMoveUpdatePrettyUserEvt(T(), e, updateIdx));
+			}
+		}).D(d);
+
+		return d;
+	});
+
+
+
+
+	/*public static IObservable<IPrettyUserEvt> Transform(IUIEvt uiEvt) => Obs.Create<IPrettyUserEvt>(obs =>
 	{
 		var d = new Disp();
 
@@ -72,5 +127,5 @@ public static class PrettyPrintAggregator
 		}).D(d);
 
 		return d;
-	});
+	});*/
 }

@@ -28,7 +28,7 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 
 	// IWinUserEventsSupport
 	// =====================
-	public IUIEvt Evt { get; }
+	public IObservable<IUserEvt> Evt { get; }
 	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => subPartition.FindNodeAtMouseCoordinates(pt);
 
 

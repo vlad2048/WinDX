@@ -5,9 +5,10 @@ public static class TestLogger
 	public static void LArr<T>(IEnumerable<T> source, string title)
 	{
 		var arr = source.ToArray();
+		L("");
 		LTitle($"{title} (x{arr.Length})");
 		for (var i = 0; i < arr.Length; i++)
-			L($"  [{i}]: {arr[i]}");
+			L($"  {arr[i]}");
 		L("");
 	}
 

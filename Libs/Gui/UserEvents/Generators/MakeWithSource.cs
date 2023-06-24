@@ -6,7 +6,7 @@ namespace UserEvents.Generators;
 
 public static partial class UserEventGenerator
 {
-	public static (IRwVar<IUIEvt>, IUIEvt, IDisposable) MakeWithSource()
+	/*public static (IRwVar<IUIEvt>, IUIEvt, IDisposable) MakeWithSource()
 	{
 		var d = new Disp();
 		var evtSrc = Var.Make(MakeEmpty()).D(d);
@@ -20,5 +20,5 @@ public static partial class UserEventGenerator
 	private static IUIEvt MakeEmpty() => new UIEvt(
 		VarMay.MakeConst<nint>(),
 		Obs.Never<IUserEvt>()
-	);
+	);*/
 }

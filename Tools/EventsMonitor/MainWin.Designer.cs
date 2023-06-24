@@ -32,8 +32,6 @@ partial class MainWin
 		basicControl1 = new Controls.BasicControl();
 		ctrlEventDisplayer1 = new Controls.EventDisplayer();
 		label2 = new Label();
-		dxFormEventDisplayer = new Controls.DXEventDisplayer();
-		label3 = new Label();
 		ctrlEventDisplayer2 = new Controls.EventDisplayer();
 		basicControl2 = new Controls.BasicControl();
 		label4 = new Label();
@@ -80,23 +78,6 @@ partial class MainWin
 		label2.Text = "Ctrl";
 		label2.TextAlign = ContentAlignment.TopCenter;
 		// 
-		// dxFormEventDisplayer
-		// 
-		dxFormEventDisplayer.Location = new Point(12, 445);
-		dxFormEventDisplayer.Name = "dxFormEventDisplayer";
-		dxFormEventDisplayer.Size = new Size(250, 330);
-		dxFormEventDisplayer.TabIndex = 5;
-		// 
-		// label3
-		// 
-		label3.Font = new Font("Segoe UI", 15.75F, FontStyle.Bold, GraphicsUnit.Point);
-		label3.Location = new Point(12, 407);
-		label3.Name = "label3";
-		label3.Size = new Size(250, 35);
-		label3.TabIndex = 1;
-		label3.Text = "DX Form";
-		label3.TextAlign = ContentAlignment.TopCenter;
-		// 
 		// ctrlEventDisplayer2
 		// 
 		ctrlEventDisplayer2.Location = new Point(268, 445);
@@ -129,12 +110,10 @@ partial class MainWin
 		Controls.Add(ctrlEventDisplayer2);
 		Controls.Add(basicControl2);
 		Controls.Add(label4);
-		Controls.Add(dxFormEventDisplayer);
 		Controls.Add(ctrlEventDisplayer1);
 		Controls.Add(basicControl1);
 		Controls.Add(formEventDisplayer);
 		Controls.Add(label2);
-		Controls.Add(label3);
 		Controls.Add(label1);
 		KeyPreview = true;
 		Name = "MainWin";
@@ -148,8 +127,6 @@ partial class MainWin
 	private Controls.BasicControl basicControl1;
 	private Controls.EventDisplayer ctrlEventDisplayer1;
 	private Label label2;
-	private Controls.DXEventDisplayer dxFormEventDisplayer;
-	private Label label3;
 	private Controls.EventDisplayer ctrlEventDisplayer2;
 	private Controls.BasicControl basicControl2;
 	private Label label4;

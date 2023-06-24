@@ -38,7 +38,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 	// IWinUserEventsSupport
 	// =====================
-	public IUIEvt Evt { get; }
+	public IObservable<IUserEvt> Evt { get; }
 	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => partitionSet.MainPartition.FindNodeAtMouseCoordinates(pt);
 
 	public override string ToString() => GetType().Name;
@@ -66,7 +66,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
 
-		Evt.Evt.Subscribe(e => L($"[Win] - {e}")).D(D);
+		//Evt.Subscribe(e => L($"[Win] - {e}")).D(D);
 
 		
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>

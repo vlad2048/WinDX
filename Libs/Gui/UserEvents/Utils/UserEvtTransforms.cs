@@ -7,7 +7,9 @@ namespace UserEvents.Utils;
 
 public static class UserEvtTransforms
 {
-	internal static IUIEvt Map(
+	public static IObservable<IUserEvt> Translate(this IObservable<IUserEvt> obs, Func<Pt> ofsFun) => obs.Select(e => e.TranslateMouse(ofsFun()));
+
+	/*internal static IUIEvt Map(
 		this IUIEvt uiEvt,
 		Func<IObservable<IUserEvt>, IObservable<IUserEvt>> mapFun
 	)
@@ -33,5 +35,5 @@ public static class UserEvtTransforms
 		=> new UIEvt(
 			uiEvt.WinHandle,
 			uiEvt.Evt.MakeHot(d)
-		);
+		);*/
 }

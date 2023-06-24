@@ -1,4 +1,5 @@
-﻿using System.Reactive.Subjects;
+﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using PowBasics.Geom;
 using PowRxVar;
 using UserEvents;
@@ -12,7 +13,7 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
-	private readonly ISubject<>
+	private readonly ISubject<IUserEvt> whenEvt;
 
 	// ************
 	// * Internal *
@@ -21,15 +22,6 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	/// Source for R
 	/// </summary>
 	internal IRwVar<R> RSrc { get; }
-
-	/// <summary>
-	/// Source for Evt. <br/>
-	/// ● Assigned by the HitTesting logic. <br/>
-	/// ● It should be internal, but we can't as it's accessed from the UserEvents project through the INodeStateUserEventsSupport interface. <br/>
-	/// </summary>
-	//public IRwVar<IUIEvt> EvtSrc { get; }
-	public void DispatchEvt(IUserEvt evt);
-
 
 	// **********
 	// * Public *
@@ -45,13 +37,20 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	/// <summary>
 	/// Translated window events (+ generated MouseEnter/MouseLeave). <br/>
 	/// </summary>
-	public IUIEvt Evt { get; }
+	public IObservable<IUserEvt> Evt => whenEvt.AsObservable();
+
+	/// <summary>
+	/// Source for Evt. <br/>
+	/// ● Assigned by the HitTesting logic. <br/>
+	/// ● It should be internal, but we can't as it's accessed from the UserEvents project through the INodeStateUserEventsSupport interface. <br/>
+	/// </summary>
+	public void DispatchEvt(IUserEvt evt) => whenEvt.OnNext(evt);
 
 
 	public NodeState()
 	{
 		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(d);
-		//(EvtSrc, Evt) = UserEventGenerator.MakeWithSource().D(d);
+		whenEvt = new Subject<IUserEvt>().D(d);
 	}
 }
 

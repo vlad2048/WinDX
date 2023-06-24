@@ -30,10 +30,18 @@ public class ObservableChecker<T> : IDisposable
 		actArr = actArr.SelectToArray(evtDisplayFun);
 		expArr = expArr.SelectToArray(evtDisplayFun);
 
-		LArr(expArr, $"Expected {name} events");
-		LArr(actArr, $"Actual   {name} events");
+		var isSame = expArr.Length == actArr.Length && expArr.Zip(actArr).All(t => t.First!.Equals(t.Second));
+		if (isSame)
+		{
+			LArr(expArr, $"{name} events");
+		}
+		else
+		{
+			LArr(expArr, $"Expected {name} events");
+			LArr(actArr, $"Actual   {name} events");
+		}
 
-		CollectionAssert.AreEqual(expArr, list.ToArray());
+		CollectionAssert.AreEqual(expArr, actArr);
 
 		list.Clear();
 	}
