@@ -21,7 +21,7 @@ static partial class Setup
 
 		// TODO: understand why ToolStrip and StatusStrip buttons Click events take 2 clicks to fire
 		// (use MouseDown maybe)
-		ui.openFlexBuilderToolBtn.Events().Click.Subscribe(_ =>
+		ui.openFlexBuilderToolBtn.Events().MouseDown.Subscribe(_ =>
 		{
 			var layout = selLayout.V.Ensure();
 			var layoutDef = new LayoutDef(

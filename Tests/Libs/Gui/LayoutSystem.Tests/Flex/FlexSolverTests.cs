@@ -67,6 +67,24 @@ sealed class FlexSolverTests
 
 
 	[Test]
+	public void _04_StackElseFit() =>
+		M(Vec.Fil, null,
+				M(Vec.FitFil, Stack(Dir.Vert, Align.Middle),
+					M(Vec.Fix(110, 100)),
+					M(Vec.Fix(50, 60))
+				)
+			)
+			.Check(new Sz(150, 200),
+				A(0, 0, 150, 200,
+					A(0, 0, 110, 200,
+						A(0, 0, 110, 100),
+						A(30, 100, 50, 60)
+					)
+				)
+			);
+
+
+	[Test]
 	public void _10_StackWrap() =>
 		M(Vec.Fil, Stack(Dir.Vert, Align.Start),
 			M(Vec.FilFit, Wrap(Dir.Horz),

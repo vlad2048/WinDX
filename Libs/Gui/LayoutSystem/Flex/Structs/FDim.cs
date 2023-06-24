@@ -15,7 +15,7 @@ public enum DimType
 	/// <summary>
 	/// Ideal size:    Max <br/>
 	/// Required size: Min <br/>
-	/// Min &lt; Max &lt; ∞ <br/>
+	/// <![CDATA[  Min < Max < ∞  ]]> <br/>
 	/// </summary>
 	Flt,
 

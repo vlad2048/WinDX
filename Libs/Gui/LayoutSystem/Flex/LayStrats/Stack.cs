@@ -161,7 +161,8 @@ file static class StackUtils
 	public static (int p, int l)[] LayoutElse(int free, FDim[] dims, Align align)
 	{
 		var lngs = dims.Map(e => e.Max.Cap(0, free));
-		var lngMax = lngs.MaxT();
+		//var lngMax = lngs.MaxT();
+		var lngMax = free;
 		return align switch
 		{
 // @formatter:off

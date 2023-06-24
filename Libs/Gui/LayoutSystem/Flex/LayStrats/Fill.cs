@@ -18,16 +18,6 @@ public sealed class FillStrat : IStrat
 
 	public FillStrat(ISpec spec) => Spec = spec;
 
-	/*public override string ToString() => "Fill" + Spec switch
-	{
-		ScrollSpec {Enabled: (false, false)} => string.Empty,
-		ScrollSpec {Enabled: (truer, false)} => " (scroll X)",
-		ScrollSpec {Enabled: (false, truer)} => " (scroll Y)",
-		ScrollSpec {Enabled: (truer, truer)} => " (scroll X/Y)",
-		PopSpec => " (pop)",
-		_ => throw new ArgumentException()
-	};*/
-
 	public override string ToString()
 	{
 		static string b(bool v) => v switch
@@ -50,18 +40,6 @@ public sealed class FillStrat : IStrat
 		FDimVec[] kidDims
 	)
 	{
-		/*var sz = GeomMaker.SzDirFun(
-			dir => freeSz.Dir(dir).HasValue switch
-			{
-				truer => freeSz.Dir(dir)!.Value,
-				false => kidDims.Any() switch
-				{
-					truer => kidDims.Max(e => e.Dir(dir).Max.EnsureNotInf()),
-					false => 0,
-				}
-			}
-		);*/
-
 		var sz = GeomMaker.SzDirFun(dir =>
 			{
 				var d = node.V.Dim.Dir(dir);
