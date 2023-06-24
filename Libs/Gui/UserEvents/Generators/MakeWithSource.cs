@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using PowMaybe;
 using PowRxVar;
 using UserEvents.Structs;
 
@@ -12,14 +11,14 @@ public static partial class UserEventGenerator
 		var d = new Disp();
 		var evtSrc = Var.Make(MakeEmpty()).D(d);
 		var evt = new UIEvt(
-			evtSrc.SwitchVar(e => e.WinHandle),
+			evtSrc.SwitchMayVar(e => e.WinHandle),
 			evtSrc.Select(e => e.Evt).Switch()
 		);
 		return (evtSrc, evt, d);
 	}
 
 	private static IUIEvt MakeEmpty() => new UIEvt(
-		Var.MakeConst(May.None<nint>()),
+		VarMay.MakeConst<nint>(),
 		Obs.Never<IUserEvt>()
 	);
 }

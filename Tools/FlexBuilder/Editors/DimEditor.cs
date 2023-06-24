@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using FlexBuilder.Utils.Exts;
 using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
-using PowMaybe;
 using PowRxVar;
 using PowWinForms;
 
@@ -24,15 +22,15 @@ sealed partial class DimEditor : UserControl
 	}
 
 
-	public IRwBndVar<Maybe<Dim>> Value { get; }
+	public IRwMayBndVar<Dim> Value { get; }
 
 
 	public DimEditor()
 	{
 		InitializeComponent();
 
-		var rxVar = Var.MakeBnd(May.None<Dim>()).D(this);
-		Value = rxVar.ToRwBndVar();
+		var rxVar = VarMay.MakeBnd<Dim>().D(this);
+		Value = rxVar.ToRwMayBndVar();
 
 		this.InitRX(d =>
 		{

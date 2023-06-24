@@ -7,5 +7,6 @@ namespace UserEvents;
 public interface INodeStateUserEventsSupport
 {
 	IRoVar<R> R { get; }
-	IRwVar<IUIEvt> EvtSrc { get; }
+	// IRwVar<IUIEvt> EvtSrc { get; }
+	void DispatchEvt(IUserEvt evt);
 }

@@ -124,7 +124,7 @@ static partial class Setup
 		return d;
 	}
 
-	private static void HookWinSizeBothWaysAndPersistPos(IRoVar<Maybe<Layout>> layout, UserPrefs userPrefs, Action<FreeSz> winSzMutator, SysWin win)
+	private static void HookWinSizeBothWaysAndPersistPos(IRoMayVar<Layout> layout, UserPrefs userPrefs, Action<FreeSz> winSzMutator, SysWin win)
 	{
 		win.ClientR
 			.Subscribe(r => { winSzMutator(FreeSzMaker.FromSz(r.Size)); }).D(win.D);
@@ -157,10 +157,10 @@ static partial class Setup
 
 
 	private static void PaintWindow(SysWin win,
-		IRoVar<Maybe<Layout>> layout,
+		IRoMayVar<Layout> layout,
 		IRenderWinCtx renderWinCtx,
-		IRoVar<Maybe<Node>> selNode,
-		IRoVar<Maybe<Node>> hoveredNode
+		IRoMayVar<Node> selNode,
+		IRoMayVar<Node> hoveredNode
 	)
 	{
 		win.WhenMsg
@@ -189,7 +189,7 @@ static partial class Setup
 
 
 
-	private static void DrawOnWin(IGfx gfx, Layout lay, IRoVar<Maybe<Node>> maySelNode, IRoVar<Maybe<Node>> mayHovNode)
+	private static void DrawOnWin(IGfx gfx, Layout lay, IRoMayVar<Node> maySelNode, IRoMayVar<Node> mayHovNode)
 	{
 		PaintConsts.PaletteStart();
 

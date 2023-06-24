@@ -1,10 +1,11 @@
-﻿using ControlSystem.Structs;
-using ControlSystem.Utils;
+﻿using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using PowBasics.CollectionsExt;
 using PowRxVar;
 using SysWinLib;
-using IWin = ControlSystem.IWinUserEventsSupport;
+using UserEvents;
+using IWin = UserEvents.IWinUserEventsSupport;
+using INode = UserEvents.INodeStateUserEventsSupport;
 
 namespace ControlSystem.Logic.PopupLogic;
 
@@ -23,19 +24,19 @@ sealed class PopupMan : IDisposable
 	private readonly IWin parentWin;
 	private readonly SysWin parentSysWin;
 	private readonly SpectorWinDrawState spectorDrawState;
-	private readonly Dictionary<NodeState, PopupWin> map;
+	private readonly Dictionary<INode, PopupWin> map;
 
 	public PopupMan(IWin parentWin, SysWin parentSysWin, SpectorWinDrawState spectorDrawState)
 	{
 		this.parentWin = parentWin;
 		this.parentSysWin = parentSysWin;
 		this.spectorDrawState = spectorDrawState;
-		map = new Dictionary<NodeState, PopupWin>().D(d);
+		map = new Dictionary<INode, PopupWin>().D(d);
 	}
 
 	public void InvalidatePopups() => map.Values.ForEach(e => e.Invalidate());
 
-	public IWin GetWin(NodeState? nodeState) => nodeState switch
+	public IWinUserEventsSupport GetWin(INode? nodeState) => nodeState switch
 	{
 		null => parentWin,
 		not null => map[nodeState]
@@ -70,44 +71,6 @@ sealed class PopupMan : IDisposable
 
 		return partitionSet;
 	}
-
-	/*public BoundPartition[] ShowSubPartitions(
-		SubPartition[] subPartitions,
-		IReadOnlyDictionary<int, int?> parentMapping
-	)
-	{
-		var boundSubPartitions = new List<BoundPartition>();
-
-		var handles = new List<nint>();
-		for (var layoutIdx = 0; layoutIdx < subPartitions.Length; layoutIdx++)
-		{
-			var subPartition = subPartitions[layoutIdx];
-			if (!map.TryGetValue(subPartition.Id, out var popupWin))
-			{
-				var parentIdx = parentMapping[layoutIdx];
-				var winParentHandle = parentIdx switch
-				{
-					null => parentWin.Handle,
-					not null => handles[parentIdx.Value]
-				};
-				popupWin = map[subPartition.Id] = new PopupWin(
-					subPartition,
-					parentWin,
-					winParentHandle,
-					spectorDrawState
-				);
-			}
-			else
-			{
-				popupWin.Invalidate();
-			}
-
-			handles.Add(popupWin.Handle);
-			boundSubPartitions.Add(new BoundPartition(subPartition, popupWin));
-		}
-
-		return boundSubPartitions.ToArray();
-	}*/
 }
 
 

@@ -11,19 +11,17 @@ sealed partial class EventDisplayer : UserControl
 	private const int MAX_ITEMS = 256;
 
 	private readonly IRwVar<bool> isEmpty;
-	private readonly IRwVar<Maybe<Control>> trackedCtrl;
+	private readonly IRwMayVar<Control> trackedCtrl;
 
 	public EventDisplayer()
 	{
 		InitializeComponent();
 
-		isEmpty = Var.Make(true);
-		trackedCtrl = Var.Make(May.None<Control>());
+		isEmpty = Var.Make(true).D(this);
+		trackedCtrl = VarMay.Make<Control>().D(this);
 
 		this.InitRX(d =>
 		{
-			isEmpty.D(d);
-			trackedCtrl.D(d);
 			var isPaused = Var.Make(false).D(d);
 
 			isPaused.Subscribe(paused => pauseBtn.Text = paused ? "Resume" : "Pause").D(d);

@@ -1,6 +1,4 @@
-﻿using ControlSystem.Logic.UserEventsLogic;
-using ControlSystem.Structs;
-using ControlSystem.Utils;
+﻿using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Utils;
 using PowBasics.CollectionsExt;
@@ -10,6 +8,7 @@ using PowRxVar;
 using RenderLib;
 using SysWinLib;
 using SysWinLib.Structs;
+using UserEvents;
 using UserEvents.Generators;
 using UserEvents.Structs;
 using UserEvents.Utils;
@@ -30,7 +29,7 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 	// IWinUserEventsSupport
 	// =====================
 	public IUIEvt Evt { get; }
-	public Maybe<NodeState> HitFun(Pt pt) => subPartition.FindNodeAtMouseCoordinates(pt);
+	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => subPartition.FindNodeAtMouseCoordinates(pt);
 
 
 	public PopupWin(
@@ -80,8 +79,6 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 
 file static class PopupWinUtils
 {
-	//private const int DEFAULT = (int)CreateWindowFlags.CW_USEDEFAULT;
-
 	public static SysWin MakeWin(R layoutR, SysWin parentWin, nint winParentHandle)
 	{
 		var win = new SysWin(e =>

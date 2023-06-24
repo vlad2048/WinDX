@@ -12,7 +12,7 @@ namespace UserEvents.Converters;
 
 public static class UserEventConverter
 {
-	/*public static IDisposable MakeForNodes<N>(
+	public static IDisposable MakeForNodes<N>(
 		IUIEvt winEvt,
 		IObservable<IChangeSet<N>> nodes,
 		Func<Pt, Maybe<N>> hitFun
@@ -23,9 +23,25 @@ public static class UserEventConverter
 
 		var nodesList = nodes.AsObservableList().D(d);
 
+		var hovNode = VarMay.Make<N>().D(d);
+		var mouse = new Pt(-int.MaxValue, -int.MaxValue);
+
+		void CheckEnterLeave()
+		{
+			var hovNodeNext = hitFun(mouse);
+			var isHovPrev = hovNode.V.IsSome(out var hovPrev);
+			var isHovNext = hovNodeNext.IsSome(out var hovNext);
+			switch (isHovPrev, isHovNext)
+			{
+				case (false, true):
+					hovNext.EvtSrc.
+					break;
+			}
+		}
+
 
 		return d;
-	}*/
+	}
 
 
 	//private static IObservable<N>
@@ -38,7 +54,7 @@ public static class UserEventConverter
 
 
 
-	public static IDisposable MakeForNodes<N>(
+	public static IDisposable MakeForNodes_Old<N>(
 		IUIEvt winEvt,
 		IObservable<IChangeSet<N>> nodes,
 		Func<Pt, Maybe<N>> hitFun

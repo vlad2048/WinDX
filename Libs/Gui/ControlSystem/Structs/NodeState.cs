@@ -1,4 +1,5 @@
-﻿using PowBasics.Geom;
+﻿using System.Reactive.Subjects;
+using PowBasics.Geom;
 using PowRxVar;
 using UserEvents;
 using UserEvents.Generators;
@@ -11,6 +12,7 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
+	private readonly ISubject<>
 
 	// ************
 	// * Internal *
@@ -25,7 +27,8 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	/// ● Assigned by the HitTesting logic. <br/>
 	/// ● It should be internal, but we can't as it's accessed from the UserEvents project through the INodeStateUserEventsSupport interface. <br/>
 	/// </summary>
-	public IRwVar<IUIEvt> EvtSrc { get; }
+	//public IRwVar<IUIEvt> EvtSrc { get; }
+	public void DispatchEvt(IUserEvt evt);
 
 
 	// **********
@@ -48,7 +51,7 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	public NodeState()
 	{
 		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(d);
-		(EvtSrc, Evt) = UserEventGenerator.MakeWithSource().D(d);
+		//(EvtSrc, Evt) = UserEventGenerator.MakeWithSource().D(d);
 	}
 }
 

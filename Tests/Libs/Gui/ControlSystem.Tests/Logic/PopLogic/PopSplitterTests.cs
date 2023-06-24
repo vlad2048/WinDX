@@ -8,7 +8,6 @@ using PowRxVar;
 using PowTrees.Algorithms;
 using Shouldly;
 using TestBase;
-using static TestBase.TreeLogger;
 #pragma warning disable CS8618
 
 namespace ControlSystem.Tests.Logic.PopLogic;

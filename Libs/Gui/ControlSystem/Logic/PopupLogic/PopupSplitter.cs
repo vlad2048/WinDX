@@ -7,6 +7,7 @@ using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
+using UserEvents;
 
 namespace ControlSystem.Logic.PopupLogic;
 
@@ -50,10 +51,11 @@ record Partition(
 		)
 		.ToArray();
 
-	public Maybe<NodeState> FindNodeAtMouseCoordinates(Pt pt) =>
+	public Maybe<INodeStateUserEventsSupport> FindNodeAtMouseCoordinates(Pt pt) =>
 		AllNodeStates
 			.Where(state => RMap[state].Contains(pt))
 			.Reverse()
+			.OfType<INodeStateUserEventsSupport>()
 			.FirstOrMaybe();
 
 

@@ -14,11 +14,6 @@ static class AddDelExts
 		);
 	}
 
-	public static (T[] adds, T[] dels) GetAddDels<T>(this IObservableList<T> list, T[] arr) => (
-		arr.WhereNotToArray(list.Items.Contains),
-		arr.WhereToArray(list.Items.Contains)
-	);
-
 	public static (K[] adds, K[] dels) GetAddDels<K, V>(this IObservableCache<V, K> cache, K[] arr) where K : notnull => (
 		arr.WhereToArray(e => !cache.Lookup(e).HasValue),
 		cache.Keys.WhereNotToArray(arr.Contains)

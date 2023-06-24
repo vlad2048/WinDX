@@ -16,7 +16,7 @@ public static class TreeChecker
 		expTree.LogTree("Expected");
 		var areSame = actTree.IsEqual(expTree);
 		areSame.ShouldBeTrue("Wrong tree");
-		TreeLogger.L("Trees match ✅");
+		L("Trees match ✅");
 	}
 }
 
@@ -28,20 +28,4 @@ public static class TreeLogger
 		L(root.LogToString());
 		L("");
 	}
-
-	public static void L(string s) => Console.WriteLine(s);
-
-	public static void LTitle(string s)
-	{
-		var pad = new string('=', s.Length);
-		L(s);
-		L(pad);
-	}
-
-	/*public static void LTitleSmall(string s)
-	{
-		var pad = new string('-', s.Length);
-		L(s);
-		L(pad);
-	}*/
 }

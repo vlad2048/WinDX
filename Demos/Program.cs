@@ -17,7 +17,7 @@ class Program
 	{
 		//VarDbg.BreakpointOnDispAlloc(21);
 
-		using (var d = new Disp())
+		/*using (var d = new Disp())
 		{
 			var userPrefs = new UserPrefs().Track();
 			Setup.InitConsole(userPrefs).D(d);
@@ -38,10 +38,10 @@ class Program
 				new DemoNfo("PopNodeComplex", Wrap(() => new PopNodeComplexDemoWin())),
 				new DemoNfo("UserEvents", Wrap(() => new UserEventsDemoWin()))
 			);
-		}
+		}*/
 
 		
-		//using (new PopNodeComplexDemoWin()) App.Run();
+		using (new UserEventsDemoWin()) App.Run();
 
 
 		VarDbg.CheckForUndisposedDisps(true);

@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using PowMaybe;
 using PowRxVar;
 using SysWinInterfaces;
 using UserEvents.Structs;
@@ -15,8 +14,9 @@ public static partial class UserEventGenerator
 	public static IUIEvt MakeForWin(ISysWinUserEventsSupport win)
 	{
 		var isOver = false;
+
 		return new UIEvt(
-			Var.MakeConst(May.Some(win.Handle)),
+			VarMay.MakeConst(win.Handle),
 
 			Obs.Merge<IUserEvt>(
 				win.WhenMsg.WhenLBUTTONDOWN	().Select(e => new MouseButtonDownUserEvt	(e.Point.ToPt(), MouseBtn.Left		)),

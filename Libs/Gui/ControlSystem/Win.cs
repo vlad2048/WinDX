@@ -18,19 +18,13 @@ using SysWinLib;
 using SysWinLib.Structs;
 using TreePusherLib;
 using TreePusherLib.ConvertExts;
+using UserEvents;
 using UserEvents.Generators;
 using UserEvents.Structs;
 using WinAPI.User32;
 using WinAPI.Windows;
 
 namespace ControlSystem;
-
-
-public interface IWinUserEventsSupport
-{
-	IUIEvt Evt { get; }
-	Maybe<NodeState> HitFun(Pt pt);
-}
 
 
 public class Win : Ctrl, IWinUserEventsSupport
@@ -45,7 +39,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 	// IWinUserEventsSupport
 	// =====================
 	public IUIEvt Evt { get; }
-	public Maybe<NodeState> HitFun(Pt pt) => partitionSet.MainPartition.FindNodeAtMouseCoordinates(pt);
+	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => partitionSet.MainPartition.FindNodeAtMouseCoordinates(pt);
 
 	public override string ToString() => GetType().Name;
 	public void Invalidate() => sysWin.Invalidate();
@@ -59,7 +53,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 		Evt = UserEventGenerator.MakeForWin(sysWin);
 		SpectorDrawState = new SpectorWinDrawState().D(D);
 		var popupMan = new PopupMan(this, sysWin, SpectorDrawState).D(D);
-		var eventDispatcher = new EventDispatcher().D(D);
+		var eventDispatcher = new WinEventDispatcher().D(D);
 
 		var canSkipLayout = new TimedFlag();
 		SpectorDrawState.WhenChanged.Subscribe(_ =>
@@ -71,6 +65,8 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		G.WinMan.AddWin(this);
+
+		Evt.Evt.Subscribe(e => L($"[Win] - {e}")).D(D);
 
 		
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>

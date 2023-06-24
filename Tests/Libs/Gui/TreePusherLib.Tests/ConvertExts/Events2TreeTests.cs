@@ -153,9 +153,9 @@ file static class ShouldExts
 	{
 		var actRoot = reconstructredTree.Root;
 		var actIncomplete = reconstructredTree.IncompleteNodes.SelectToArray(e => (e.ParentNod.V, e.ChildNode));
-		TreeLogger.L($"Actual   incomplete nodes: [{actIncomplete.JoinText("; ")}]");
-		TreeLogger.L($"Expected incomplete nodes: [{expIncomplete.JoinText("; ")}]");
-		TreeLogger.L("");
+		L($"Actual   incomplete nodes: [{actIncomplete.JoinText("; ")}]");
+		L($"Expected incomplete nodes: [{expIncomplete.JoinText("; ")}]");
+		L("");
 		actRoot.ShouldBeSameTree(expRoot);
 
 		CollectionAssert.AreEqual(expIncomplete, actIncomplete);

@@ -13,7 +13,7 @@ static class RxUIExts
 
 	
 	public static IDisposable EditInner<T>(
-		this IFullRwBndVar<Maybe<T>> mayVar,
+		this IFullRwMayBndVar<T> mayVar,
 		Action<bool> enableUI,
 		Action<T> setUI,
 		IObservable<Func<T, T>> UI2Val
@@ -41,7 +41,7 @@ static class RxUIExts
 
 
 	public static IDisposable EditInner<T>(
-		this IFullRwBndVar<Maybe<T>> mayVar,
+		this IFullRwMayBndVar<T> mayVar,
 		Action<bool> enableUI,
 		Action<T> setUI,
 		IObservable<T> UI2Val
