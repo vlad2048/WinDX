@@ -33,7 +33,6 @@ namespace ControlSystem;
 public class Win : Ctrl, IWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
-	private readonly PopupMan popupMan;
 	private readonly ISubject<Unit> whenInvalidate;
 	private PartitionSet partitionSet = PartitionSet.Empty;
 	private IObservable<Unit> WhenInvalidate => whenInvalidate.AsObservable();
@@ -49,11 +48,6 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 	public override string ToString() => GetType().Name;
 	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
-	private void InvalidateInternal()
-	{
-		sysWin.Invalidate();
-		popupMan.InvalidatePopups();
-	}
 	public nint Handle => sysWin.Handle;
 
 
@@ -65,7 +59,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 		this.D(sysWin.D);
 		Evt = UserEventGenerator.MakeForWin(sysWin);
 		SpectorDrawState = new SpectorWinDrawState().D(D);
-		popupMan = new PopupMan(this, sysWin, SpectorDrawState).D(D);
+		var popupMan = new PopupMan(this, sysWin, SpectorDrawState).D(D);
 		var eventDispatcher = new WinEventDispatcher().D(D);
 
 		var canSkipLayout = new TimedFlag();
@@ -83,7 +77,8 @@ public class Win : Ctrl, IWinUserEventsSupport
 		WhenInvalidate
 			.Subscribe(_ =>
 			{
-				InvalidateInternal();
+				sysWin.Invalidate();
+				popupMan.InvalidatePopups();
 			}).D(D);
 
 		
