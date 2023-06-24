@@ -28,7 +28,7 @@ static partial class Setup
 	public static IDisposable DisplayLayout(
 		MainWin ui,
 		IRwMayVar<LayoutDef> layoutDefForRedraw,
-		IRoMayVar<Layout> layout,
+		IRoMayVar<FlexLayout> layout,
 		UserPrefs userPrefs,
 		IRoMayVar<Node> selNode,
 		IRoMayVar<Node> hoveredNode,
@@ -124,7 +124,7 @@ static partial class Setup
 		return d;
 	}
 
-	private static void HookWinSizeBothWaysAndPersistPos(IRoMayVar<Layout> layout, UserPrefs userPrefs, Action<FreeSz> winSzMutator, SysWin win)
+	private static void HookWinSizeBothWaysAndPersistPos(IRoMayVar<FlexLayout> layout, UserPrefs userPrefs, Action<FreeSz> winSzMutator, SysWin win)
 	{
 		win.ClientR
 			.Subscribe(r => { winSzMutator(FreeSzMaker.FromSz(r.Size)); }).D(win.D);
@@ -157,7 +157,7 @@ static partial class Setup
 
 
 	private static void PaintWindow(SysWin win,
-		IRoMayVar<Layout> layout,
+		IRoMayVar<FlexLayout> layout,
 		IRenderWinCtx renderWinCtx,
 		IRoMayVar<Node> selNode,
 		IRoMayVar<Node> hoveredNode
@@ -189,7 +189,7 @@ static partial class Setup
 
 
 
-	private static void DrawOnWin(IGfx gfx, Layout lay, IRoMayVar<Node> maySelNode, IRoMayVar<Node> mayHovNode)
+	private static void DrawOnWin(IGfx gfx, FlexLayout lay, IRoMayVar<Node> maySelNode, IRoMayVar<Node> mayHovNode)
 	{
 		PaintConsts.PaletteStart();
 

@@ -15,7 +15,7 @@ static partial class Setup
 {
 	public static void DetailsTreeInit(
 		MainWin ui,
-		IRoMayVar<Layout> layout
+		IRoMayVar<FlexLayout> layout
 	)
 	{
 		var ctrl = ui.detailsTree;
@@ -25,7 +25,7 @@ static partial class Setup
 
 	public static IDisposable DetailsTreeHook(
 		MainWin ui,
-		IRoMayVar<Layout> layout,
+		IRoMayVar<FlexLayout> layout,
 		IRwMayVar<Node> selNode,
 		IRwMayVar<Node> hovNode
 	)
@@ -51,7 +51,7 @@ static partial class Setup
 		return d;
 	}
 
-	private static void SetupDetailsColumns(TreeListView ctrl, IRoMayVar<Layout> layout)
+	private static void SetupDetailsColumns(TreeListView ctrl, IRoMayVar<FlexLayout> layout)
 	{
 		ctrl.AddTextColumn<FlexNode>(ColumnName.Node, null, nod => $"{nod.V.Strat}");
 		ctrl.AddTextColumn<FlexNode>(ColumnName.Width, 80, nod => nod.V.Dim.X.Fmt());

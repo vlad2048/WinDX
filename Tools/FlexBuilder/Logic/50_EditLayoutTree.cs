@@ -20,7 +20,7 @@ static partial class Setup
 {
 	public static void EditTreeInit(
 		MainWin ui,
-		IRoMayVar<Layout> layout
+		IRoMayVar<FlexLayout> layout
 	)
 	{
 		var ctrl = ui.layoutTree;
@@ -33,7 +33,7 @@ static partial class Setup
 	public static IDisposable EditTreeHook(
 		MainWin ui,
 		IFullRwMayBndVar<LayoutDef> layoutDef,
-		IRoMayVar<Layout> layout,
+		IRoMayVar<FlexLayout> layout,
 		IRwMayVar<Node> selNode,
 		IRwMayVar<Node> hovNode
 	)
@@ -204,7 +204,7 @@ static partial class Setup
 
 	private static void SetupEditColumns(
 	    TreeListView ctrl,
-	    IRoMayVar<Layout> layout
+	    IRoMayVar<FlexLayout> layout
 	   )
     {
 	    var warningIcon = Resource.LayoutTree_Warning;
@@ -285,7 +285,7 @@ static partial class Setup
 	    return warn;
     }
 
-    private static FlexWarning? GetDimWarningForColumn(this IRoMayVar<Layout> layout, Node nod, WarningDir colDir) =>
+    private static FlexWarning? GetDimWarningForColumn(this IRoMayVar<FlexLayout> layout, Node nod, WarningDir colDir) =>
 	    layout.V.IsSome(out var lay) switch
 	    {
 		    true => lay.WarningMap.GetDimWarningForColumn(nod, colDir),

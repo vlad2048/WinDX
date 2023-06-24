@@ -61,7 +61,7 @@ sealed partial class MainWin : Form
 		});
 	}
 
-	private static Layout ComputeLayout(LayoutDef def) => FlexSolver.Solve(def.Root, def.WinSize);
+	private static FlexLayout ComputeLayout(LayoutDef def) => FlexSolver.Solve(def.Root, def.WinSize);
 
 	private static Action<FreeSz> WinSzMutator(IRwMayVar<LayoutDef> layoutDef) => freeSz => {
 		if (layoutDef.V.IsNone(out var def)) return;

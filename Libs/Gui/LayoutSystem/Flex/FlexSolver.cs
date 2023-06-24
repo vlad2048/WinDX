@@ -11,20 +11,17 @@ namespace LayoutSystem.Flex;
 
 public static class FlexSolver
 {
-	public static Layout Solve(
+	public static FlexLayout Solve(
 		Node root,
 		FreeSz freeSz
 	)
 	{
 		var (rootFixed, warnings) = root.RespectRules(freeSz);
 
-		rootFixed = rootFixed
-			.AddMargins()
-			//.SetPopNodesSizeToZero()
-			;
+		rootFixed = rootFixed.AddMargins();
 
 		var (rMap, detailsMap) = ComputeLayout(rootFixed, freeSz);
-		return new Layout(
+		return new FlexLayout(
 			root,
 			freeSz,
 			rMap.Remap(root),
