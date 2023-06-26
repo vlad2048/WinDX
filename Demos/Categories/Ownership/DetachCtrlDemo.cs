@@ -165,7 +165,7 @@ sealed class DetachCtrlDemo : Win
 			var c2 = new NormalCtrlChild().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(F(nRoot).Dim(200, 250).StratStack(Dir.Vert).Marg(5)))
+				using (r.Flex(F(nRoot).Dim(200, 250).StratStack(Dir.Vert, Align.Middle).Marg(5)))
 				{
 					r.Gfx.FillR(C.BrushNormalCtrlRoot);
 					using (r.Ctrl(c1)) { }
