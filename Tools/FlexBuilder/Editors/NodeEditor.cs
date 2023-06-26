@@ -77,7 +77,7 @@ sealed partial class NodeEditor : UserControl
 		flagsScrollYCheckBox.Checked = node.Flags.Scroll.Y;
 
 		switch (node.Strat) {
-			case FillStrat s:
+			case FillStrat:
 				stratCombo.SelectedIndex = 0;
 				(stratDirCombo.Visible, stratAlignCombo.Visible) = (false, false);
 				break;

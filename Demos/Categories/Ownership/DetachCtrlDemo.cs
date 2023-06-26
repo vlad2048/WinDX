@@ -181,7 +181,7 @@ sealed class DetachCtrlDemo : Win
 			var nRoot = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(F(nRoot).Dim(80, 30).Marg(20, 0)))
+				using (r.Flex(F(nRoot).Dim(80, 30).Marg(0, 20)))
 				{
 					r.Gfx.FillR(C.BrushNormalCtrlChild);
 				}
