@@ -39,7 +39,7 @@ sealed class SimpleWin : Win
 				using (r[nodeFit].DimFit().Marg(30).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.WinBrush2);
-					using (r.Ctrl(c1))
+					using (r[c1])
 					{
 					}
 				}
@@ -64,7 +64,7 @@ sealed class C1Ctrl : Ctrl
 				using (r[nodeFil].DimFit().Marg(20).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C1Brush2);
-					using (r.Ctrl(c2))
+					using (r[c2])
 					{
 					}
 				}
@@ -89,7 +89,7 @@ sealed class C2Ctrl : Ctrl
 				r[nodeFil].DimFit().Marg(10);
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C2Brush2);
-					using (r.Ctrl(c3))
+					using (r[c3])
 					{
 					}
 				}

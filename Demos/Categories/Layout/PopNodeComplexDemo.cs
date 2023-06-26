@@ -34,7 +34,7 @@ sealed class PopNodeComplexDemo : Win
 				using (r[n2].StratStack(Dir.Vert).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN2);
-					using (r.Ctrl(c1)) { }
+					using (r[c1]) { }
 
 					using (r[p1].Dim(250, 150).Pop().M)
 					{
@@ -55,7 +55,7 @@ sealed class PopNodeComplexDemo : Win
 								}
 							}
 
-							using (r.Ctrl(c2)) { }
+							using (r[c2]) { }
 						}
 					}
 				}
@@ -89,7 +89,7 @@ sealed class PopNodeComplexDemo : Win
 				using (r[p3].Dim(190, 340).Pop().M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushP3);
-					using (r.Ctrl(c3)) { }
+					using (r[c3]) { }
 				}
 			}).D(D);
 		}

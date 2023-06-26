@@ -35,7 +35,7 @@ static class RenderUtils
             },
             () =>
             {
-                using (renderArgs.Ctrl(partition.RootCtrl)) { }
+                using (renderArgs[partition.RootCtrl]) { }
             }
         );
     }

@@ -132,7 +132,7 @@ file static class WinUtils
 				},
 				() =>
 				{
-					using (renderArgs.Ctrl(rootCtrl)) { }
+					using (renderArgs[rootCtrl]) { }
 				}
 			);
 	}

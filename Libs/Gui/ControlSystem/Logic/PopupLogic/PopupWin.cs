@@ -39,9 +39,8 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 		SpectorWinDrawState spectorDrawState
 	)
 	{
-		this.subPartition = subPartition;
-		(subPartitionRebased, var layR) = subPartition.SplitOffset();
-		layoutR = Var.Make(layR).D(D);
+		layoutR = Var.Make(R.Empty).D(D);
+		(this.subPartition, subPartitionRebased) = SetLayout(subPartition);
 		sysWin = PopupWinUtils.MakeWin(layoutR.V, parentWin, winParentHandle).D(D);
 		this.D(sysWin.D);
 		Evt = UserEventGenerator.MakeForWin(sysWin).Translate(() => layoutR.V.Pos);
@@ -67,10 +66,11 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 		}).D(D);
 	}
 
-	public void SetLayout(Partition subPartition_)
+	public (Partition, Partition) SetLayout(Partition subPartition_)
 	{
 		subPartition = subPartition_;
 		(subPartitionRebased, layoutR.V) = subPartition_.SplitOffset();
+		return (subPartition, subPartitionRebased);
 	}
 
 	public void Invalidate() => sysWin.Invalidate();
