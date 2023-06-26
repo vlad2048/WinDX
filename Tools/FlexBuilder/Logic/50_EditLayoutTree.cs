@@ -4,10 +4,8 @@ using FlexBuilder.Editors;
 using FlexBuilder.Utils;
 using FlexBuilder.Utils.Exts;
 using LayoutSystem.Flex;
-using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.StructsShared;
-using LayoutSystem.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
@@ -120,23 +118,23 @@ static partial class Setup
 		{
 			var mayNode = selNode.V;
 			if (mayNode.IsNone(out var node)) return;
-			var r0 = DimEditor.rnd.Next(30, 160);
-			var r1 = DimEditor.rnd.Next(30, 160);
-			AddNode(node, new FlexNode(Vec.Fix(r0, r1), new FillStrat(new ScrollSpec(BoolVec.False)), Mg.Zero));
+			var r0 = DimEditor.rnd.Next(3, 16) * 10;
+			var r1 = DimEditor.rnd.Next(3, 16) * 10;
+			AddNode(node, new FlexNodeFluent().Dim(r0, r1).Build());
 		}).D(d);
 
 		ui.addStackMenuItem.Events().Click.Subscribe(_ =>
 		{
 			var mayNode = selNode.V;
 			if (mayNode.IsNone(out var node)) return;
-			AddNode(node, new FlexNode(Vec.FilFit, new StackStrat(Dir.Horz, Align.Start), Mg.Zero));
+			AddNode(node, new FlexNodeFluent().DimFilFit().StratStack(Dir.Horz).Build());
 		}).D(d);
 
 		ui.addWrapMenuItem.Events().Click.Subscribe(_ =>
 		{
 			var mayNode = selNode.V;
 			if (mayNode.IsNone(out var node)) return;
-			AddNode(node, new FlexNode(Vec.FilFit, new WrapStrat(Dir.Horz), Mg.Zero));
+			AddNode(node, new FlexNodeFluent().DimFilFit().StratWrap(Dir.Horz).Build());
 		}).D(d);
 
 		ui.removeNodeMenuItem.Events().Click.ToUnit().Merge(

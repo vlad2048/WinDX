@@ -90,7 +90,7 @@ sealed class DetachCtrlDemo : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(nRoot, Vec.Fil, Stack(Dir.Horz, Align.Start)))
+			using (r.Flex(F(nRoot).StratStack(Dir.Horz)))
 			{
 				r.Gfx.FillR(C.BrushWinBack);
 				if (state.V == State.Attached)
@@ -110,7 +110,7 @@ sealed class DetachCtrlDemo : Win
 
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nRoot, Vec.Fil, Stack(Dir.Horz, Align.Start)))
+				using (r.Flex(F(nRoot).StratStack(Dir.Horz)))
 				{
 					r.Gfx.FillR(C.BrushWinDetachBack);
 					using (r.Ctrl(ctrl)) { }
@@ -131,7 +131,7 @@ sealed class DetachCtrlDemo : Win
 			var c2 = new DetachCtrlChild().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nRoot, Vec.Fix(300, 250), Stack(Dir.Horz, Align.Start), Mg.Mk(5)))
+				using (r.Flex(F(nRoot).Dim(300, 250).StratStack(Dir.Horz).Marg(5)))
 				{
 					r.Gfx.FillR(C.BrushDetachCtrlRoot);
 					using (r.Ctrl(c1)) { }
@@ -147,7 +147,7 @@ sealed class DetachCtrlDemo : Win
 			var nRoot = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nRoot, Vec.Fil, Fill, new Marg(20, 40, 20, 40)))
+				using (r.Flex(F(nRoot).Marg(20, 40)))
 				{
 					r.Gfx.FillR(C.BrushDetachCtrlChild);
 				}
@@ -165,7 +165,7 @@ sealed class DetachCtrlDemo : Win
 			var c2 = new NormalCtrlChild().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nRoot, Vec.Fix(200, 250), Stack(Dir.Vert, Align.Middle), Mg.Mk(5)))
+				using (r.Flex(F(nRoot).Dim(200, 250).StratStack(Dir.Vert).Marg(5)))
 				{
 					r.Gfx.FillR(C.BrushNormalCtrlRoot);
 					using (r.Ctrl(c1)) { }
@@ -181,7 +181,7 @@ sealed class DetachCtrlDemo : Win
 			var nRoot = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nRoot, Vec.Fix(80, 30), Fill, new Marg(20, 0, 20, 0)))
+				using (r.Flex(F(nRoot).Dim(80, 30).Marg(20, 0)))
 				{
 					r.Gfx.FillR(C.BrushNormalCtrlChild);
 				}

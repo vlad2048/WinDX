@@ -1,7 +1,5 @@
 ﻿using ControlSystem.Logic.PopupLogic;
 using ControlSystem.Structs;
-using LayoutSystem.Flex;
-using LayoutSystem.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
@@ -554,14 +552,14 @@ sealed class PopSplitterTests : RxTest
 	);
 
 	private static TNod<MixOnOff> Cb(Ctrl ctrl, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new CtrlNode(ctrl), true), kids);
-	private static TNod<MixOnOff> Nb(NodeState nodeState, bool on, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new StFlexNode(nodeState, new FlexNode(Vec.Fil, Strats.Fill, Mg.Zero)), on), kids);
-	private static TNod<MixOnOff> NPopb(NodeState nodeState, bool on, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new StFlexNode(nodeState, new FlexNode(Vec.Fil, Strats.Pop, Mg.Zero)), on), kids);
+	private static TNod<MixOnOff> Nb(NodeState nodeState, bool on, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new StFlexNodeFluent(nodeState).StBuild(), on), kids);
+	private static TNod<MixOnOff> NPopb(NodeState nodeState, bool on, params TNod<MixOnOff>[] kids) => Nod.Make(new MixOnOff(new StFlexNodeFluent(nodeState).Pop().StBuild(), on), kids);
 
 
 
 	private static MixNode C(Ctrl ctrl, params MixNode[] kids) => Nod.Make(new CtrlNode(ctrl), kids);
-	private static MixNode N(NodeState nodeState, params MixNode[] kids) => Nod.Make(new StFlexNode(nodeState, new FlexNode(Vec.Fil, Strats.Fill, Mg.Zero)), kids);
-	private static MixNode NPop(NodeState nodeState, params MixNode[] kids) => Nod.Make(new StFlexNode(nodeState, new FlexNode(Vec.Fil, Strats.Pop, Mg.Zero)), kids);
+	private static MixNode N(NodeState nodeState, params MixNode[] kids) => Nod.Make(new StFlexNodeFluent(nodeState).StBuild(), kids);
+	private static MixNode NPop(NodeState nodeState, params MixNode[] kids) => Nod.Make(new StFlexNodeFluent(nodeState).Pop().StBuild(), kids);
 }
 
 file static class CtrlMaker

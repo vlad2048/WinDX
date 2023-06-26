@@ -10,11 +10,12 @@ namespace LayoutSystem.Tests.TestSupport;
 static class SolverChecker
 {
 	public static void Check(
-		this Node treeRaw,
+		this TNod<FlexNodeFluent> treeFluentRaw,
 		Sz totalSz,
 		TNod<R> expRTree
 	)
 	{
+		var treeRaw = treeFluentRaw.Map(e => e.Build());
 		var freeSz = FreeSzMaker.FromSz(totalSz);
 		var (tree, _) = treeRaw.RespectRules(freeSz);
 		treeRaw.L("Raw");

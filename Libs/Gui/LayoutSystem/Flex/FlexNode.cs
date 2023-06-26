@@ -6,11 +6,12 @@ namespace LayoutSystem.Flex;
 
 public sealed record FlexNode(
 	DimVec Dim,
+	FlexFlags Flags,
 	IStrat Strat,
 	Marg Marg
 )
 {
-	public override string ToString() => $"{Dim} - {Strat}";
+	public override string ToString() => $"{Dim} ({Flags}) - {Strat}";
 
 	[JsonIgnore]
 	public DimVec DimWithMarg => new(DimWithMargDir(Dir.Horz), DimWithMargDir(Dir.Vert));

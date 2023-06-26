@@ -48,11 +48,10 @@ static class FlexRules
 
 	public static Fix? NoFilInScroll(this Node node)
 	{
-		if (node.Parent?.V.Strat is not FillStrat { Spec: ScrollSpec { Enabled: var scrollEnabled } }) return null;
 		var n = node.V;
 		var kd = n.Dim;
-		var fixX = scrollEnabled.X && kd.X.IsFil();
-		var fixY = scrollEnabled.Y && kd.Y.IsFil();
+		var fixX = node.V.Flags.Scroll.X && kd.X.IsFil();
+		var fixY = node.V.Flags.Scroll.Y && kd.Y.IsFil();
 		if (!fixX && !fixY) return null;
 		return new Fix(
 			new Warn(fixX, fixY, WarningType.NoFilInScroll, "You cannot have a Fil inside a Scroll (equivalent to Fit)"),
@@ -100,8 +99,8 @@ static class FlexRules
 
 	public static Fix? PopIsNotFil(this Node node)
 	{
-		if (node.V.Strat is not FillStrat { Spec: PopSpec }) return null;
 		var n = node.V;
+		if (!n.Flags.Pop) return null;
 		var fixX = n.Dim.X.Typ() == DimType.Fil;
 		var fixY = n.Dim.Y.Typ() == DimType.Fil;
 		if (!fixX && !fixY) return null;

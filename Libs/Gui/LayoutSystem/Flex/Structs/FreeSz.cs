@@ -1,5 +1,4 @@
-﻿using LayoutSystem.Flex.LayStrats;
-using PowBasics.Geom;
+﻿using PowBasics.Geom;
 
 namespace LayoutSystem.Flex.Structs;
 
@@ -25,16 +24,14 @@ public static class FreeSzExts
 		}
 	);
 
-	internal static FreeSz UnbridleScrolls(this FreeSz free, Node node) => node.V.Strat switch
-	{
-		FillStrat { Spec: ScrollSpec { Enabled: var scrollEnabled } } =>
-			FreeSzMaker.DirFun(dir => scrollEnabled.Dir(dir) switch
+	internal static FreeSz UnbridleScrolls(this FreeSz free, Node node) =>
+		FreeSzMaker.DirFun(dir =>
+			node.V.Flags.Scroll.Dir(dir) switch
 			{
-				true => null,
+				truer => null,
 				false => free.Dir(dir)
-			}),
-		_ => free
-	};
+			}
+		);
 
 	internal static DimVec ToDim(this FreeSz free) => Vec.DirFun(dir => 
 		free.Dir(dir).HasValue switch

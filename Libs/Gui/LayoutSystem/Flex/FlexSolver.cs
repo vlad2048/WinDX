@@ -1,6 +1,5 @@
 ﻿using LayoutSystem.Flex.Details;
 using LayoutSystem.Flex.Details.Structs;
-using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Flex.TreeLogic;
 using LayoutSystem.Utils.Exts;
@@ -175,7 +174,7 @@ public static class FlexSolver
 
 
 
-	private static bool IsPop(this Node node) => node.V.Strat is FillStrat { Spec: PopSpec };
+	private static bool IsPop(this Node node) => node.V.Flags.Pop;
 
 
 

@@ -1,8 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
-using LayoutSystem.Flex.LayStrats;
-using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
@@ -279,19 +277,20 @@ static class PopupSplitter
 
 	private static bool IsPop(this MixNode node, [NotNullWhen(true)] out NodeState? nodeState)
 	{
-		if (node.V is StFlexNode { State: var nodeState_, Flex.Strat: FillStrat { Spec: PopSpec } })
+		if (node.V is StFlexNode { Flex.Flags.Pop: true, State: var nodeState_ })
 		{
 			nodeState = nodeState_;
 			return true;
 		}
-		nodeState = null;
-		return false;
+		else
+		{
+			nodeState = null;
+			return false;
+		}
 	}
 
 	private static bool IsCtrl(this MixNode node) => node.V is CtrlNode;
-
-	private static bool IsPop(this IMixNode node) => node is StFlexNode { Flex.Strat: FillStrat { Spec: PopSpec } };
-	//private static bool IsCtrl(this IMixNode node) => node is CtrlNode;
+	private static bool IsPop(this IMixNode node) => node is StFlexNode { Flex.Flags.Pop: true };
 
 
 	private static void EnqueueRange<T>(this Queue<T> queue, IEnumerable<T> source)

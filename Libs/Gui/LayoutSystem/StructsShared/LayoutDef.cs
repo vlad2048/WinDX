@@ -1,8 +1,8 @@
 ﻿using LayoutSystem.Flex;
 using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
+using LayoutSystem.Utils;
 using PowBasics.Geom;
-using static LayoutSystem.Utils.TreeBuilder;
 
 namespace LayoutSystem.StructsShared;
 
@@ -13,6 +13,6 @@ sealed record LayoutDef(
 {
 	public static readonly LayoutDef Default = new(
 		new FreeSz(150, 200),
-		M(Vec.Fil, Strats.Stack(Dir.Horz, Align.Start))
+		Nod.Make(new FlexNode(Vec.Fil, FlexFlags.None, Strats.Stack(Dir.Horz, Align.Start), Mg.Zero))
 	);
 }

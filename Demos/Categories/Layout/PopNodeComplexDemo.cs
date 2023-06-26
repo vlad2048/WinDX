@@ -1,8 +1,6 @@
 ﻿using System.Drawing;
 using ControlSystem;
 using ControlSystem.Structs;
-using LayoutSystem.Flex;
-using LayoutSystem.Flex.LayStrats;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Structs;
@@ -26,33 +24,33 @@ sealed class PopNodeComplexDemo : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(n0, Vec.Fil, Stack(Dir.Horz, Align.Start)))
+			using (r.Flex(F(n0).StratStack(Dir.Horz)))
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.BrushN0);
-				using (r.Flex(n1, Vec.FixFil(70), Fill))
+				using (r.Flex(F(n1).DimFixFil(70)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN1);
 				}
-				using (r.Flex(n2, Vec.Fil, Stack(Dir.Vert, Align.Start)))
+				using (r.Flex(F(n2).StratStack(Dir.Vert)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN2);
 					using (r.Ctrl(c1)) { }
 
-					using (r.Flex(p1, Vec.Fix(250, 150), Pop))
+					using (r.Flex(F(p1).Dim(250, 150).Pop()))
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.BrushP1);
-						using (r.Flex(n4, Vec.Fil, Stack(Dir.Horz, Align.Start)))
+						using (r.Flex(F(n4).StratStack(Dir.Horz)))
 						{
 							r.Gfx.FillR(r.Gfx.R, Consts.BrushN4);
-							using (r.Flex(n5, Vec.FixFil(50), Fill))
+							using (r.Flex(F(n5).DimFixFil(50)))
 							{
 								r.Gfx.FillR(r.Gfx.R, Consts.BrushN5);
-								using (r.Flex(p2, Vec.Fix(45, 230), Pop))
+								using (r.Flex(F(p2).Dim(45, 230).Pop()))
 								{
 									r.Gfx.FillR(r.Gfx.R, Consts.BrushP2);
-									using (r.Flex(n6, Vec.Fil, Fill))
+									using (r.Flex(F(n6).DimFil()))
 									{
-										r.Gfx.FillR(r.Gfx.R, Consts.BrushP2);
+										r.Gfx.FillR(r.Gfx.R, Consts.BrushN6);
 									}
 								}
 							}
@@ -72,7 +70,7 @@ sealed class PopNodeComplexDemo : Win
 			var n3 = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(n3, Vec.FilFix(90), Fill))
+				using (r.Flex(F(n3).DimFilFix(90)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN3);
 				}
@@ -88,7 +86,7 @@ sealed class PopNodeComplexDemo : Win
 			var p3 = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(p3, Vec.Fix(190, 340), Pop))
+				using (r.Flex(F(p3).Dim(190, 340).Pop()))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushP3);
 					using (r.Ctrl(c3)) { }
@@ -104,7 +102,7 @@ sealed class PopNodeComplexDemo : Win
 			var n7 = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(n7, Vec.Fil, Fill))
+				using (r.Flex(F(n7)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN7);
 				}

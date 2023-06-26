@@ -14,25 +14,7 @@ namespace LayoutSystem.Flex.LayStrats;
 /// </summary>
 public sealed class FillStrat : IStrat
 {
-	public ISpec Spec { get; }
-
-	public FillStrat(ISpec spec) => Spec = spec;
-
-	public override string ToString()
-	{
-		static string b(bool v) => v switch
-		{
-			true => "☑",
-			false => "☐"
-		};
-		return Spec switch
-		{
-			ScrollSpec { Enabled: (false, false) } => "Fill",
-			ScrollSpec { Enabled: var (sx, sy) } => $"Scroll({b(sx)},{b(sy)})",
-			PopSpec => "Pop",
-			_ => throw new ArgumentException()
-		};
-	}
+	public override string ToString() => "Fill";
 
 	public LayNfo Lay(
 		Node node,
@@ -64,7 +46,6 @@ public sealed class FillStrat : IStrat
 					Pt.Empty,
 					GeomMaker.SzDirFun(dir => freeSz.Dir(dir).HasValue switch
 					{
-						//false => t.kidDim.Dir(dir).Max.EnsureNotInf(),
 						false => t.kidDim.Dir(dir).Type switch
 						{
 							DimType.Fil => 0,

@@ -1,9 +1,6 @@
 ﻿using System.Drawing;
 using ControlSystem;
 using ControlSystem.Structs;
-using LayoutSystem.Flex;
-using LayoutSystem.Flex.LayStrats;
-using LayoutSystem.Utils;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Structs;
@@ -21,18 +18,18 @@ sealed class PopNodeDemo : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(nodeRoot, Vec.Fil, Stack(Dir.Vert, Align.Start)))
+			using (r.Flex(F(nodeRoot).StratStack(Dir.Vert)))
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.BrushRoot);
-				using (r.Flex(nodeFill1, Vec.Fix(120, 75), Fill))
+				using (r.Flex(F(nodeFill1).Dim(120, 75)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill1);
 				}
-				using (r.Flex(nodePop, Vec.Fix(250, 50), Pop))
+				using (r.Flex(F(nodePop).Dim(250, 50).Pop()))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushPop);
 				}
-				using (r.Flex(nodeFill2, Vec.Fix(80, 100), Fill))
+				using (r.Flex(F(nodeFill2).Dim(80, 100)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill2);
 				}

@@ -17,19 +17,16 @@ public static class FreeSzMaker
 
 	public static FreeSz ForPop(Node nod)
 	{
+		if (!nod.V.Flags.Pop) throw new ArgumentException("Not a Pop node");
 		var dim = nod.V.Dim;
-		return nod.V.Strat switch
-		{
-			FillStrat { Spec: PopSpec } => DirFun(dir =>
-				dim.Dir(dir).Typ() switch
-				{
-					DimType.Fit => null,
-					DimType.Fix => dim.Dir(dir)!.Value.Max,
-					DimType.Flt => dim.Dir(dir)!.Value.Max,
-					DimType.Fil => throw new ArgumentException("Rule broken")
-				}
-			),
-			_ => throw new ArgumentException("Not a Pop node")
-		};
+		return DirFun(dir =>
+			dim.Dir(dir).Typ() switch
+			{
+				DimType.Fit => null,
+				DimType.Fix => dim.Dir(dir)!.Value.Max,
+				DimType.Flt => dim.Dir(dir)!.Value.Max,
+				DimType.Fil => throw new ArgumentException("Rule broken")
+			}
+		);
 	}
 }

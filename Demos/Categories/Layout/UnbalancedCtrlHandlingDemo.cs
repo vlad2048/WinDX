@@ -19,10 +19,10 @@ sealed class UnbalancedCtrlHandlingDemo : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(nodeRoot, Vec.Fix(400, 350), Fill))
+			using (r.Flex(F(nodeRoot).Dim(400, 350)))
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.WinBrush1);
-				using (r.Flex(nodeFit, Vec.Fit, Fill, Mg.Mk(30)))
+				using (r.Flex(F(nodeFit).DimFit().Marg(30)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.WinBrush2);
 					using (r.Ctrl(c1))
@@ -44,10 +44,10 @@ sealed class UnbalancedCtrlHandlingDemo : Win
 
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nodeRoot, Vec.Fix(180, 250), Fill))
+				using (r.Flex(F(nodeRoot).Dim(180, 250)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C1Brush1);
-					using (r.Flex(nodeFil, Vec.Fit, Fill, Mg.Mk(20)))
+					using (r.Flex(F(nodeFil).DimFit().Marg(20)))
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.C1Brush2);
 						using (r.Ctrl(c2))
@@ -69,10 +69,10 @@ sealed class UnbalancedCtrlHandlingDemo : Win
 
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nodeRoot, Vec.Fix(110, 170), Fill))
+				using (r.Flex(F(nodeRoot).Dim(110, 170)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C2Brush1);
-					r.Flex(nodeFil, Vec.Fit, Fill, Mg.Mk(10));
+					r.Flex(F(nodeFil).DimFit().Marg(10));
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.C2Brush2);
 						using (r.Ctrl(c3))
@@ -93,10 +93,10 @@ sealed class UnbalancedCtrlHandlingDemo : Win
 
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(nodeRoot, Vec.Fix(60, 80), Fill))
+				using (r.Flex(F(nodeRoot).Dim(60, 80)))
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C3Brush1);
-					using (r.Flex(nodeFil, Vec.Fil, Fill, Mg.Mk(5)))
+					using (r.Flex(F(nodeFil).Marg(5)))
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.C3Brush2);
 					}

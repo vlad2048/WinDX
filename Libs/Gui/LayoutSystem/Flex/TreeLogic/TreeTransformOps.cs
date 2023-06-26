@@ -11,17 +11,16 @@ static class TreeTransformOps
 		{
 			truer =>
 				Nod.Make(
-					new FlexNode(
-						DimVecMaker.DirFun(
+					root.V with {
+						Dim = DimVecMaker.DirFun(
 							dir => root.V.Dim.Dir(dir).IsFil() switch
 							{
 								false => D.Fit,
 								truer => D.Fil
 							}
 						),
-						new MarginStrat(),
-						root.V.Marg
-					),
+						Strat = new MarginStrat()
+					},
 					Nod.Make(
 						root.V,
 						root.Children.Select(AddMargins)

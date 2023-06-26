@@ -33,8 +33,8 @@ partial class NodeEditor
 		stratDirCombo = new ComboBox();
 		stratAlignCombo = new ComboBox();
 		groupBox1 = new GroupBox();
-		specScrollYCheckBox = new CheckBox();
-		specScrollXCheckBox = new CheckBox();
+		flagsScrollYCheckBox = new CheckBox();
+		flagsScrollXCheckBox = new CheckBox();
 		groupBox2 = new GroupBox();
 		margMinusBtn = new Button();
 		margPlusBtn = new Button();
@@ -42,15 +42,15 @@ partial class NodeEditor
 		margDownNumeric = new NumericUpDown();
 		margLeftNumeric = new NumericUpDown();
 		margUpNumeric = new NumericUpDown();
-		specGroupBox = new GroupBox();
-		specTypeCombo = new ComboBox();
+		groupBox3 = new GroupBox();
+		flagsPopCheckBox = new CheckBox();
 		groupBox1.SuspendLayout();
 		groupBox2.SuspendLayout();
 		((System.ComponentModel.ISupportInitialize)margRightNumeric).BeginInit();
 		((System.ComponentModel.ISupportInitialize)margDownNumeric).BeginInit();
 		((System.ComponentModel.ISupportInitialize)margLeftNumeric).BeginInit();
 		((System.ComponentModel.ISupportInitialize)margUpNumeric).BeginInit();
-		specGroupBox.SuspendLayout();
+		groupBox3.SuspendLayout();
 		SuspendLayout();
 		// 
 		// horzDimEditor
@@ -98,36 +98,35 @@ partial class NodeEditor
 		// 
 		// groupBox1
 		// 
-		groupBox1.Controls.Add(specGroupBox);
 		groupBox1.Controls.Add(stratCombo);
 		groupBox1.Controls.Add(stratAlignCombo);
 		groupBox1.Controls.Add(stratDirCombo);
-		groupBox1.Location = new Point(3, 185);
+		groupBox1.Location = new Point(3, 272);
 		groupBox1.Name = "groupBox1";
-		groupBox1.Size = new Size(200, 161);
+		groupBox1.Size = new Size(200, 82);
 		groupBox1.TabIndex = 5;
 		groupBox1.TabStop = false;
 		groupBox1.Text = "Strat";
 		// 
-		// specScrollYCheckBox
+		// flagsScrollYCheckBox
 		// 
-		specScrollYCheckBox.AutoSize = true;
-		specScrollYCheckBox.Location = new Point(101, 47);
-		specScrollYCheckBox.Name = "specScrollYCheckBox";
-		specScrollYCheckBox.Size = new Size(65, 19);
-		specScrollYCheckBox.TabIndex = 6;
-		specScrollYCheckBox.Text = "Scroll Y";
-		specScrollYCheckBox.UseVisualStyleBackColor = true;
+		flagsScrollYCheckBox.AutoSize = true;
+		flagsScrollYCheckBox.Location = new Point(119, 47);
+		flagsScrollYCheckBox.Name = "flagsScrollYCheckBox";
+		flagsScrollYCheckBox.Size = new Size(65, 19);
+		flagsScrollYCheckBox.TabIndex = 6;
+		flagsScrollYCheckBox.Text = "Scroll Y";
+		flagsScrollYCheckBox.UseVisualStyleBackColor = true;
 		// 
-		// specScrollXCheckBox
+		// flagsScrollXCheckBox
 		// 
-		specScrollXCheckBox.AutoSize = true;
-		specScrollXCheckBox.Location = new Point(101, 22);
-		specScrollXCheckBox.Name = "specScrollXCheckBox";
-		specScrollXCheckBox.Size = new Size(65, 19);
-		specScrollXCheckBox.TabIndex = 5;
-		specScrollXCheckBox.Text = "Scroll X";
-		specScrollXCheckBox.UseVisualStyleBackColor = true;
+		flagsScrollXCheckBox.AutoSize = true;
+		flagsScrollXCheckBox.Location = new Point(119, 22);
+		flagsScrollXCheckBox.Name = "flagsScrollXCheckBox";
+		flagsScrollXCheckBox.Size = new Size(65, 19);
+		flagsScrollXCheckBox.TabIndex = 5;
+		flagsScrollXCheckBox.Text = "Scroll X";
+		flagsScrollXCheckBox.UseVisualStyleBackColor = true;
 		// 
 		// groupBox2
 		// 
@@ -137,7 +136,7 @@ partial class NodeEditor
 		groupBox2.Controls.Add(margDownNumeric);
 		groupBox2.Controls.Add(margLeftNumeric);
 		groupBox2.Controls.Add(margUpNumeric);
-		groupBox2.Location = new Point(3, 73);
+		groupBox2.Location = new Point(3, 160);
 		groupBox2.Name = "groupBox2";
 		groupBox2.Size = new Size(200, 106);
 		groupBox2.TabIndex = 6;
@@ -200,45 +199,47 @@ partial class NodeEditor
 		margUpNumeric.Size = new Size(45, 23);
 		margUpNumeric.TabIndex = 0;
 		// 
-		// specGroupBox
+		// groupBox3
 		// 
-		specGroupBox.Controls.Add(specTypeCombo);
-		specGroupBox.Controls.Add(specScrollYCheckBox);
-		specGroupBox.Controls.Add(specScrollXCheckBox);
-		specGroupBox.Location = new Point(6, 80);
-		specGroupBox.Name = "specGroupBox";
-		specGroupBox.Size = new Size(188, 73);
-		specGroupBox.TabIndex = 7;
-		specGroupBox.TabStop = false;
-		specGroupBox.Text = "Spec";
+		groupBox3.Controls.Add(flagsPopCheckBox);
+		groupBox3.Controls.Add(flagsScrollYCheckBox);
+		groupBox3.Controls.Add(flagsScrollXCheckBox);
+		groupBox3.Location = new Point(3, 84);
+		groupBox3.Name = "groupBox3";
+		groupBox3.Size = new Size(200, 70);
+		groupBox3.TabIndex = 7;
+		groupBox3.TabStop = false;
+		groupBox3.Text = "Flags";
 		// 
-		// specTypeCombo
+		// flagsPopCheckBox
 		// 
-		specTypeCombo.FormattingEnabled = true;
-		specTypeCombo.Items.AddRange(new object[] { "Scroll", "Pop" });
-		specTypeCombo.Location = new Point(6, 31);
-		specTypeCombo.Name = "specTypeCombo";
-		specTypeCombo.Size = new Size(74, 23);
-		specTypeCombo.TabIndex = 0;
+		flagsPopCheckBox.AutoSize = true;
+		flagsPopCheckBox.Location = new Point(6, 22);
+		flagsPopCheckBox.Name = "flagsPopCheckBox";
+		flagsPopCheckBox.Size = new Size(61, 19);
+		flagsPopCheckBox.TabIndex = 0;
+		flagsPopCheckBox.Text = "Popup";
+		flagsPopCheckBox.UseVisualStyleBackColor = true;
 		// 
 		// NodeEditor
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
+		Controls.Add(groupBox3);
 		Controls.Add(groupBox2);
 		Controls.Add(groupBox1);
 		Controls.Add(vertDimEditor);
 		Controls.Add(horzDimEditor);
 		Name = "NodeEditor";
-		Size = new Size(203, 348);
+		Size = new Size(203, 357);
 		groupBox1.ResumeLayout(false);
 		groupBox2.ResumeLayout(false);
 		((System.ComponentModel.ISupportInitialize)margRightNumeric).EndInit();
 		((System.ComponentModel.ISupportInitialize)margDownNumeric).EndInit();
 		((System.ComponentModel.ISupportInitialize)margLeftNumeric).EndInit();
 		((System.ComponentModel.ISupportInitialize)margUpNumeric).EndInit();
-		specGroupBox.ResumeLayout(false);
-		specGroupBox.PerformLayout();
+		groupBox3.ResumeLayout(false);
+		groupBox3.PerformLayout();
 		ResumeLayout(false);
 	}
 
@@ -257,8 +258,8 @@ partial class NodeEditor
 	public NumericUpDown margDownNumeric;
 	public NumericUpDown margLeftNumeric;
 	public NumericUpDown margUpNumeric;
-	public CheckBox specScrollXCheckBox;
-	public CheckBox specScrollYCheckBox;
-	public GroupBox specGroupBox;
-	public ComboBox specTypeCombo;
+	public CheckBox flagsScrollXCheckBox;
+	public CheckBox flagsScrollYCheckBox;
+	private GroupBox groupBox3;
+	private CheckBox flagsPopCheckBox;
 }

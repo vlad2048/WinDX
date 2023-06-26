@@ -1,6 +1,5 @@
 ﻿using BrightIdeasSoftware;
 using ControlSystem.Structs;
-using LayoutSystem.Flex.LayStrats;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowMaybe;
@@ -37,7 +36,7 @@ static partial class Setup
 		return map;
 	}
 
-	private static bool IsPop(this MixNode node) => node.V is StFlexNode { Flex.Strat: FillStrat { Spec: PopSpec } };
+	private static bool IsPop(this MixNode node) => node.V is StFlexNode { Flex.Flags.Pop: true };
 
 	private static TNod<MixNodeWithNfo> AddNfoToTree(this MixNode root)
 	{
