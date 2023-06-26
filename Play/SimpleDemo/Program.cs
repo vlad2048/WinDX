@@ -33,10 +33,10 @@ sealed class SimpleWin : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(F(nodeRoot).Dim(400, 350)))
+			using (r[nodeRoot].Dim(400, 350).M)
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.WinBrush1);
-				using (r.Flex(F(nodeFit).DimFit().Marg(30)))
+				using (r[nodeFit].DimFit().Marg(30).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.WinBrush2);
 					using (r.Ctrl(c1))
@@ -58,10 +58,10 @@ sealed class C1Ctrl : Ctrl
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(F(nodeRoot).Dim(180, 250)))
+			using (r[nodeRoot].Dim(180, 250).M)
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.C1Brush1);
-				using (r.Flex(F(nodeFil).DimFit().Marg(20)))
+				using (r[nodeFil].DimFit().Marg(20).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C1Brush2);
 					using (r.Ctrl(c2))
@@ -82,11 +82,11 @@ sealed class C2Ctrl : Ctrl
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(F(nodeRoot).Dim(110, 170)))
+			using (r[nodeRoot].Dim(110, 170).M)
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.C2Brush1);
-				//using (r.Flex(F(nodeFil).DimFit().Marg(10)))
-				r.Flex(F(nodeFil).DimFit().Marg(10));
+				//using (r[nodeFil].DimFit().Marg(10))
+				r[nodeFil].DimFit().Marg(10);
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C2Brush2);
 					using (r.Ctrl(c3))
@@ -106,10 +106,10 @@ sealed class C3Ctrl : Ctrl
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(F(nodeRoot).Dim(60, 80)))
+			using (r[nodeRoot].Dim(60, 80).M)
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.C3Brush1);
-				using (r.Flex(F(nodeFil).Marg(5)))
+				using (r[nodeFil].Marg(5).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.C3Brush2);
 				}

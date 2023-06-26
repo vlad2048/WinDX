@@ -5,7 +5,6 @@ global using Obs = System.Reactive.Linq.Observable;
 global using Node = TNod<LayoutSystem.Flex.FlexNode>;
 global using MixNode = TNod<ControlSystem.Structs.IMixNode>;
 global using static SysWinLib.Utils.LogUtils;
-global using static ControlSystem.FlexMaker;
 
 using System.Runtime.CompilerServices;
 using ControlSystem.Singletons.WinMan_;

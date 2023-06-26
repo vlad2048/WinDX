@@ -18,18 +18,18 @@ sealed class PopNodeDemo : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(F(nodeRoot).StratStack(Dir.Vert)))
+			using (r[nodeRoot].StratStack(Dir.Vert).M)
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.BrushRoot);
-				using (r.Flex(F(nodeFill1).Dim(120, 75)))
+				using (r[nodeFill1].Dim(120, 75).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill1);
 				}
-				using (r.Flex(F(nodePop).Dim(250, 50).Pop()))
+				using (r[nodePop].Dim(250, 50).Pop().M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushPop);
 				}
-				using (r.Flex(F(nodeFill2).Dim(80, 100)))
+				using (r[nodeFill2].Dim(80, 100).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill2);
 				}

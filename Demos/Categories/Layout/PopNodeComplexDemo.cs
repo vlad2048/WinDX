@@ -24,31 +24,31 @@ sealed class PopNodeComplexDemo : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(F(n0).StratStack(Dir.Horz)))
+			using (r[n0].StratStack(Dir.Horz).M)
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.BrushN0);
-				using (r.Flex(F(n1).DimFixFil(70)))
+				using (r[n1].DimFixFil(70).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN1);
 				}
-				using (r.Flex(F(n2).StratStack(Dir.Vert)))
+				using (r[n2].StratStack(Dir.Vert).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN2);
 					using (r.Ctrl(c1)) { }
 
-					using (r.Flex(F(p1).Dim(250, 150).Pop()))
+					using (r[p1].Dim(250, 150).Pop().M)
 					{
 						r.Gfx.FillR(r.Gfx.R, Consts.BrushP1);
-						using (r.Flex(F(n4).StratStack(Dir.Horz)))
+						using (r[n4].StratStack(Dir.Horz).M)
 						{
 							r.Gfx.FillR(r.Gfx.R, Consts.BrushN4);
-							using (r.Flex(F(n5).DimFixFil(50)))
+							using (r[n5].DimFixFil(50).M)
 							{
 								r.Gfx.FillR(r.Gfx.R, Consts.BrushN5);
-								using (r.Flex(F(p2).Dim(45, 230).Pop()))
+								using (r[p2].Dim(45, 230).Pop().M)
 								{
 									r.Gfx.FillR(r.Gfx.R, Consts.BrushP2);
-									using (r.Flex(F(n6).DimFil()))
+									using (r[n6].DimFil().M)
 									{
 										r.Gfx.FillR(r.Gfx.R, Consts.BrushN6);
 									}
@@ -70,7 +70,7 @@ sealed class PopNodeComplexDemo : Win
 			var n3 = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(F(n3).DimFilFix(90)))
+				using (r[n3].DimFilFix(90).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN3);
 				}
@@ -86,7 +86,7 @@ sealed class PopNodeComplexDemo : Win
 			var p3 = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(F(p3).Dim(190, 340).Pop()))
+				using (r[p3].Dim(190, 340).Pop().M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushP3);
 					using (r.Ctrl(c3)) { }
@@ -102,7 +102,7 @@ sealed class PopNodeComplexDemo : Win
 			var n7 = new NodeState().D(D);
 			WhenRender.Subscribe(r =>
 			{
-				using (r.Flex(F(n7)))
+				using (r[n7].M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushN7);
 				}

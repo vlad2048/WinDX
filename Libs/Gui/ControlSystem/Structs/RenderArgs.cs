@@ -21,6 +21,8 @@ public sealed class RenderArgs : IDisposable
 		this.pusher = pusher;
 	}
 
-	public IDisposable Flex(FlexNodeFluent f) => pusher.Push(f.StBuild());
+	public RenderStFlexNodeFluent this[NodeState nodeState] => new(this, nodeState);
+
+	public IDisposable Flex(StFlexNode f) => pusher.Push(f);
 	public IDisposable Ctrl(Ctrl ctrl) => pusher.Push(new CtrlNode(ctrl));
 }

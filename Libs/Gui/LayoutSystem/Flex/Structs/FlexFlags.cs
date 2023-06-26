@@ -19,4 +19,5 @@ public readonly record struct FlexFlags(
 	};
 
 	public static readonly FlexFlags None = new(BoolVec.False, false);
+	public static readonly FlexFlags PopNode = new(BoolVec.False, true);
 }

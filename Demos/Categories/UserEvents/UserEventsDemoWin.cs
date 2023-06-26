@@ -24,14 +24,14 @@ public class UserEventsDemoWin : Win
 
 		WhenRender.Subscribe(r =>
 		{
-			using (r.Flex(F(nodeRoot).StratStack(Dir.Horz)))
+			using (r[nodeRoot].StratStack(Dir.Horz).M)
 			{
 				r.Gfx.FillR(r.Gfx.R, Consts.BrushRoot);
-				using (r.Flex(F(nodeFill1).Marg(10)))
+				using (r[nodeFill1].Marg(10).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill1);
 				}
-				using (r.Flex(F(nodeFill2).Marg(10)))
+				using (r[nodeFill2].Marg(10).M)
 				{
 					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill2);
 				}
