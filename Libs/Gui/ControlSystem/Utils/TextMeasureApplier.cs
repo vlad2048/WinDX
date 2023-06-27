@@ -9,7 +9,6 @@ static class TextMeasureApplier
 {
 	public static MixNode ApplyTextMeasures(this MixNode root)
 	{
-
 		MixNode Rec(MixNode nod)
 		{
 			var node = nod.V;
