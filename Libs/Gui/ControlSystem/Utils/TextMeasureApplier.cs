@@ -44,7 +44,7 @@ static class TextMeasureApplier
 							}
 						);
 						var flexNodeFitted = flexNode with { Flex = flexNode.Flex with { Dim = dimFitted } };
-						return Nod.Make<IMixNode>(flexNodeFitted, nodesOther);
+						return Nod.Make(flexNodeFitted, nodesOther);
 					}
 
 				case TextMeasureNode:
