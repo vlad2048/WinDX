@@ -6,3 +6,4 @@ global using D2D = Vortice.Direct2D1;
 global using WIC = Vortice.WIC;
 global using ANIM = Vortice.UIAnimation;
 global using DCOMP = Vortice.DirectComposition;
+global using DWRITE = Vortice.DirectWrite;

@@ -12,11 +12,13 @@ sealed class Pencils : IDisposable
 
 	private readonly Dictionary<BrushDef, Brush> brushes;
 	private readonly Dictionary<PenDef, Pen> pens;
+	private readonly Dictionary<FontDef, Font> fonts;
 
 	public Pencils()
 	{
 		brushes = new Dictionary<BrushDef, Brush>().D(d);
 		pens = new Dictionary<PenDef, Pen>().D(d);
+		fonts = new Dictionary<FontDef, Font>().D(d);
 	}
 
 	public Brush GetBrush(BrushDef def) => brushes.GetOrCreate(def, () => def switch
@@ -31,5 +33,20 @@ sealed class Pencils : IDisposable
 		{
 			DashStyle = (DashStyle)def.DashStyle
 		}
+	);
+
+	public Font GetFont(FontDef def) => fonts.GetOrCreate(def, () => 
+		new Font(
+			def.Name,
+			def.Size,
+			(def.Bold, def.Italic) switch
+			{
+				(false, false) => FontStyle.Regular,
+				(true, false) => FontStyle.Bold,
+				(false, true) => FontStyle.Italic,
+				(true, true) => FontStyle.Bold | FontStyle.Italic
+			},
+			GraphicsUnit.Point
+		)
 	);
 }

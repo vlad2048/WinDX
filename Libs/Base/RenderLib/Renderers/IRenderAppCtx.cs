@@ -16,16 +16,18 @@ public interface IRenderAppCtxWithDispose : IRenderAppCtx, IDisposable
 public interface IRenderWinCtx : IDisposable
 {
 	void Resize(Sz sz);
-	IGfx GetGfx();
+	IGfx GetGfx(bool measureOnly);
 }
 
 public interface IGfx : IDisposable
 {
 	R R { get; set; }
 
-	void Dbg();
 	void FillR(R r, BrushDef brush);
 	void DrawR(R r, PenDef pen);
 	void DrawLine(Pt a, Pt b, PenDef penDef);
+
+	Sz MeasureText_(string text, FontDef fontDef);
+	void DrawText_(string text, FontDef fontDef, Color color);
 }
 

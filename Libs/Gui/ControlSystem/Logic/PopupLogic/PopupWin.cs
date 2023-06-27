@@ -60,7 +60,7 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
-			var gfx = renderer.GetGfx().D(d);
+			var gfx = renderer.GetGfx(false).D(d);
 			RenderUtils.RenderTree(subPartitionRebased, gfx);
 			SpectorWinRenderUtils.Render(spectorDrawState, subPartitionRebased, gfx);
 		}).D(D);

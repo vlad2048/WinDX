@@ -1,4 +1,5 @@
 ﻿using LayoutSystem.Flex;
+using PowBasics.Geom;
 
 namespace ControlSystem.Structs;
 
@@ -13,4 +14,9 @@ public sealed record CtrlNode(Ctrl Ctrl) : IMixNode
 public sealed record StFlexNode(NodeState State, FlexNode Flex) : IMixNode
 {
 	public override string ToString() => $"[R:{State.R}] - {Flex}";
+}
+
+public sealed record TextMeasureNode(Sz Size) : IMixNode
+{
+	public override string ToString() => $"text:{Size}";
 }

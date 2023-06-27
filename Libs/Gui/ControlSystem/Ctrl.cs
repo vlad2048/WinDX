@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ControlSystem.Structs;
+using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Renderers;
 using RenderLib.Structs;
@@ -60,6 +61,11 @@ public static class IGfxExt
 {
 	public static void FillR(this IGfx gfx, BrushDef brush) => gfx.FillR(gfx.R, brush);
 	public static void DrawR(this IGfx gfx, PenDef pen) => gfx.DrawR(gfx.R, pen);
+	public static void FillDrawR(this IGfx gfx, BrushDef brush, PenDef pen) => gfx.FillDrawR(gfx.R, brush, pen);
+
+	public static void FillDrawR(this IGfx gfx, R r, BrushDef brush, PenDef pen)
+	{
+		gfx.FillR(r, brush);
+		gfx.DrawR(r, pen);
+	}
 }
-
-

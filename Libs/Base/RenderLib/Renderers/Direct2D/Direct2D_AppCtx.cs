@@ -23,9 +23,14 @@ public sealed class Direct2D_AppCtx : IRenderAppCtxWithDispose
 	// ===
 	public D2D.ID2D1Factory1 D2DFactory { get; }
 
+	// DWRITE
+	// ======
+	public DWRITE.IDWriteFactory7 DWRITEFactory { get; }
+
 	internal Direct2D_AppCtx()
 	{
 		D2DFactory = D2D.D2D1.D2D1CreateFactory<D2D.ID2D1Factory1>(D2D.FactoryType.SingleThreaded, D2D.DebugLevel.Information).D(d);
+		DWRITEFactory = DWRITE.DWrite.DWriteCreateFactory<DWRITE.IDWriteFactory7>().D(d);
 	}
 
 	public IRenderWinCtx GetWinCtx(ISysWinRenderingSupport win) => new Direct2D_WinCtx(win, this);
@@ -55,9 +60,6 @@ public sealed class Direct2D_WinCtx : IRenderWinCtx
 	// D2D
 	// ===
 	public D2D.ID2D1HwndRenderTarget D2DHwndRenderTarget { get; private set; } = null!;
-
-
-	public D2D.ID2D1Factory1 D2DFactory => appCtx.D2DFactory;
 
 
 	internal Direct2D_WinCtx(ISysWinRenderingSupport win, Direct2D_AppCtx appCtx)
@@ -90,7 +92,7 @@ public sealed class Direct2D_WinCtx : IRenderWinCtx
 		InitResizeResources();
 	}
 
-	public IGfx GetGfx() => new Direct2D_Gfx(win, this);
+	public IGfx GetGfx(bool measureOnly) => new Direct2D_Gfx(win, this, measureOnly);
 
 
 
@@ -120,7 +122,7 @@ public sealed class Direct2D_WinCtx : IRenderWinCtx
 			hwndRenderTargetProperties
 		).D(ResizeD);
 
-		Pencils = new Pencils(appCtx.D2DFactory, D2DHwndRenderTarget).D(ResizeD);
+		Pencils = new Pencils(appCtx.D2DFactory, D2DHwndRenderTarget, appCtx.DWRITEFactory).D(ResizeD);
 	}
 }
 
@@ -130,23 +132,29 @@ public sealed class Direct2D_WinCtx : IRenderWinCtx
 // *******
 public sealed class Direct2D_Gfx : IGfx
 {
+	private const D2D.DrawTextOptions DrawTextOptions = D2D.DrawTextOptions.None;
+
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
 	private readonly ISysWinRenderingSupport win;
 	private readonly Pencils pencils;
+	private readonly bool measureOnly;
 
 	public D2D.ID2D1HwndRenderTarget T { get; }
 	public D2D.ID2D1Factory1 D2DFactory { get; }
+	public DWRITE.IDWriteFactory7 DWRITEFactory { get; }
 
 	public R R { get; set; }
 
-	internal Direct2D_Gfx(ISysWinRenderingSupport win, Direct2D_WinCtx winCtx)
+	internal Direct2D_Gfx(ISysWinRenderingSupport win, Direct2D_WinCtx winCtx, bool measureOnly)
 	{
 		this.win = win;
+		this.measureOnly = measureOnly;
 		R = win.ClientR.V;
 		T = winCtx.D2DHwndRenderTarget;
 		D2DFactory = winCtx.appCtx.D2DFactory;
+		DWRITEFactory = winCtx.appCtx.DWRITEFactory;
 		pencils = winCtx.Pencils;
 
 		T.BeginDraw();
@@ -156,19 +164,17 @@ public sealed class Direct2D_Gfx : IGfx
 		}).D(d);
 	}
 
-	public void Dbg()
-	{
-	}
+	private bool DrawDisabled => measureOnly || R.IsDegenerate || !win.IsInit.V;
 
 	public void FillR(R r, BrushDef brush)
 	{
-		if (!win.IsInit.V) return;
+		if (DrawDisabled) return;
 		T.FillRectangle(r.ToDrawRect(), pencils.GetBrush(brush));
 	}
 
 	public void DrawR(R r, PenDef penDef)
 	{
-		if (!win.IsInit.V) return;
+		if (DrawDisabled) return;
 
 		var pen = pencils.GetPen(penDef);
 
@@ -179,7 +185,7 @@ public sealed class Direct2D_Gfx : IGfx
 
 	public void DrawLine(Pt a, Pt b, PenDef penDef)
 	{
-		if (!win.IsInit.V) return;
+		if (DrawDisabled) return;
 		var pen = pencils.GetPen(penDef);
 
 		var m = (int)pen.Width % 2 == 0 ? 0.5f : 0.0f;
@@ -196,5 +202,29 @@ public sealed class Direct2D_Gfx : IGfx
 		var p1 = new Vector2(b.X + ox, b.Y + oy);
 
 		T.DrawLine(p0, p1, pen.Brush, pen.Width, pen.Style);
+	}
+
+
+
+	public Sz MeasureText_(string text, FontDef fontDef)
+	{
+		var layout = pencils.GetFontLayout(text, fontDef);
+		var sz = new Sz(
+			(int)Math.Round(layout.Metrics.Width) + DXFontUtils.TextMargin.Dir(Dir.Horz),
+			(int)Math.Round(layout.Metrics.Height) + DXFontUtils.TextMargin.Dir(Dir.Vert) - 1
+		);
+		return sz;
+	}
+
+	public void DrawText_(string text, FontDef fontDef, Color color)
+	{
+		if (DrawDisabled) return;
+		var layout = pencils.GetFontLayout(text, fontDef);
+		var brush = pencils.GetBrush(new SolidBrushDef(color));
+		var pos = new Vector2(
+			R.X + DXFontUtils.TextMargin.Left,
+			R.Y + DXFontUtils.TextMargin.Top - 1
+		);
+		T.DrawTextLayout(pos, layout, brush, DrawTextOptions);
 	}
 }

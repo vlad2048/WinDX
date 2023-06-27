@@ -171,7 +171,7 @@ static partial class Setup
 			{
 				if (layout.V.IsNone(out var layoutDef)) return;
 				
-				using var gfx = renderWinCtx.GetGfx();
+				using var gfx = renderWinCtx.GetGfx(false);
 				DrawOnWin(gfx, layoutDef, selNode, hoveredNode);
 			}).D(win.D);
 

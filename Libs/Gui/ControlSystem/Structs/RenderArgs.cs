@@ -1,6 +1,7 @@
-﻿using LayoutSystem.Flex;
+﻿using System.Drawing;
 using RenderLib.Renderers;
 using PowRxVar;
+using RenderLib.Structs;
 using TreePusherLib;
 
 namespace ControlSystem.Structs;
@@ -26,4 +27,12 @@ public sealed class RenderArgs : IDisposable
 
 	internal IDisposable Flex(StFlexNode f) => pusher.Push(f);
 	internal IDisposable Ctrl(Ctrl ctrl) => pusher.Push(new CtrlNode(ctrl));
+
+
+	public void DrawText(string text, FontDef font, Color color)
+	{
+		var sz = Gfx.MeasureText_(text, font);
+		pusher.Push(new TextMeasureNode(sz)).Dispose();
+		Gfx.DrawText_(text, font, color);
+	}
 }

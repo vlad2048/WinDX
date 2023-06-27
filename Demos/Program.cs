@@ -45,11 +45,15 @@ class Program
 
 				WinSpector.RunInternal(
 					new DemoNfo("SysWin", Wrap(SysWinDemo.Run)),
+
 					new DemoNfo("UnbalancedCtrlHandling", Wrap(() => new UnbalancedCtrlHandlingDemo())),
 					new DemoNfo("BalancedCtrlHandling", Wrap(() => new BalancedCtrlHandlingDemo())),
 					new DemoNfo("PopNode", Wrap(() => new PopNodeDemo())),
 					new DemoNfo("PopNodeComplex", Wrap(() => new PopNodeComplexDemo())),
+					new DemoNfo("Text", Wrap(() => new TextDemo())),
+
 					new DemoNfo("UserEvents", Wrap(() => new UserEventsDemoWin())),
+
 					new DemoNfo("DetachCtrl", Wrap(() => new DetachCtrlDemo()))
 				);
 			}

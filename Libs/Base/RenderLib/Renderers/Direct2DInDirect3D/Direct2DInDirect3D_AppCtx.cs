@@ -64,6 +64,11 @@ public sealed class Direct2DInDirect3D_AppCtx : IRenderAppCtxWithDispose
 	// ===
 	public D2D.ID2D1Factory1 D2DFactory { get; }
 
+	// DWRITE
+	// ======
+	public DWRITE.IDWriteFactory7 DWRITEFactory { get; }
+
+
 
 	internal Direct2DInDirect3D_AppCtx()
 	{
@@ -72,6 +77,8 @@ public sealed class Direct2DInDirect3D_AppCtx : IRenderAppCtxWithDispose
 		(D3DDevice, D3DDeviceCtx, DXGIDevice) = D3D11InitUtils.Helper_D3D11CreateDevice<D3D11.ID3D11Device1, D3D11.ID3D11DeviceContext1, DXGI.IDXGIDevice>().D(d);
 
 		D2DFactory = D2D.D2D1.D2D1CreateFactory<D2D.ID2D1Factory1>(D2D.FactoryType.SingleThreaded, D2D.DebugLevel.Information).D(d);
+
+		DWRITEFactory = DWRITE.DWrite.DWriteCreateFactory<DWRITE.IDWriteFactory7>().D(d);
 	}
 
 	public IRenderWinCtx GetWinCtx(ISysWinRenderingSupport win) => new Direct2DInDirect3D_WinCtx(win, this);
@@ -147,7 +154,7 @@ public sealed class Direct2DInDirect3D_WinCtx : IRenderWinCtx
 		InitResizeResources();
 	}
 
-	public IGfx GetGfx() => new Direct2DInDirect3D_Gfx(win, this);
+	public IGfx GetGfx(bool measureOnly) => new Direct2DInDirect3D_Gfx(win, this, measureOnly);
 
 
 
@@ -171,7 +178,7 @@ public sealed class Direct2DInDirect3D_WinCtx : IRenderWinCtx
 		);
 		D2DRenderTarget = AppCtx.D2DFactory.CreateDxgiSurfaceRenderTarget(DXGISurface, renderTargetProperties).D(resizeD);
 
-		Pencils = new Pencils(AppCtx.D2DFactory, D2DRenderTarget).D(resizeD);
+		Pencils = new Pencils(AppCtx.D2DFactory, D2DRenderTarget, AppCtx.DWRITEFactory).D(resizeD);
 	}
 }
 
@@ -181,29 +188,35 @@ public sealed class Direct2DInDirect3D_WinCtx : IRenderWinCtx
 // *******
 public sealed class Direct2DInDirect3D_Gfx : IGfx
 {
+	private const D2D.DrawTextOptions DrawTextOptions = D2D.DrawTextOptions.None;
+
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
 	private readonly ISysWinRenderingSupport win;
 	private readonly Pencils pencils;
+	private readonly bool measureOnly;
 
 	public Direct2DInDirect3D_AppCtx AppCtx { get; }
 	public Direct2DInDirect3D_WinCtx WinCtx { get; }
 
 	public D2D.ID2D1RenderTarget T { get; }
 	public D2D.ID2D1Factory1 D2DFactory { get; }
+	public DWRITE.IDWriteFactory7 DWRITEFactory { get; }
 
 	public R R { get; set; }
 
-	internal Direct2DInDirect3D_Gfx(ISysWinRenderingSupport win, Direct2DInDirect3D_WinCtx winCtx)
+	internal Direct2DInDirect3D_Gfx(ISysWinRenderingSupport win, Direct2DInDirect3D_WinCtx winCtx, bool measureOnly)
 	{
 		this.win = win;
+		this.measureOnly = measureOnly;
 		WinCtx = winCtx;
 		AppCtx = winCtx.AppCtx;
 		pencils = winCtx.Pencils;
 		R = win.ClientR.V;
 		T = winCtx.D2DRenderTarget;
 		D2DFactory = winCtx.AppCtx.D2DFactory;
+		DWRITEFactory = winCtx.AppCtx.DWRITEFactory;
 
 		T.BeginDraw();
 		Disposable.Create(() =>
@@ -213,19 +226,17 @@ public sealed class Direct2DInDirect3D_Gfx : IGfx
 		}).D(d);
 	}
 
-	public void Dbg()
-	{
-	}
+	private bool DrawDisabled => measureOnly || R.IsDegenerate || !win.IsInit.V;
 
 	public void FillR(R r, BrushDef brush)
 	{
-		if (!win.IsInit.V) return;
+		if (DrawDisabled) return;
 		T.FillRectangle(r.ToDrawRect(), pencils.GetBrush(brush));
 	}
 
 	public void DrawR(R r, PenDef penDef)
 	{
-		if (!win.IsInit.V) return;
+		if (DrawDisabled) return;
 
 		var pen = pencils.GetPen(penDef);
 
@@ -236,7 +247,7 @@ public sealed class Direct2DInDirect3D_Gfx : IGfx
 
 	public void DrawLine(Pt a, Pt b, PenDef penDef)
 	{
-		if (!win.IsInit.V) return;
+		if (DrawDisabled) return;
 		var pen = pencils.GetPen(penDef);
 
 		var m = (int)pen.Width % 2 == 0 ? 0.5f : 0.0f;
@@ -253,6 +264,30 @@ public sealed class Direct2DInDirect3D_Gfx : IGfx
 		var p1 = new Vector2(b.X + ox, b.Y + oy);
 
 		T.DrawLine(p0, p1, pen.Brush, pen.Width, pen.Style);
+	}
+
+
+
+	public Sz MeasureText_(string text, FontDef fontDef)
+	{
+		var layout = pencils.GetFontLayout(text, fontDef);
+		var sz = new Sz(
+			(int)Math.Round(layout.Metrics.Width) + DXFontUtils.TextMargin.Dir(Dir.Horz),
+			(int)Math.Round(layout.Metrics.Height) + DXFontUtils.TextMargin.Dir(Dir.Vert) - 1
+		);
+		return sz;
+	}
+
+	public void DrawText_(string text, FontDef fontDef, Color color)
+	{
+		if (DrawDisabled) return;
+		var layout = pencils.GetFontLayout(text, fontDef);
+		var brush = pencils.GetBrush(new SolidBrushDef(color));
+		var pos = new Vector2(
+			R.X + DXFontUtils.TextMargin.Left,
+			R.Y + DXFontUtils.TextMargin.Top - 1
+		);
+		T.DrawTextLayout(pos, layout, brush, DrawTextOptions);
 	}
 }
 

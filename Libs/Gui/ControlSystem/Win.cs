@@ -16,7 +16,7 @@ using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
 using RenderLib;
-using RenderLib.Renderers.Dummy;
+using RenderLib.Renderers;
 using SysWinLib;
 using SysWinLib.Structs;
 using TreePusherLib;
@@ -69,7 +69,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 			Invalidate();
 		}).D(D);
 
-		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
+		var renderer = RendererGetter.Get(RendererType.Direct2D, sysWin).D(D);
 		G.WinMan.AddWin(this);
 
 		//Evt.Subscribe(e => L($"[Win] - {e}")).D(D);
@@ -85,14 +85,13 @@ public class Win : Ctrl, IWinUserEventsSupport
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
-			var gfx = renderer.GetGfx().D(d);
 
 			// Layout
 			// ======
 			if (canSkipLayout.IsNotSet())
 			{
 				partitionSet = this
-					.BuildTree()
+					.BuildTree(renderer)
 					.SolveTree(this, out var mixLayout)
 					.SplitPopups()
 					.CreatePopups(popupMan)
@@ -104,6 +103,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 			// Render
 			// ======
+			var gfx = renderer.GetGfx(false).D(d);
 			RenderUtils.RenderTree(partitionSet.MainPartition, gfx);
 			SpectorWinRenderUtils.Render(SpectorDrawState, partitionSet.MainPartition, gfx);
 
@@ -114,10 +114,10 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 file static class WinUtils
 {
-	public static ReconstructedTree<IMixNode> BuildTree(this Ctrl rootCtrl)
+	public static ReconstructedTree<IMixNode> BuildTree(this Ctrl rootCtrl, IRenderWinCtx renderer)
 	{
 		using var d = new Disp();
-		var gfx = new Dummy_Gfx().D(d);
+		using var gfx = renderer.GetGfx(true).D(d);
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
 		var pusher = new TreePusher<IMixNode>(treeEvtSig);
 		var renderArgs = new RenderArgs(gfx, pusher).D(d);
@@ -144,7 +144,7 @@ file static class WinUtils
 		out MixLayout mixLayout
 	)
 	{
-		var mixRoot = tree.Root;
+		var mixRoot = tree.Root.ApplyTextMeasures();
 
 		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
 		var flexRoot = stFlexRoot.Map(e => e.Flex);
