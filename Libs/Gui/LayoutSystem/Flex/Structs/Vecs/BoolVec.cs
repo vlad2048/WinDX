@@ -7,4 +7,5 @@ public readonly record struct BoolVec(bool X, bool Y)
 	public override string ToString() => $"{X} x {Y}";
 
 	public static readonly BoolVec False = new(false, false);
+	public static readonly BoolVec True = new(true, true);
 }

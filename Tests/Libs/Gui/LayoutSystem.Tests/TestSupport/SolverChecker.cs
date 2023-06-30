@@ -18,20 +18,18 @@ static class SolverChecker
 		var treeRaw = treeFluentRaw.Map(e => e.Build());
 		var freeSz = FreeSzMaker.FromSz(totalSz);
 		var (tree, _) = treeRaw.RespectRules(freeSz);
-		treeRaw.L("Raw");
-		tree.L("Good");
+		treeRaw.LTree("Raw");
+		tree.LTree("Good");
 
 		var layout = FlexSolver.Solve(treeRaw, freeSz);
 		var actRTree = layout.Root.MapN(node => layout.RMap[node]);
 
-		//tree.ZipTree(expRTree).L("Expected");
-		//tree.ZipTree(actRTree).L("Actual");
-		expRTree.L("Expected");
-		actRTree.L("Actual");
+		expRTree.LTree("Expected");
+		actRTree.LTree("Actual");
 		var isCorrect = actRTree.IsEqual(expRTree);
 		if (isCorrect)
 		{
-			"-> OK".L();
+			L("-> OK");
 		}
 		else
 		{

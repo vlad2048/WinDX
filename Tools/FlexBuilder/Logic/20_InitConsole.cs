@@ -8,9 +8,12 @@ namespace FlexBuilder.Logic;
 
 static partial class Setup
 {
+	public const bool EnableConsole = false;
+
 	public static IDisposable InitConsole(UserPrefs userPrefs)
 	{
 		var d = new Disp();
+		if (!EnableConsole) return d;
 
 		ConUtils.Init(userPrefs.ConR.ToR());
 

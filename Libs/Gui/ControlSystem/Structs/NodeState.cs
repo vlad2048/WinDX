@@ -1,12 +1,15 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using ControlSystem.Logic.Scrolling_;
 using PowBasics.Geom;
 using PowRxVar;
 using UserEvents;
-using UserEvents.Generators;
 using UserEvents.Structs;
 
 namespace ControlSystem.Structs;
+
+
+
 
 public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 {
@@ -46,11 +49,13 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	/// </summary>
 	public void DispatchEvt(IUserEvt evt) => whenEvt.OnNext(evt);
 
+	public ScrollState ScrollState { get; }
 
 	public NodeState()
 	{
 		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(D);
 		whenEvt = new Subject<IUserEvt>().D(D);
+		ScrollState = new ScrollState().D(D);
 	}
 }
 

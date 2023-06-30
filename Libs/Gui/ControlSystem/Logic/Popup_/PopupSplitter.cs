@@ -7,7 +7,7 @@ using PowMaybe;
 using PowRxVar;
 using UserEvents;
 
-namespace ControlSystem.Logic.PopupLogic;
+namespace ControlSystem.Logic.Popup_;
 
 
 

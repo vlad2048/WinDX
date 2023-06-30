@@ -57,15 +57,15 @@ public sealed class StackStrat : IStrat
 		var dim = node.V.Dim;
 
 		var sz = GeomMaker.MkSzDir(MainDir,
-			dim.Dir(MainDir).IsFit() switch
+			dim.Dir(MainDir).Typ() switch
 			{
-				truer => kidDims.Sum(e => e.Dir(MainDir).Max),
-				false => dim.Dir(MainDir)!.Value.Max
+				DimType.Fit => kidDims.Sum(e => e.Dir(MainDir).Max),
+				_ => dim.Dir(MainDir)!.Value.Max,
 			},
-			dim.Dir(ElseDir).IsFit() switch
+			dim.Dir(ElseDir).Typ() switch
 			{
-				truer => kidDims.MaxT(e => e.Dir(ElseDir).Max),
-				false => dim.Dir(ElseDir)!.Value.Max
+				DimType.Fit => kidDims.MaxT(e => e.Dir(ElseDir).Max),
+				_ => dim.Dir(ElseDir)!.Value.Max,
 			}
 		).CapWith(freeSz);
 
@@ -131,7 +131,7 @@ static class StackUtilsShared
 			var indices = arr.GetIndicesWhere(t => t.todo > 0);
 			var cnt = indices.Length;
 		
-			// spread todo into them
+			// spread _todo into them
 			var multTotal = indices.Sum(i => arr[i].mult);
 			var adds = indices.Map(i => (int)(arr[i].mult * todo / multTotal));
 			// correct for division errors

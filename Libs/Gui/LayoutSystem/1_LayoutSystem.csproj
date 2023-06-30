@@ -11,4 +11,8 @@
 		<PackageReference Include="PowTrees" Version="0.0.27" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Flex\Utils\" />
+	</ItemGroup>
+
 </Project>

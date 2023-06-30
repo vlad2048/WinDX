@@ -15,7 +15,7 @@ using UserEvents.Utils;
 using WinAPI.User32;
 using WinAPI.Windows;
 
-namespace ControlSystem.Logic.PopupLogic;
+namespace ControlSystem.Logic.Popup_;
 
 sealed class PopupWin : Ctrl, IWinUserEventsSupport
 {

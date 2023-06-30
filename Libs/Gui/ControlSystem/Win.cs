@@ -1,8 +1,8 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using ControlSystem.Logic.PopupLogic;
-using ControlSystem.Logic.UserEventsLogic;
+using ControlSystem.Logic.Popup_;
+using ControlSystem.Logic.UserEvents_;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
@@ -93,6 +93,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 				partitionSet = this
 					.BuildTree(renderer)
 					.SolveTree(this, out var mixLayout)
+					.UpdateScrollStates()
 					.SplitPopups()
 					.CreatePopups(popupMan)
 					.DispatchNodeEvents(eventDispatcher, popupMan.GetWin)
@@ -149,10 +150,10 @@ file static class WinUtils
 		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
 		var flexRoot = stFlexRoot.Map(e => e.Flex);
 		var freeSz = FreeSzMaker.FromSz(win.ClientR.V.Size);
+
 		var layout = FlexSolver.Solve(flexRoot, freeSz);
 
 		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
-
 		return mixLayout =
 			new MixLayout(
 				win,
@@ -176,6 +177,29 @@ file static class WinUtils
 						e => e
 					)
 			);
+	}
+
+	public static MixLayout UpdateScrollStates(this MixLayout layout)
+	{
+		layout.MixRoot.Where(e => e.V is StFlexNode).ForEach(nod =>
+		{
+			var node = (StFlexNode)nod.V;
+			var scrollState = node.State.ScrollState;
+			var kids = nod.GetFirstChildrenWhere(e => e is StFlexNode { Flex.Flags.Pop: false });
+			if (kids.Length == 0)
+			{
+				scrollState.X.DisableScroll();
+				scrollState.Y.DisableScroll();
+			}
+			else
+			{
+				var kidsRs = kids.SelectToArray(e => layout.RMap[((StFlexNode)(e.V)).State]);
+				var contentSz = kidsRs.Union().Size;
+				var viewSz = layout.RMap[node.State].Size;
+			}
+		});
+
+		return layout;
 	}
 
 	public static PartitionSet SplitPopups(

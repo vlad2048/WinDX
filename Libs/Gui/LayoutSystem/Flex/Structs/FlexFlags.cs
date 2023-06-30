@@ -1,4 +1,7 @@
 ﻿// ReSharper disable once CheckNamespace
+
+using PowBasics.Geom;
+
 namespace LayoutSystem.Flex.Structs;
 
 public readonly record struct FlexFlags(
@@ -20,4 +23,10 @@ public readonly record struct FlexFlags(
 
 	public static readonly FlexFlags None = new(BoolVec.False, false);
 	public static readonly FlexFlags PopNode = new(BoolVec.False, true);
+
+	/// <summary>
+	/// Width : width  of the vertical   scrollbar
+	/// Height: height of the horizontal scrollbar
+	/// </summary>
+	public static readonly Sz ScrollBarCrossDims = new(17, 17);
 }

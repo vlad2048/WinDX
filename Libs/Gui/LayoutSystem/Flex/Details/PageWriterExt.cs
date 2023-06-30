@@ -53,7 +53,7 @@ static class PageWriterExt
 		w.WriteLine(pos.f(), C.PosVal);
 	}
 
-	public static void LayKidsInputs(this W w, Node node, FreeSz scrFreeSz, FreeSz freeSz)
+	public static void LayKidsInputs(this W w, Node node, FreeSz freeSz)
 	{
 		w.WriteLine();
 		w.WriteLine("LayKids:", C.LayKidsTitle);
@@ -62,9 +62,8 @@ static class PageWriterExt
 		w.WriteLine(node.f(), C.Node);
 
 		w.Write("free: ", C.Key);
-		w.Write(scrFreeSz.f(), C.Free);
-		if (scrFreeSz != freeSz)
-			w.Write($"  {freeSz.f()}", C.Crossed);
+		w.Write(freeSz.f(), C.Free);
+		//if (scrFreeSz != freeSz) w.Write($"  {freeSz.f()}", C.Crossed);
 		w.WriteLine();
 		w.WriteSeparator();
 	}
@@ -100,10 +99,10 @@ static class PageWriterExt
 		w.WriteLine();
 	}
 
-	public static void LayKidsOutput(this W w, LayNfo layNfoCapped, LayNfo layNfo, FreeSz scrFreeSz, bool topLevel)
+	public static void LayKidsOutput(this W w, LayNfo layNfo)
 	{
 		w.WriteSeparator();
-		switch (topLevel)
+		/*switch (topLevel)
 		{
 			case truer:
 				if (!layNfoCapped.IsSame(layNfo))
@@ -119,7 +118,7 @@ static class PageWriterExt
 					w.WriteLine(sz.f(), C.Crossed);
 				w.WriteLine(szCapped.f(), C.NodeStratQuestion);
 				break;
-		}
+		}*/
 	}
 
 

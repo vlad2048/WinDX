@@ -26,5 +26,8 @@ public static class DimVecMaker
 	
 	public static          DimVec FilFix(int y)       => new(D.Fil   , D.Fix(y));
 	public static          DimVec FixFil(int x)       => new(D.Fix(x), D.Fil   );
+
+	public static          DimVec FixFit(int x)       => new(D.Fix(x), null    );
+	public static          DimVec FitFix(int y)       => new(null    , D.Fix(y));
 // @formatter:on
 }

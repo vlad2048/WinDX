@@ -51,8 +51,10 @@ public class FlexNodeFluent
     public FlexNodeFluent DimFil() => Dim(Vec.Fil);
     public FlexNodeFluent DimFitFil() => Dim(Vec.FitFil);
     public FlexNodeFluent DimFilFit() => Dim(Vec.FilFit);
-    public FlexNodeFluent DimFilFix(int y) => Dim(Vec.FilFix(y));
     public FlexNodeFluent DimFixFil(int x) => Dim(Vec.FixFil(x));
+    public FlexNodeFluent DimFilFix(int y) => Dim(Vec.FilFix(y));
+    public FlexNodeFluent DimFixFit(int x) => Dim(Vec.FixFit(x));
+    public FlexNodeFluent DimFitFix(int y) => Dim(Vec.FitFix(y));
 
     public FlexNodeFluent ScrollX() => Flags(FlagsVal with { Scroll = new BoolVec(truer, false) });
     public FlexNodeFluent ScrollY() => Flags(FlagsVal with { Scroll = new BoolVec(false, truer) });

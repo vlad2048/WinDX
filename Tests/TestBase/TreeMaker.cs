@@ -12,20 +12,10 @@ public static class TreeChecker
 {
 	public static void ShouldBeSameTree<T>(this TNod<T> actTree, TNod<T> expTree)
 	{
-		actTree.LogTree("Actual");
-		expTree.LogTree("Expected");
+		actTree.LTree("Actual");
+		expTree.LTree("Expected");
 		var areSame = actTree.IsEqual(expTree);
 		areSame.ShouldBeTrue("Wrong tree");
 		L("Trees match ✅");
-	}
-}
-
-public static class TreeLogger
-{
-	public static void LogTree<T>(this TNod<T> root, string title)
-	{
-		LTitle(title);
-		L(root.LogToString());
-		L("");
 	}
 }

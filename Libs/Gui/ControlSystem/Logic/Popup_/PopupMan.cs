@@ -6,7 +6,7 @@ using SysWinLib;
 using IWin = UserEvents.IWinUserEventsSupport;
 using INode = UserEvents.INodeStateUserEventsSupport;
 
-namespace ControlSystem.Logic.PopupLogic;
+namespace ControlSystem.Logic.Popup_;
 
 
 sealed record BoundPartition(

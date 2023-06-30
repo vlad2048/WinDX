@@ -43,8 +43,8 @@ sealed class TreeExtsTests
 	public void _00_ExtendUpAndIncluding_1()
 	{
 		var (root, child) = extendTree.Single(e => e.V == 3).ExtendUpAndIncluding(e => e >= 10);
-		TreeLogger.LogTree(root, "Root");
-		TreeLogger.LogTree(child, "Child");
+		root.LTree("Root");
+		child.LTree("Child");
 		root.V.ShouldBe(10);
 		child.V.ShouldBe(3);
 	}
@@ -53,8 +53,8 @@ sealed class TreeExtsTests
 	public void _01_ExtendUpAndIncluding_2()
 	{
 		var (root, child) = extendTree.Single(e => e.V == 12).ExtendUpAndIncluding(e => e >= 10);
-		TreeLogger.LogTree(root, "Root");
-		TreeLogger.LogTree(child, "Child");
+		root.LTree("Root");
+		child.LTree("Child");
 		root.V.ShouldBe(12);
 		child.V.ShouldBe(12);
 	}
@@ -64,8 +64,8 @@ sealed class TreeExtsTests
 	public void _05_ExtendDownToAndExcluding()
 	{
 		var (root, boundary) = extendTree.Single(e => e.V == 2).ExtendDownToAndExcluding(e => e >= 10);
-		extendTree.LogTree("ExtendTree");
-		root.LogTree("Root");
+		extendTree.LTree("ExtendTree");
+		root.LTree("Root");
 		root.ShouldBeSameTree(
 			N(2,
 				N(3,
@@ -131,6 +131,59 @@ sealed class TreeExtsTests
 					)
 				)
 			);
+
+
+
+
+
+
+	[Test]
+	public void _20_GetFirstChildrenWhere()
+	{
+		var actArr =
+			N(0,
+					N(1,
+						N(100,
+							N(2),
+							N(101)
+						),
+						N(3,
+							N(102),
+							N(4)
+						)
+					),
+					N(103),
+					N(5,
+						N(6,
+							N(7,
+								N(104)
+							),
+							N(8)
+						),
+						N(105,
+							N(106,
+								N(9,
+									N(107)
+								)
+							),
+							N(107)
+						)
+					)
+				)
+				.GetFirstChildrenWhere(e => e >= 100)
+				.SelectToArray(e => e.V);
+
+		var expArr = new []
+		{
+			100,
+			102,
+			103,
+			104,
+			105
+		};
+
+		CollectionAssert.AreEqual(expArr, actArr);
+	}
 }
 
 

@@ -2,6 +2,7 @@
 using LayoutSystem.Flex.Details.Structs;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Flex.TreeLogic;
+using LayoutSystem.Flex.Utils;
 using LayoutSystem.Utils.Exts;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
@@ -29,7 +30,7 @@ public static class FlexSolver
 			rootFixed,
 			rMap,
 			detailsMap
-		);
+		).CheckSanity();
 	}
 
 
@@ -49,9 +50,9 @@ public static class FlexSolver
 			var write = new PageWriter();
 			write.LayNodeInputPos(pos);
 
-			var layNfo = LayKids(node, freeSz, write, true);
+			var layNfo = LayKidsWithScrollHandling(node, freeSz, write);
 
-			rMap[node] = new R(pos, layNfo.ResolvedSz.CapWith(freeSz));
+			rMap[node] = new R(pos, layNfo.ResolvedSz);
 			write.FinalR(pos, layNfo.ResolvedSz, freeSz);
 
 			var kidIdx = 0;
@@ -77,22 +78,66 @@ public static class FlexSolver
 		return (rMap, detailsMap);
 	}
 
-	private static LayNfo LayKids(Node node, FreeSz freeSz, PageWriter write, bool topLevel)
+
+	private static LayNfo LayKidsWithScrollHandling(Node node, FreeSz freeSz, PageWriter write)
 	{
-		var scrFreeSz = freeSz.UnbridleScrolls(node);
+		var hasKids = node.Children.Any();
 
-		write.LayKidsInputs(node, scrFreeSz, freeSz);
+		switch (node.V.Flags.Scroll, hasKids)
+		{
+			case (_, false):
+			case ((false, false), _):
+				return LayKids(node, freeSz, write);
 
-		var kidDims = node.Children.Map((kid, kidIdx) => ResolveKid(kid, kidIdx, scrFreeSz, write));
+			case ((truer, truer), truer):
+			{
+				var layNfoDad = LayKids(node, freeSz, write);
+				var layNfoKids = LayKids(node, new FreeSz(null, null), write);
+				var layNfo = new LayNfo(layNfoDad.ResolvedSz, layNfoKids.Kids);
+				return layNfo;
+			}
+
+			case ((false, truer), truer):
+			case ((truer, false), truer):
+			{
+				var layNfoDad = LayKids(node, freeSz, write);
+				var nodeSz = layNfoDad.ResolvedSz;
+				var scrollDir = node.V.Flags.Scroll.X ? Dir.Horz : Dir.Vert;
+
+				var freeSzNoScroll = FreeSzMaker.DirFun(dir => dir == scrollDir ? null : nodeSz.Dir(dir));
+				var layNfoKidsNoScroll = LayKids(node, freeSzNoScroll, write);
+				var layNfoKids = layNfoKidsNoScroll;
+				var scrollNeeded = layNfoKidsNoScroll.Kids.Union().Size.Dir(scrollDir) > nodeSz.Dir(scrollDir);
+
+				if (scrollNeeded)
+				{
+					var freeSzScroll = FreeSzMaker.DirFun(dir => dir == scrollDir ? null : Math.Max(0, nodeSz.Dir(dir) - FlexFlags.ScrollBarCrossDims.Dir(dir)));
+					var layNfoKidsScroll = LayKids(node, freeSzScroll, write);
+					layNfoKids = layNfoKidsScroll;
+				}
+
+				var layNfo = new LayNfo(layNfoDad.ResolvedSz, layNfoKids.Kids);
+				return layNfo;
+			}
+		}
+	}
+
+
+
+	private static LayNfo LayKids(Node node, FreeSz freeSz, PageWriter write)
+	{
+		write.LayKidsInputs(node, freeSz);
+
+		var kidDims = node.Children.Map((kid, kidIdx) => ResolveKid(kid, kidIdx, freeSz, write));
 
 		var layNfo = node.V.Strat.Lay(
 			node,
-			scrFreeSz,
+			freeSz,
 			kidDims
 		);
-		var layNfoCapped = layNfo.CapWithFreeSize(scrFreeSz);
+		var layNfoCapped = layNfo.CapWithFreeSize(freeSz);
 
-		write.LayKidsOutput(layNfoCapped, layNfo, scrFreeSz, topLevel);
+		write.LayKidsOutput(layNfo);
 
 		return layNfoCapped;
 	}
@@ -131,7 +176,7 @@ public static class FlexSolver
 		write.KidFreeSz(kidFreeSz);
 		write.Indent();
 
-		var layNfo = LayKids(kid, kidFreeSz, write, false);
+		var layNfo = LayKids(kid, kidFreeSz, write);
 
 		// Keep the original dimensions if they were resolved,
 		// but for the unresolved ones, use the sizes calculated by calling the Layout

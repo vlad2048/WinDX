@@ -1,3 +1,4 @@
+using FlexBuilder.Logic;
 using FlexBuilder.Structs;
 using PowMaybe;
 using PowRxVar;
@@ -14,7 +15,7 @@ static class Program
 		//VarDbg.BreakpointOnDispAlloc(1);
 
 		// TODO: understand why it's needed
-		Kernel32Methods.AllocConsole();
+		if (Setup.EnableConsole) Kernel32Methods.AllocConsole();
 
 		ApplicationConfiguration.Initialize();
 

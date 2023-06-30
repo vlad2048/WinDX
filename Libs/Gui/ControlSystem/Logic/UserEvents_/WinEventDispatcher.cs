@@ -1,4 +1,4 @@
-﻿using ControlSystem.Logic.PopupLogic;
+﻿using ControlSystem.Logic.Popup_;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using DynamicData;
@@ -8,7 +8,7 @@ using UserEvents;
 using IWin = UserEvents.IWinUserEventsSupport;
 using INode = UserEvents.INodeStateUserEventsSupport;
 
-namespace ControlSystem.Logic.UserEventsLogic;
+namespace ControlSystem.Logic.UserEvents_;
 
 
 sealed class WinEventDispatcher : IDisposable
