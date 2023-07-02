@@ -1,8 +1,10 @@
-﻿using PowBasics.Geom;
+﻿using System.Diagnostics;
+using PowBasics.Geom;
 
 namespace LayoutSystem.Flex.Structs;
 
 
+[DebuggerStepThrough]
 public readonly record struct FreeSz(int? X, int? Y)
 {
 	public override string ToString()

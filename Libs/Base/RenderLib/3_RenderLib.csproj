@@ -9,7 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="PowBasics" Version="0.0.16" />
 		<PackageReference Include="PowBasics.Geom" Version="0.0.16" />
-		<PackageReference Include="PowRxVar" Version="0.0.43" />
+		<PackageReference Include="PowRxVar" Version="0.0.44" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -22,10 +22,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\SysWinInterfaces\2_SysWinInterfaces.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Renderers\Dummy\" />
 	</ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ namespace LayoutSystem.Flex.Utils;
 
 static class FlexLayoutSanityChecker
 {
-	public static FlexLayout CheckSanity(this FlexLayout layout)
+	public static FlexLayout SanityCheck(this FlexLayout layout)
 	{
 		var root = layout.Root;
 		var rMap = layout.RMap;

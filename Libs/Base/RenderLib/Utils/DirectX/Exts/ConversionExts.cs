@@ -1,7 +1,7 @@
 ﻿using Vortice.Mathematics;
 using Color = System.Drawing.Color;
 
-namespace RenderLib.Renderers.Utils.DirectX.Exts;
+namespace RenderLib.Utils.DirectX.Exts;
 
 static class ConversionExts
 {

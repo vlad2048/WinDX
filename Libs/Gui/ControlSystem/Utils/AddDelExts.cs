@@ -5,6 +5,11 @@ namespace ControlSystem.Utils;
 
 static class AddDelExts
 {
+	public static (K[] adds, K[] dels) GetAddDels<K, V>(this IReadOnlyDictionary<K, V> map, K[] arr) where K : notnull => (
+		arr.WhereNotToArray(map.ContainsKey),
+		map.Keys.WhereNotToArray(arr.Contains)
+	);
+
 	public static (T[] adds, K[] dels) GetAddDels<T, K, V>(this IReadOnlyDictionary<K, V> map, T[] arr, Func<T, K> projFun) where K : notnull
 	{
 		var keys = arr.SelectToArray(projFun);

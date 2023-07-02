@@ -26,6 +26,7 @@ public interface IGfx : IDisposable
 	void FillR(R r, BrushDef brush);
 	void DrawR(R r, PenDef pen);
 	void DrawLine(Pt a, Pt b, PenDef penDef);
+	void DrawBmp(Bitmap bmp);
 
 	Sz MeasureText_(string text, FontDef fontDef);
 	void DrawText_(string text, FontDef fontDef, Color color);

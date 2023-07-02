@@ -2,6 +2,7 @@
 using PowRxVar;
 using TestBase;
 using TreePusherLib.ConvertExts;
+using TreePusherLib.ConvertExts.Structs;
 // ReSharper disable EmptyEmbeddedStatement
 #pragma warning disable CS0642
 
@@ -18,6 +19,7 @@ sealed class Events2TreeTests : RxTest
 		var pusher = new TreePusher<int>(evtSig);
 
 		evtObs.ToTree(
+			_ => { },
 			_ => { },
 			() =>
 			{
@@ -57,6 +59,7 @@ sealed class Events2TreeTests : RxTest
 
 		evtObs.ToTree(
 			_ => { },
+			_ => { },
 			() =>
 			{
 				using (pusher.Push(3))
@@ -93,6 +96,7 @@ sealed class Events2TreeTests : RxTest
 
 		evtObs.ToTree(
 			_ => { },
+			_ => { },
 			() =>
 			{
 				using (pusher.Push(3))
@@ -122,6 +126,7 @@ sealed class Events2TreeTests : RxTest
 
 		// TODO: understand why the expected data looks/is wrong
 		evtObs.ToTree(
+			_ => { },
 			_ => { },
 			() =>
 			{

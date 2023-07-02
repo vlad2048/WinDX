@@ -1,4 +1,5 @@
 ﻿using ControlSystem.Logic.Popup_;
+using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
@@ -399,8 +400,8 @@ sealed class PopSplitterTests : RxTest
 				)
 			);
 
-		rMap = new[] { n1, n2, n3, n4, n5, p1, p2, p3 }
-			.ToDictionary(e => e, _ => R.Empty);
+		var ns = new[] { n1, n2, n3, n4, n5, p1, p2, p3 };
+		rMap = ns.ToDictionary(e => e, _ => R.Empty);
 	}
 
 	[TearDown]

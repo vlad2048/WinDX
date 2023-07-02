@@ -26,7 +26,7 @@ class Program
 
 		if (RunSingleDemo)
 		{
-			using (new UserEventsDemoWin()) App.Run();
+			using (new ScrollDemo()) App.Run();
 		}
 		else
 		{

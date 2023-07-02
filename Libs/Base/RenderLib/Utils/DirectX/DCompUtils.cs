@@ -2,7 +2,7 @@
 using PowRxVar;
 using Vortice;
 
-namespace RenderLib.Renderers.Utils.DirectX;
+namespace RenderLib.Utils.DirectX;
 
 static class DCompUtils
 {

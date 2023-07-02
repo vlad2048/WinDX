@@ -9,7 +9,7 @@ public static class RegisterClassUtils
 {
 	internal static readonly IntPtr InstanceHandle = Process.GetCurrentProcess().Handle;
 	private static readonly IntPtr Icon = User32Helpers.LoadIcon(IntPtr.Zero, SystemIcon.IDI_APPLICATION);
-	private static readonly IntPtr Cursor = User32Helpers.LoadCursor(IntPtr.Zero, SystemCursor.IDC_CROSS);
+	private static readonly IntPtr Cursor = User32Helpers.LoadCursor(IntPtr.Zero, SystemCursor.IDC_ARROW);
 	private static readonly Dictionary<string, WindowProc> registered = new();
 
 	public static string Register(string name, RegisterClassParams ps)

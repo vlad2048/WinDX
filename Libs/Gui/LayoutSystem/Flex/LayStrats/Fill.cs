@@ -1,4 +1,5 @@
-﻿using LayoutSystem.Flex.Structs;
+﻿using LayoutSystem.Flex.LayStratsUtils_;
+using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
 
@@ -22,22 +23,12 @@ public sealed class FillStrat : IStrat
 		FDimVec[] kidDims
 	)
 	{
-		var sz = GeomMaker.SzDirFun(dir =>
-			{
-				var d = node.V.Dim.Dir(dir);
-				return d.Typ() switch
-				{
-					DimType.Fix => d!.Value.Max,
-					DimType.Flt => d!.Value.Max,
-					DimType.Fit => kidDims.MaxT(e => e.Dir(dir).Max.EnsureNotInf()),
-					DimType.Fil => freeSz.Dir(dir).HasValue switch
-					{
-						truer => freeSz.Dir(dir)!.Value,
-						false => 0
-					}
-				};
-			}
-		).CapWith(freeSz);
+		var sz = LayStratsUtils.ComputeSz(
+			node.V.Dim,
+			freeSz,
+			dir => kidDims.MaxT(e => e.Dir(dir).Max)
+		);
+
 
 		var kidRs =
 			node.Children.Zip(kidDims)

@@ -38,6 +38,15 @@ public static class IUIEvtExts
 			.OfType<MouseLeaveUserEvt>()
 			.ToUnit();
 
+	public static (IRoVar<bool>, IDisposable) IsMouseOver(this IObservable<IUserEvt> evt) =>
+		Var.Make(
+			false,
+			Obs.Merge(
+				evt.WhenMouseEnter().Select(_ => true),
+				evt.WhenMouseLeave().Select(_ => false)
+			)
+		);
+
 
 	// ************
 	// * Keyboard *

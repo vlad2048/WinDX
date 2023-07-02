@@ -6,50 +6,18 @@ using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
 using PowWinForms.Utils;
+using WinSpectorLib.Controls;
 using WinSpectorLib.Utils;
 
 namespace WinSpectorLib.Logic;
 
 static partial class Setup
 {
-	private sealed record MixNodeWithNfo(
-		IMixNode Node,
-		int? PopIndex
-	);
-
-	private static IReadOnlyDictionary<IMixNode, int?> GetPopMapping(this MixNode root)
-	{
-		var map = new Dictionary<IMixNode, int?>();
-		//int? idx = null;
-
-		var cnt = 0;
-
-		void Rec(MixNode node, int? idx)
-		{
-			if (node.IsPop())
-				idx = cnt++;
-			map[node.V] = idx;
-			foreach (var kid in node.Children)
-				Rec(kid, idx);
-		}
-		Rec(root, null);
-		return map;
-	}
-
-	private static bool IsPop(this MixNode node) => node.V is StFlexNode { Flex.Flags.Pop: true };
-
-	private static TNod<MixNodeWithNfo> AddNfoToTree(this MixNode root)
-	{
-		var map = root.GetPopMapping();
-		return root.Map(e => new MixNodeWithNfo(e, map[e]));
-	}
-
-
-	public static IDisposable ViewLayout(WinSpectorWin ui, IRoMayVar<MixLayout> selLayout)
+	public static IDisposable ViewLayout(WinSpectorWin ui, IRoMayVar<MixLayout> selLayout, IRwVar<bool> showEvents)
 	{
 		var d = new Disp();
 		var ctrl = ui.layoutTree;
-		PrepareTree(ctrl, selLayout);
+		PrepareTree(ctrl, selLayout, ui.eventDisplayer);
 		ctrl.SetRoot(selLayout.Map2(e => e.MixRoot.AddNfoToTree())).D(d);
 
 		var selNodeNfo = VarMay.Make<TNod<MixNodeWithNfo>>().D(d);
@@ -67,20 +35,59 @@ static partial class Setup
 			win.SpectorDrawState.HovNode.V = hovNode.V;
 		}).D(d);
 
+		SetupContextMenu(ui, selNode, showEvents).D(d);
+
 		return d;
 	}
 
 
+
+	// ***************
+	// * Nfo Wrapper *
+	// ***************
+	private sealed record MixNodeWithNfo(
+		IMixNode Node,
+		int? PopIndex
+	);
+	private static IReadOnlyDictionary<IMixNode, int?> GetPopMapping(this MixNode root)
+	{
+		var map = new Dictionary<IMixNode, int?>();
+		var cnt = 0;
+		void Rec(MixNode node, int? idx)
+		{
+			if (node.IsPop())
+				idx = cnt++;
+			map[node.V] = idx;
+			foreach (var kid in node.Children)
+				Rec(kid, idx);
+		}
+		Rec(root, null);
+		return map;
+	}
+	private static bool IsPop(this MixNode node) => node.V is StFlexNode { Flex.Flags.Pop: true };
+	private static TNod<MixNodeWithNfo> AddNfoToTree(this MixNode root)
+	{
+		var map = root.GetPopMapping();
+		return root.Map(e => new MixNodeWithNfo(e, map[e]));
+	}
+
+
+
+	// ****************
+	// * Column Setup *
+	// ****************
 	private static class ColumnName
 	{
 		public const string Node = "Node";
+		public const string Flags = "Flags";
 		public const string Width = "Width";
 		public const string Height = "Height";
 		public const string R = "R";
 		public const string Warnings = "Warnings";
+		public const string Tracked = "Tracked";
 	}
 
-	private static void PrepareTree(TreeListView ctrl, IRoMayVar<MixLayout> layout)
+	private static void PrepareTree(TreeListView ctrl, IRoMayVar<MixLayout> layout, EventDisplayer eventDisplayer)
 	{
 		var warningIcon = Resource.LayoutTree_Warning;
 		var errorIcon = Resource.LayoutTree_Error;
@@ -108,6 +115,14 @@ static partial class Setup
 				null
 			)
 		});
+
+		ctrl.AddTextColumn<MixNodeWithNfo>(ColumnName.Flags, 100, nod => nod.V.Node switch
+		{
+			CtrlNode => "_",
+			StFlexNode { Flex.Flags: var flags } => $"{flags}",
+			_ => "_"
+		});
+
 
 		ctrl.AddTextColumnWithColorAndTooltip<MixNodeWithNfo>(ColumnName.Width, 80, nod =>
 		{
@@ -201,6 +216,12 @@ static partial class Setup
 			}
 
 		});
+
+		ctrl.AddTextColumn<MixNodeWithNfo>(ColumnName.Tracked, 100, nod =>
+		{
+			if (nod.V.Node is not StFlexNode st) return string.Empty;
+			return eventDisplayer.GetTrackedNodeName(st);
+		});
 	}
 
 	private static FlexWarning? GetDimWarningForColumn(this IReadOnlyDictionary<NodeState, FlexWarning> warningMap, NodeState nodState, WarningDir colDir)
@@ -216,6 +237,59 @@ static partial class Setup
 			true => lay.WarningMap.GetDimWarningForColumn(nodState, colDir),
 			false => null
 		};
+
+
+
+	// ****************
+	// * Context Menu *
+	// ****************
+	private static IDisposable SetupContextMenu(
+		WinSpectorWin ui,
+		IRoMayVar<MixNode> selNode,
+		IRwVar<bool> showEvents
+	)
+	{
+		var d = new Disp();
+
+		ui.layoutTreeContextMenu.Events().Opening.Subscribe(e =>
+		{
+			if (selNode.V.IsNone(out var nod) || nod.V is not StFlexNode st)
+			{
+				e.Cancel = true;
+				return;
+			}
+
+			var isTracked = ui.eventDisplayer.IsNodeTracked(st);
+
+			ui.trackEventsMenuItem.Enabled = !isTracked;
+			ui.stopTrackingMenuItem.Enabled = isTracked;
+			ui.stopAllTrackingMenuItem.Enabled = ui.eventDisplayer.IsAnyNodeTracked();
+
+		}).D(d);
+
+
+		ui.trackEventsMenuItem.Events().Click.Subscribe(_ =>
+		{
+			if (selNode.V.IsNone(out var nod) || nod.V is not StFlexNode st)
+				return;
+			ui.eventDisplayer.TrackNode(st);
+			showEvents.V = true;
+		}).D(d);
+
+		ui.stopTrackingMenuItem.Events().Click.Subscribe(_ =>
+		{
+			if (selNode.V.IsNone(out var nod) || nod.V is not StFlexNode st)
+				return;
+			ui.eventDisplayer.StopTrackingNode(st);
+		}).D(d);
+
+		ui.stopAllTrackingMenuItem.Events().Click.Subscribe(_ =>
+		{
+			ui.eventDisplayer.StopAllTracking();
+		}).D(d);
+
+		return d;
+	}
 }
 
 

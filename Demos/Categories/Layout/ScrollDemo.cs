@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using ControlSystem;
+using ControlSystem.Logic.Scrolling_;
 using ControlSystem.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
@@ -10,11 +11,16 @@ namespace Demos.Categories.Layout;
 
 sealed class ScrollDemo : Win
 {
-	public ScrollDemo() : base(opt => opt.R = new R(-300, 50, 150, 200))
+	public ScrollDemo() : base(opt => opt.R = new R(-400, 50, 300, 400))
 	{
 		var nodeRoot = new NodeState().D(D);
+		var nodeHorz = new NodeState().D(D);
 		var nodeScroll = new NodeState().D(D);
-		var nodesLines = Enumerable.Range(0, 20).SelectToArray(_ => new NodeState().D(D));
+		var nodeTop = new NodeState().D(D);
+		var nodeBottom = new NodeState().D(D);
+		var nodesLines = Enumerable.Range(0, 9).SelectToArray(_ => new NodeState().D(D));
+
+		var scrollBar = new ScrollBarCtrl(Dir.Vert, nodeScroll.ScrollState.Y).D(D);
 
 		WhenRender.Subscribe(r =>
 		{
@@ -22,20 +28,45 @@ sealed class ScrollDemo : Win
 			{
 				r.Gfx.FillR(Consts.BackBrush);
 
-				using (r[nodeScroll].StratStack(Dir.Vert).Marg(20).M)
+				using (r[nodeTop].DimFilFix(50).M) { }
+
+				using (r[nodeScroll].StratStack(Dir.Vert).ScrollXY().Marg(20).M)
 				{
 					r.Gfx.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines.Length; i++)
 					{
 						var nodeLine = nodesLines[i];
 
-						using (r[nodeLine].DimFilFit().Marg(i > 0 ? 1 : 0, 0, 0, 0).M)
+						using (r[nodeLine].DimFixFit(180).Marg(i > 0 ? 1 : 0, 0, 0, 0).M)
 						{
 							r.Gfx.FillR(Consts.LineBrush);
-							r.DrawText($"Line {i}", Consts.Font, Consts.TextColor);
+							r.DrawText($"01234567890123456789 Line {i}", Consts.Font, Consts.TextColor);
 						}
 					}
 				}
+
+				/*using (r[nodeHorz].StratStack(Dir.Horz).Marg(20).M)
+				{
+					using (r[nodeScroll].StratStack(Dir.Vert).M) // .ScrollY().M)
+					{
+						r.Gfx.FillR(Consts.ScrollBrush);
+						for (var i = 0; i < nodesLines.Length; i++)
+						{
+							var nodeLine = nodesLines[i];
+
+							using (r[nodeLine].DimFixFit(180).Marg(i > 0 ? 1 : 0, 0, 0, 0).M)
+							{
+								r.Gfx.FillR(Consts.LineBrush);
+								r.DrawText($"Line {i}", Consts.Font, Consts.TextColor);
+							}
+						}
+					}
+
+					using (r[scrollBar]) { }
+				}*/
+
+				using (r[nodeBottom].M) { }
+
 			}
 		}).D(D);
 	}

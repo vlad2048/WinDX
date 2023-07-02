@@ -21,7 +21,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Flex\TestSupport\" />
+		<Folder Include="Flex\TestSupport\" />
 	</ItemGroup>
 
 </Project>

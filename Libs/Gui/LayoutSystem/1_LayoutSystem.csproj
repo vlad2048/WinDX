@@ -12,7 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Flex\Utils\" />
+		<Folder Include="Flex\LayStratsUtils_\" />
 	</ItemGroup>
 
 </Project>

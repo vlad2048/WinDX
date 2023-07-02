@@ -209,6 +209,8 @@ static partial class Setup
 
 		ctrl.AddTextColumn<FlexNode>(ColumnName.Node, null, nod => $"{nod.V.Strat}");
 
+		ctrl.AddTextColumn<FlexNode>(ColumnName.Flags, 100, nod => $"{nod.V.Flags}");
+
 		ctrl.AddTextColumnWithColorAndTooltip<FlexNode>(ColumnName.Width, 80, nod =>
 		{
 			var warn = layout.GetDimWarningForColumn(nod, WarningDir.Horz);

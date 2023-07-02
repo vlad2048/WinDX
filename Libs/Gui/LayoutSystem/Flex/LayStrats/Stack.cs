@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using LayoutSystem.Flex.LayStratsUtils_;
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
@@ -45,29 +46,16 @@ public sealed class StackStrat : IStrat
 		FDimVec[] kidDims
 	)
 	{
-		/* Stack node assumptions
-		 * ======================
-		 *   - kids.Main != FIL		REMOVED
-		 *
-		 * Common assumptions
-		 * ==================
-		 *   - dad.X = FIT  =>  kids.X != FIL
-		 *   - dad.Y = FIT  =>  kids.Y != FIL
-		 */
-		var dim = node.V.Dim;
-
-		var sz = GeomMaker.MkSzDir(MainDir,
-			dim.Dir(MainDir).Typ() switch
+		var sz = LayStratsUtils.ComputeSz(
+			node.V.Dim,
+			freeSz,
+			dir => (dir == MainDir) switch
 			{
-				DimType.Fit => kidDims.Sum(e => e.Dir(MainDir).Max),
-				_ => dim.Dir(MainDir)!.Value.Max,
-			},
-			dim.Dir(ElseDir).Typ() switch
-			{
-				DimType.Fit => kidDims.MaxT(e => e.Dir(ElseDir).Max),
-				_ => dim.Dir(ElseDir)!.Value.Max,
+				truer => kidDims.Sum(e => e.Dir(MainDir).Max),
+				false => kidDims.MaxT(e => e.Dir(ElseDir).Max),
 			}
-		).CapWith(freeSz);
+		);
+
 
 		static FDim GetX(FDimVec vec) => vec.X;
 		static FDim GetY(FDimVec vec) => vec.Y;
@@ -161,7 +149,6 @@ file static class StackUtils
 	public static (int p, int l)[] LayoutElse(int free, FDim[] dims, Align align)
 	{
 		var lngs = dims.Map(e => e.Max.Cap(0, free));
-		//var lngMax = lngs.MaxT();
 		var lngMax = free;
 		return align switch
 		{

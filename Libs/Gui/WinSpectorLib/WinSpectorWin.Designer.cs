@@ -30,21 +30,30 @@ partial class WinSpectorWin
 		components = new System.ComponentModel.Container();
 		winList = new ListBox();
 		layoutTree = new BrightIdeasSoftware.TreeListView();
+		layoutTreeContextMenu = new ContextMenuStrip(components);
+		trackEventsMenuItem = new ToolStripMenuItem();
+		stopTrackingMenuItem = new ToolStripMenuItem();
+		toolStripSeparator1 = new ToolStripSeparator();
+		stopAllTrackingMenuItem = new ToolStripMenuItem();
 		toolStrip1 = new ToolStrip();
 		openFlexBuilderToolBtn = new ToolStripButton();
 		statusStrip = new StatusStrip();
 		windowsGroupBox = new GroupBox();
+		redrawWindowBtn = new Button();
 		unselectWindowBtn = new Button();
 		layoutGroupBox = new GroupBox();
 		demosGroupBox = new GroupBox();
 		demosList = new BrightIdeasSoftware.ObjectListView();
-		redrawWindowBtn = new Button();
+		eventsGroupBox = new GroupBox();
+		eventDisplayer = new Controls.EventDisplayer();
 		((System.ComponentModel.ISupportInitialize)layoutTree).BeginInit();
+		layoutTreeContextMenu.SuspendLayout();
 		toolStrip1.SuspendLayout();
 		windowsGroupBox.SuspendLayout();
 		layoutGroupBox.SuspendLayout();
 		demosGroupBox.SuspendLayout();
 		((System.ComponentModel.ISupportInitialize)demosList).BeginInit();
+		eventsGroupBox.SuspendLayout();
 		SuspendLayout();
 		// 
 		// winList
@@ -60,6 +69,7 @@ partial class WinSpectorWin
 		// layoutTree
 		// 
 		layoutTree.CellEditUseWholeCell = false;
+		layoutTree.ContextMenuStrip = layoutTreeContextMenu;
 		layoutTree.Dock = DockStyle.Fill;
 		layoutTree.Location = new Point(3, 19);
 		layoutTree.Name = "layoutTree";
@@ -69,19 +79,48 @@ partial class WinSpectorWin
 		layoutTree.View = View.Details;
 		layoutTree.VirtualMode = true;
 		// 
+		// layoutTreeContextMenu
+		// 
+		layoutTreeContextMenu.Items.AddRange(new ToolStripItem[] { trackEventsMenuItem, stopTrackingMenuItem, toolStripSeparator1, stopAllTrackingMenuItem });
+		layoutTreeContextMenu.Name = "layoutTreeContextMenu";
+		layoutTreeContextMenu.Size = new Size(160, 76);
+		// 
+		// trackEventsMenuItem
+		// 
+		trackEventsMenuItem.Name = "trackEventsMenuItem";
+		trackEventsMenuItem.Size = new Size(159, 22);
+		trackEventsMenuItem.Text = "Track events";
+		// 
+		// stopTrackingMenuItem
+		// 
+		stopTrackingMenuItem.Name = "stopTrackingMenuItem";
+		stopTrackingMenuItem.Size = new Size(159, 22);
+		stopTrackingMenuItem.Text = "Stop tracking";
+		// 
+		// toolStripSeparator1
+		// 
+		toolStripSeparator1.Name = "toolStripSeparator1";
+		toolStripSeparator1.Size = new Size(156, 6);
+		// 
+		// stopAllTrackingMenuItem
+		// 
+		stopAllTrackingMenuItem.Name = "stopAllTrackingMenuItem";
+		stopAllTrackingMenuItem.Size = new Size(159, 22);
+		stopAllTrackingMenuItem.Text = "Stop all tracking";
+		// 
 		// toolStrip1
 		// 
 		toolStrip1.Items.AddRange(new ToolStripItem[] { openFlexBuilderToolBtn });
 		toolStrip1.Location = new Point(0, 0);
 		toolStrip1.Name = "toolStrip1";
-		toolStrip1.Size = new Size(800, 25);
+		toolStrip1.Size = new Size(792, 25);
 		toolStrip1.TabIndex = 5;
 		toolStrip1.Text = "toolStrip1";
 		// 
 		// openFlexBuilderToolBtn
 		// 
 		openFlexBuilderToolBtn.DisplayStyle = ToolStripItemDisplayStyle.Image;
-		openFlexBuilderToolBtn.Image = WinSpectorLib.Resource.ToolBtn_OpenFlexBuilder;
+		openFlexBuilderToolBtn.Image = Resource.ToolBtn_OpenFlexBuilder;
 		openFlexBuilderToolBtn.ImageTransparentColor = Color.Magenta;
 		openFlexBuilderToolBtn.Name = "openFlexBuilderToolBtn";
 		openFlexBuilderToolBtn.Size = new Size(23, 22);
@@ -91,7 +130,7 @@ partial class WinSpectorWin
 		// 
 		statusStrip.Location = new Point(0, 428);
 		statusStrip.Name = "statusStrip";
-		statusStrip.Size = new Size(800, 22);
+		statusStrip.Size = new Size(792, 22);
 		statusStrip.TabIndex = 6;
 		statusStrip.Text = "statusStrip";
 		// 
@@ -106,6 +145,15 @@ partial class WinSpectorWin
 		windowsGroupBox.TabIndex = 7;
 		windowsGroupBox.TabStop = false;
 		windowsGroupBox.Text = "Windows";
+		// 
+		// redrawWindowBtn
+		// 
+		redrawWindowBtn.Location = new Point(6, 121);
+		redrawWindowBtn.Name = "redrawWindowBtn";
+		redrawWindowBtn.Size = new Size(75, 23);
+		redrawWindowBtn.TabIndex = 2;
+		redrawWindowBtn.Text = "Redraw";
+		redrawWindowBtn.UseVisualStyleBackColor = true;
 		// 
 		// unselectWindowBtn
 		// 
@@ -149,34 +197,48 @@ partial class WinSpectorWin
 		demosList.TabIndex = 0;
 		demosList.View = View.Details;
 		// 
-		// redrawWindowBtn
+		// eventsGroupBox
 		// 
-		redrawWindowBtn.Location = new Point(6, 121);
-		redrawWindowBtn.Name = "redrawWindowBtn";
-		redrawWindowBtn.Size = new Size(75, 23);
-		redrawWindowBtn.TabIndex = 2;
-		redrawWindowBtn.Text = "Redraw";
-		redrawWindowBtn.UseVisualStyleBackColor = true;
+		eventsGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
+		eventsGroupBox.Controls.Add(eventDisplayer);
+		eventsGroupBox.Location = new Point(794, 28);
+		eventsGroupBox.Name = "eventsGroupBox";
+		eventsGroupBox.Size = new Size(303, 397);
+		eventsGroupBox.TabIndex = 10;
+		eventsGroupBox.TabStop = false;
+		eventsGroupBox.Text = "Events";
+		// 
+		// eventDisplayer
+		// 
+		eventDisplayer.Dock = DockStyle.Fill;
+		eventDisplayer.Location = new Point(3, 19);
+		eventDisplayer.Name = "eventDisplayer";
+		eventDisplayer.Size = new Size(297, 375);
+		eventDisplayer.TabIndex = 0;
 		// 
 		// WinSpectorWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
-		ClientSize = new Size(800, 450);
+		ClientSize = new Size(792, 450);
+		Controls.Add(eventsGroupBox);
 		Controls.Add(demosGroupBox);
 		Controls.Add(layoutGroupBox);
 		Controls.Add(windowsGroupBox);
 		Controls.Add(statusStrip);
 		Controls.Add(toolStrip1);
+		KeyPreview = true;
 		Name = "WinSpectorWin";
 		Text = "WinSpector";
 		((System.ComponentModel.ISupportInitialize)layoutTree).EndInit();
+		layoutTreeContextMenu.ResumeLayout(false);
 		toolStrip1.ResumeLayout(false);
 		toolStrip1.PerformLayout();
 		windowsGroupBox.ResumeLayout(false);
 		layoutGroupBox.ResumeLayout(false);
 		demosGroupBox.ResumeLayout(false);
 		((System.ComponentModel.ISupportInitialize)demosList).EndInit();
+		eventsGroupBox.ResumeLayout(false);
 		ResumeLayout(false);
 		PerformLayout();
 	}
@@ -194,4 +256,11 @@ partial class WinSpectorWin
 	public GroupBox demosGroupBox;
 	public BrightIdeasSoftware.ObjectListView demosList;
 	public Button redrawWindowBtn;
+	private GroupBox eventsGroupBox;
+	public ToolStripMenuItem trackEventsMenuItem;
+	public ToolStripMenuItem stopTrackingMenuItem;
+	public ToolStripMenuItem stopAllTrackingMenuItem;
+	private ToolStripSeparator toolStripSeparator1;
+	public ContextMenuStrip layoutTreeContextMenu;
+	public Controls.EventDisplayer eventDisplayer;
 }

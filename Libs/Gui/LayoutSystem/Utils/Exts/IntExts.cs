@@ -9,4 +9,6 @@ static class IntExts
 		int.MaxValue => throw new ArgumentException("Cannot be int.MaxValue"),
 		_ => v
 	};
+
+	public static int SilentlyIgnoreInf(this int v) => v == int.MaxValue ? 0 : v;
 }

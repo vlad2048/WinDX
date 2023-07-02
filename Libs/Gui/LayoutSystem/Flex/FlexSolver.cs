@@ -30,8 +30,9 @@ public static class FlexSolver
 			rootFixed,
 			rMap,
 			detailsMap
-		).CheckSanity();
+		).SanityCheck();
 	}
+
 
 
 	// ******************
@@ -200,7 +201,7 @@ public static class FlexSolver
 	// *************
 	// * Remapping *
 	// *************
-	private static IReadOnlyDictionary<Node, R> Remap(this IReadOnlyDictionary<Node, R> rMap, Node rootRaw)
+	private static IReadOnlyDictionary<Node, V> Remap<V>(this IReadOnlyDictionary<Node, V> rMap, Node rootRaw)
 	{
 		var rs = rMap.Where(e => e.Key.V.Strat is not IStratInternal).SelectToArray(e => e.Value);
 		return
@@ -220,48 +221,4 @@ public static class FlexSolver
 
 
 	private static bool IsPop(this Node node) => node.V.Flags.Pop;
-
-
-
-	/*
-	/// <summary>
-	/// Calculate how much free size we should provide a kid Lay() call to resolve its dimensions
-	/// If:
-	///   - dim.FIT -> provide an unbounded space for the layout to deduce its size
-	///   - dim.FIL -> provide all the free size the parent has
-	///	  - dim.FIX -> use the kid's fix size
-	/// </summary>
-	private static FreeSz ComputeFreeSizeForKid(DimVec kidDim, FreeSz dadFreeSz) =>
-		FreeSzMaker.DirFun(
-			dir => kidDim.Dir(dir).Typ() switch
-			{
-				DimType.Fit => null,
-				DimType.Fil => dadFreeSz.Dir(dir),
-				_ => kidDim.Dir(dir)!.Value.Max
-			}
-		);
-
-
-	/// <summary>
-	/// Keep the original dimensions if they were resolved,
-	/// but for the unresolved ones, use the sizes calculated by calling the Layout
-	/// </summary>
-	private static FDimVec UseLayoutResultToResolveFitDimensions(DimVec kidDim, Sz layoutSz) =>
-		FDimVecMaker.DirFun(
-			dir => kidDim.Dir(dir).HasValue switch
-			{
-				truer => kidDim.Dir(dir)!.Value,
-				false => D.Fix(layoutSz.Dir(dir))
-			}
-		);
-
-
-	private static Node ZeroPopSize(this Node node) => node.IsPop() switch
-	{
-		truer => node.CloneWithNewContent(node.V with { Dim = Vec.Fix(0, 0) }),
-		false => node
-	};
-
-	private static bool IsPop(this Node node) => node.V.Strat is FillStrat { Spec: PopSpec };
-	*/
 }

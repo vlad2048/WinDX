@@ -104,6 +104,13 @@ public sealed class GDIPlus_Gfx : IGfx
 		gfx.DrawLine(pencils.GetPen(penDef), a.ToDrawPt(), b.ToDrawPt());
 	}
 
+	public void DrawBmp(Bitmap bmp)
+	{
+		if (DrawDisabled) return;
+		gfx.DrawImage(bmp, R.Pos.ToDrawPt());
+	}
+
+
 
 
 	public Sz MeasureText_(string text, FontDef fontDef) => TextRenderer.MeasureText(

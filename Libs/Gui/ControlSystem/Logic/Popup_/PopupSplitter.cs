@@ -1,107 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
-using PowMaybe;
-using PowRxVar;
-using UserEvents;
 
 namespace ControlSystem.Logic.Popup_;
-
-
-
-/// <summary>
-/// Represents a partition of the layout to be displayed on the main window or child popup window
-/// </summary>
-/// <param name="Id">
-/// ● null for the main window partition <br/>
-/// ● The NodeState of the Pop node for a popup window partition
-/// </param>
-/// <param name="Root">
-/// Tree root <br/>
-/// ● Always a Ctrl <br/>
-/// ● This is the Ctrl that gets renderered to trigger the tree rendering
-/// </param>
-/// <param name="RMap">
-/// ● The keys represents which nodes logically belong in this partition <br/>
-/// ● The values are the rectangles from the layout
-/// </param>
-/// <param name="CtrlSet">
-/// The set of all the Ctrls contained in Root (these will be the ones we call Render for)
-/// </param>
-record Partition(
-	NodeState? Id,
-	MixNode Root,
-	IReadOnlyDictionary<NodeState, R> RMap,
-	HashSet<Ctrl> CtrlSet
-)
-{
-	public Ctrl RootCtrl => ((CtrlNode)Root.V).Ctrl;
-
-	public NodeState[] AllNodeStates =>
-		(
-			from node in Root
-			where node.V is StFlexNode
-			let state = ((StFlexNode)node.V).State
-			where RMap.ContainsKey(state)
-			select state
-		)
-		.ToArray();
-
-	public Maybe<INodeStateUserEventsSupport> FindNodeAtMouseCoordinates(Pt pt) =>
-		AllNodeStates
-			.Where(state => RMap[state].Contains(pt))
-			.Reverse()
-			.OfType<INodeStateUserEventsSupport>()
-			.FirstOrMaybe();
-
-
-	private static readonly Ctrl emptyCtrl = new Ctrl().DisposeOnProgramExit();
-
-	public static readonly Partition Empty = new(
-		null,
-		Nod.Make<IMixNode>(new CtrlNode(emptyCtrl)),
-		new Dictionary<NodeState, R>(),
-		new HashSet<Ctrl>{emptyCtrl}
-	);
-}
-
-
-
-/// <summary>
-/// Contains all the layout partitions across the main window and the popup windows
-/// </summary>
-/// <param name="Partitions">
-/// Partitions: <br/>
-/// ● The first one is associated with the main window <br/>
-/// ● The subsequent ones are associated with the popup windows
-/// </param>
-/// <param name="ParentMapping">
-/// Mapping from the Partitions Ids (NodeState) to the Partitions Ids (NodeState) (or null to reference the main window)
-/// </param>
-sealed record PartitionSet(
-	Partition[] Partitions,
-	IReadOnlyDictionary<NodeState, NodeState?> ParentMapping
-)
-{
-	public Partition MainPartition => Partitions[0];
-	
-	public Partition[] SubPartitions => Partitions.Skip(1).ToArray();
-
-	public Ctrl[] AllCtrls => (
-		from partition in Partitions
-		from ctrl in partition.CtrlSet
-		select ctrl
-	)
-		.Distinct()
-		.ToArray();
-
-	public static readonly PartitionSet Empty = new(
-		new [] { Partition.Empty },
-		new Dictionary<NodeState, NodeState?>()
-	);
-}
 
 static class PopupSplitter
 {
@@ -121,6 +25,9 @@ static class PopupSplitter
 					.ExtendToCtrlUp(backMap)
 					.ExtendToCtrlDown(backMap);
 				var enabledStates = partitionExtended.GetEnabledStates(stateStart);
+				var nodeMap = partitionExtended
+					.Where(e => e.V is StFlexNode { State: var state } && enabledStates.Contains(state))
+					.ToDictionary(e => ((StFlexNode)e.V).State);
 				var partitionRMap = rMap
 					.Where(t => enabledStates.Contains(t.Key))
 					.ToDictionary(e => e.Key, e => e.Value);
@@ -128,8 +35,10 @@ static class PopupSplitter
 				return new Partition(
 					stateStart,
 					partitionExtended,
+					nodeMap,
 					partitionRMap,
-					ctrlSet
+					ctrlSet,
+					PartitionScrollBars.Empty
 				);
 			});
 

@@ -1,5 +1,4 @@
-﻿using ControlSystem.Logic.Popup_;
-using ControlSystem.Structs;
+﻿using ControlSystem.Structs;
 using ControlSystem.Utils;
 using DynamicData;
 using PowBasics.CollectionsExt;
@@ -7,6 +6,7 @@ using PowRxVar;
 using UserEvents;
 using IWin = UserEvents.IWinUserEventsSupport;
 using INode = UserEvents.INodeStateUserEventsSupport;
+using ControlSystem.Logic.Popup_.Structs;
 
 namespace ControlSystem.Logic.UserEvents_;
 
@@ -29,20 +29,14 @@ sealed class WinEventDispatcher : IDisposable
 	public void DispatchNodeEvents(PartitionSet partitionSet, Func<NodeState?, IWin> winFun)
 	{
 		var winsNext = partitionSet.Partitions.SelectToArray(e => winFun(e.Id));
-		var (winsAdd, winsDel) = wins.GetAddDels(winsNext);
 
-		winsSrc.Edit(upd =>
-		{
-			upd.RemoveKeys(winsDel);
-			foreach (var winAdd in winsAdd)
-				upd.AddOrUpdate(new EventDispatcher(winAdd));
-		});
+		winsSrc.EditDiffKeys(wins, winsNext, win => new EventDispatcher(win));
 
 		foreach (var partition in partitionSet.Partitions)
 		{
 			var win = winFun(partition.Id);
 			var nodeTracker = wins.Lookup(win).Value;
-			nodeTracker.Update(partition.AllNodeStates.OfType<INode>().ToArray());
+			nodeTracker.Update(partition.AllNodeStatesIncludingScrollBars.OfType<INode>().ToArray());
 		}
 	}
 }

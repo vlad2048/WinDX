@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace LayoutSystem;
 
-static class FmtConstants
+public static class FmtConstants
 {
 	public const bool truer = true;
 }

@@ -4,24 +4,24 @@ using System.Diagnostics;
 using System.Reactive.Disposables;
 using RenderLib.Renderers.Direct2DInDirect3D;
 
-namespace RenderLib.Renderers.Utils.DirectX;
+namespace RenderLib.Utils.DirectX;
 
 
 static class D3D11InitUtils
 {
-	public static (TDev, TCtx, TDXGIDev, IDisposable) Helper_D3D11CreateDevice<TDev, TCtx, TDXGIDev>()
-		where TDev : D3D11.ID3D11Device
-		where TCtx : D3D11.ID3D11DeviceContext
-		where TDXGIDev : DXGI.IDXGIDevice
-		=>
-			Helper_D3D11CreateDevice<TDev, TCtx, TDXGIDev>(
-				null,
-				RConsts.DriverType,
-				RConsts.CreationFlags,
-				RConsts.FeatureLevels
-			);
+    public static (TDev, TCtx, TDXGIDev, IDisposable) Helper_D3D11CreateDevice<TDev, TCtx, TDXGIDev>()
+        where TDev : D3D11.ID3D11Device
+        where TCtx : D3D11.ID3D11DeviceContext
+        where TDXGIDev : DXGI.IDXGIDevice
+        =>
+            Helper_D3D11CreateDevice<TDev, TCtx, TDXGIDev>(
+                null,
+                RConsts.DriverType,
+                RConsts.CreationFlags,
+                RConsts.FeatureLevels
+            );
 
-	private static (TDev, TCtx, TDXGIDev, IDisposable) Helper_D3D11CreateDevice<TDev, TCtx, TDXGIDev>(
+    private static (TDev, TCtx, TDXGIDev, IDisposable) Helper_D3D11CreateDevice<TDev, TCtx, TDXGIDev>(
         DXGI.IDXGIAdapter? adapter,
         D3D.DriverType driverType,
         D3D11.DeviceCreationFlags creationFlags,

@@ -2,25 +2,23 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ControlSystem.Logic.Popup_;
+using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Logic.Scrolling_;
 using ControlSystem.Logic.UserEvents_;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Structs;
 using ControlSystem.WinSpectorLogic.Utils;
-using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
-using PowTrees.Algorithms;
 using RenderLib;
-using RenderLib.Renderers;
 using SysWinLib;
 using SysWinLib.Structs;
-using TreePusherLib;
-using TreePusherLib.ConvertExts;
+using TreePusherLib.ConvertExts.Structs;
 using UserEvents;
 using UserEvents.Generators;
 using UserEvents.Structs;
@@ -69,10 +67,9 @@ public class Win : Ctrl, IWinUserEventsSupport
 			Invalidate();
 		}).D(D);
 
-		var renderer = RendererGetter.Get(RendererType.Direct2D, sysWin).D(D);
+		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
+		var scrollMan = new ScrollMan(renderer).D(D);
 		G.WinMan.AddWin(this);
-
-		//Evt.Subscribe(e => L($"[Win] - {e}")).D(D);
 
 		WhenInvalidate
 			.Subscribe(_ =>
@@ -91,11 +88,11 @@ public class Win : Ctrl, IWinUserEventsSupport
 			if (canSkipLayout.IsNotSet())
 			{
 				partitionSet = this
-					.BuildTree(renderer)
+					.BuildCtrlTree(renderer)
 					.SolveTree(this, out var mixLayout)
-					.UpdateScrollStates()
 					.SplitPopups()
 					.CreatePopups(popupMan)
+					.AddScrollBars(scrollMan)
 					.DispatchNodeEvents(eventDispatcher, popupMan.GetWin)
 					.Assign_CtrlWins_and_NodeRs(this);
 
@@ -115,96 +112,17 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 file static class WinUtils
 {
-	public static ReconstructedTree<IMixNode> BuildTree(this Ctrl rootCtrl, IRenderWinCtx renderer)
-	{
-		using var d = new Disp();
-		using var gfx = renderer.GetGfx(true).D(d);
-		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
-		var pusher = new TreePusher<IMixNode>(treeEvtSig);
-		var renderArgs = new RenderArgs(gfx, pusher).D(d);
-		return
-			treeEvtObs.ToTree(
-				mixNode =>
-				{
-					if (mixNode is not CtrlNode { Ctrl: var ctrl }) return;
-					if (ctrl.D.IsDisposed)
-						throw new ObjectDisposedException(ctrl.GetType().Name, "Cannot render a disposed Ctrl");
-					ctrl.SignalRender(renderArgs);
-				},
-				() =>
-				{
-					using (renderArgs[rootCtrl]) { }
-				}
-			);
-	}
-
-
 	public static MixLayout SolveTree(
 		this ReconstructedTree<IMixNode> tree,
 		Win win,
 		out MixLayout mixLayout
 	)
-	{
-		var mixRoot = tree.Root.ApplyTextMeasures();
+		=> mixLayout = tree.ResolveCtrlTree(FreeSzMaker.FromSz(win.ClientR.V.Size), win);
 
-		var stFlexRoot = mixRoot.OfTypeTree<IMixNode, StFlexNode>();
-		var flexRoot = stFlexRoot.Map(e => e.Flex);
-		var freeSz = FreeSzMaker.FromSz(win.ClientR.V.Size);
-
-		var layout = FlexSolver.Solve(flexRoot, freeSz);
-
-		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
-		return mixLayout =
-			new MixLayout(
-				win,
-				freeSz,
-				mixRoot,
-				layout.RMap.MapKeys(flex2st),
-				layout.WarningMap.MapKeys(flex2st),
-
-				tree.IncompleteNodes
-					.GroupBy(e => e.ParentNod)
-					.Select(e => e.First())
-					.ToDictionary(
-						e => e.ParentNod.FindCtrlContaining(),
-						e => e.ChildNode
-					),
-
-				mixRoot
-					.Where(e => e.V is CtrlNode)
-					.ToDictionary(
-						e => ((CtrlNode)e.V).Ctrl,
-						e => e
-					)
-			);
-	}
-
-	public static MixLayout UpdateScrollStates(this MixLayout layout)
-	{
-		layout.MixRoot.Where(e => e.V is StFlexNode).ForEach(nod =>
-		{
-			var node = (StFlexNode)nod.V;
-			var scrollState = node.State.ScrollState;
-			var kids = nod.GetFirstChildrenWhere(e => e is StFlexNode { Flex.Flags.Pop: false });
-			if (kids.Length == 0)
-			{
-				scrollState.X.DisableScroll();
-				scrollState.Y.DisableScroll();
-			}
-			else
-			{
-				var kidsRs = kids.SelectToArray(e => layout.RMap[((StFlexNode)(e.V)).State]);
-				var contentSz = kidsRs.Union().Size;
-				var viewSz = layout.RMap[node.State].Size;
-			}
-		});
-
-		return layout;
-	}
-
-	public static PartitionSet SplitPopups(
-		this MixLayout layout
-	)
+	public static PartitionSet AddScrollBars(this PartitionSet partitionSet, ScrollMan scrollMan)
+		=> scrollMan.AddScrollBars(partitionSet);
+	
+	public static PartitionSet SplitPopups(this MixLayout layout)
 		=> PopupSplitter.Split(layout.MixRoot, layout.RMap);
 
 	
@@ -225,21 +143,30 @@ file static class WinUtils
 		)
 			.ForEach(t => t.nodeState.RSrc.V = t.r);
 
+
+
+		(
+			from partition in partitionSet.Partitions
+			from ctrl in partition.ScrollBars.ControlMap.Values.SelectMany(e => e)
+			select ctrl
+		)
+			.ForEach(ctrl => ctrl.WinSrc.V = May.Some(win));
+
+		(
+			from partition in partitionSet.Partitions
+			from nodeState in partition.ScrollBars.RMap.Keys
+			select (nodeState, r: partition.ScrollBars.RMap[nodeState])
+		)
+			.ForEach(t => t.nodeState.RSrc.V = t.r);
+
+
+
 		return partitionSet;
 	}
 
 
 
-
-
-
-
-	private static Ctrl FindCtrlContaining(this MixNode nod)
-	{
-		while (nod.V is not CtrlNode { Ctrl: not null })
-			nod = nod.Parent ?? throw new ArgumentException("Cannot find containing Ctrl");
-		return ((CtrlNode)nod.V).Ctrl;
-	}
+	
 
 
 

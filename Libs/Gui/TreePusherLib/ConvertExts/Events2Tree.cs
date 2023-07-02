@@ -1,23 +1,15 @@
 ﻿using PowBasics.CollectionsExt;
 using PowRxVar;
+using TreePusherLib.ConvertExts.Structs;
 
 namespace TreePusherLib.ConvertExts;
-
-public sealed record IncompleteNodeNfo<T>(
-	TNod<T> ParentNod,
-	T ChildNode
-);
-
-public sealed record ReconstructedTree<T>(
-	TNod<T> Root,
-	IncompleteNodeNfo<T>[] IncompleteNodes
-);
 
 public static class Events2Tree
 {
 	public static ReconstructedTree<T> ToTree<T>(
 		this ITreeEvtObs<T> evtObs,
 		Action<T> onPush,
+		Action<T> onPop,
 		Action runAction
 	)
 	{
@@ -34,6 +26,7 @@ public static class Events2Tree
 
 		evtObs.WhenPop.Subscribe(args =>
 		{
+			onPop(args);
 			var top = stack.Pop();
 			if (top.V!.Equals(args)) return;	// Happy path
 

@@ -3,6 +3,7 @@
 static class ColumnName
 {
 	public const string Node = "Node";
+	public const string Flags = "Flags";
 	public const string Width = "Width";
 	public const string Height = "Height";
 	public const string R = "R";

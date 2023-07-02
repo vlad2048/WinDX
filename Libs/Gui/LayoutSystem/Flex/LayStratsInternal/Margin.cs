@@ -1,4 +1,5 @@
 ﻿using LayoutSystem.Flex.Structs;
+using LayoutSystem.Utils.Exts;
 using PowBasics.Geom;
 
 namespace LayoutSystem.Flex.LayStratsInternal;
@@ -23,7 +24,7 @@ sealed class MarginStrat : IStratInternal
 			dir => freeSz.Dir(dir).HasValue switch
 			{
 				truer => freeSz.Dir(dir)!.Value,
-				false => kidDim.Dir(dir).Max + marg.Dir(dir)
+				false => kidDim.Dir(dir).Max.EnsureNotInf() + marg.Dir(dir)
 			}
 		);
 

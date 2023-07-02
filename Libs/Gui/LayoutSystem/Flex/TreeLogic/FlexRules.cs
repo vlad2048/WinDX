@@ -48,14 +48,16 @@ static class FlexRules
 
 	public static Fix? NoFilInScroll(this Node node)
 	{
-		var n = node.V;
-		var kd = n.Dim;
-		var fixX = node.V.Flags.Scroll.X && kd.X.IsFil();
-		var fixY = node.V.Flags.Scroll.Y && kd.Y.IsFil();
+		if (node.Parent == null) return null;
+		var parentScroll = node.Parent.V.Flags.Scroll;
+		var kidDim = node.V.Dim;
+
+		var fixX = parentScroll.X && kidDim.X.IsFil();
+		var fixY = parentScroll.Y && kidDim.Y.IsFil();
 		if (!fixX && !fixY) return null;
 		return new Fix(
 			new Warn(fixX, fixY, WarningType.NoFilInScroll, "You cannot have a Fil inside a Scroll (equivalent to Fit)"),
-			n with { Dim = n.Dim.FixDim(fixX, fixY) }
+			node.V with { Dim = kidDim.FixDim(fixX, fixY) }
 		);
 	}
 

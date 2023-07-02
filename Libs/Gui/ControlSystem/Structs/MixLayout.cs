@@ -1,4 +1,5 @@
 ﻿using LayoutSystem.Flex.Structs;
+using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 
 namespace ControlSystem.Structs;
@@ -23,3 +24,11 @@ sealed record MixLayout(
 
 	IReadOnlyDictionary<Ctrl, MixNode> Ctrl2NodMap
 );
+
+static class MixLayoutExt
+{
+	public static MixLayout Translate(this MixLayout lay, Pt ofs) => lay with
+	{
+		RMap = lay.RMap.MapValues(e => e + ofs)
+	};
+}

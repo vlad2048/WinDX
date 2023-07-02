@@ -1,4 +1,5 @@
-﻿using ControlSystem.Utils;
+﻿using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Utils;
 using PowBasics.CollectionsExt;

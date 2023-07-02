@@ -54,6 +54,7 @@ static partial class Setup
 	private static void SetupDetailsColumns(TreeListView ctrl, IRoMayVar<FlexLayout> layout)
 	{
 		ctrl.AddTextColumn<FlexNode>(ColumnName.Node, null, nod => $"{nod.V.Strat}");
+		ctrl.AddTextColumn<FlexNode>(ColumnName.Flags, 100, nod => $"{nod.V.Flags}");
 		ctrl.AddTextColumn<FlexNode>(ColumnName.Width, 80, nod => nod.V.Dim.X.Fmt());
 		ctrl.AddTextColumn<FlexNode>(ColumnName.Height, 80, nod => nod.V.Dim.Y.Fmt());
 		ctrl.AddTextColumn<FlexNode>(ColumnName.R, 100, nod =>

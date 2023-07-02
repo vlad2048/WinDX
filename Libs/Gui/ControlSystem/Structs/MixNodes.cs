@@ -13,7 +13,7 @@ public sealed record CtrlNode(Ctrl Ctrl) : IMixNode
 
 public sealed record StFlexNode(NodeState State, FlexNode Flex) : IMixNode
 {
-	public override string ToString() => $"[R:{State.R}] - {Flex}";
+	public override string ToString() => $"{Flex}";
 }
 
 public sealed record TextMeasureNode(Sz Size) : IMixNode

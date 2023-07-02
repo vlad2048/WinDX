@@ -1,5 +1,5 @@
 ﻿using System.Drawing;
-using ControlSystem.Logic.Popup_;
+using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using PowBasics.Geom;
 using PowMaybe;

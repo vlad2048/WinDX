@@ -5,6 +5,7 @@ using PowRxVar;
 using SysWinLib;
 using IWin = UserEvents.IWinUserEventsSupport;
 using INode = UserEvents.INodeStateUserEventsSupport;
+using ControlSystem.Logic.Popup_.Structs;
 
 namespace ControlSystem.Logic.Popup_;
 

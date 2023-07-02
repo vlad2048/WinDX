@@ -2,6 +2,7 @@
 using System.Reactive.Subjects;
 using ControlSystem.Structs;
 using PowBasics.Geom;
+using PowMaybe;
 using PowRxVar;
 using RenderLib.Renderers;
 using RenderLib.Structs;
@@ -54,6 +55,15 @@ public class Ctrl : IDisposable
 	}
 }
 
+
+public static class CtrlExt
+{
+	public static void Invalidate(this Ctrl ctrl)
+	{
+		if (!ctrl.Win.V.IsSome(out var win)) return;
+		win.Invalidate();
+	}
+}
 
 
 

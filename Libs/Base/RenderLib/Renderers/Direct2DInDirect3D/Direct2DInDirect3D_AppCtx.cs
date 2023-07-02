@@ -3,8 +3,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using PowBasics.Geom;
 using PowRxVar;
-using RenderLib.Renderers.Utils.DirectX;
 using RenderLib.Structs;
+using RenderLib.Utils.DirectX;
 using SysWinInterfaces;
 using Vortice.DCommon;
 using WinAPI.Utils.Exts;
@@ -264,6 +264,21 @@ public sealed class Direct2DInDirect3D_Gfx : IGfx
 		var p1 = new Vector2(b.X + ox, b.Y + oy);
 
 		T.DrawLine(p0, p1, pen.Brush, pen.Width, pen.Style);
+	}
+
+	public void DrawBmp(Bitmap bmp)
+	{
+		if (DrawDisabled) return;
+		var d2dBmp = pencils.GetBmp(bmp);
+		var rectSrc = new R(0, 0, bmp.Width, bmp.Height);
+		var rectDst = rectSrc + R.Pos;
+		T.DrawBitmap(
+			d2dBmp,
+			rectDst.ToDrawRectF(),
+			1,
+			D2D.BitmapInterpolationMode.NearestNeighbor,
+			rectSrc.ToDrawRectF()
+		);
 	}
 
 
