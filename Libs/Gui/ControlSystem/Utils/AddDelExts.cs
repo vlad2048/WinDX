@@ -19,6 +19,16 @@ static class AddDelExts
 		);
 	}
 
+	public static (T[] adds, K[] dels, T[] coms) GetAddDelsComs<T, K, V>(this IReadOnlyDictionary<K, V> map, T[] arr, Func<T, K> projFun) where K : notnull
+	{
+		var keys = arr.SelectToArray(projFun);
+		return (
+			arr.WhereNotToArray(e => map.ContainsKey(projFun(e))),
+			map.Keys.WhereNotToArray(keys.Contains),
+			arr.WhereToArray(e => map.ContainsKey(projFun(e)))
+		);
+	}
+
 	public static (K[] adds, K[] dels) GetAddDels<K, V>(this IObservableCache<V, K> cache, K[] arr) where K : notnull => (
 		arr.WhereToArray(e => !cache.Lookup(e).HasValue),
 		cache.Keys.WhereNotToArray(arr.Contains)

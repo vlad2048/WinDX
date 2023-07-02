@@ -1,4 +1,5 @@
-﻿using PowBasics.Geom;
+﻿using PowBasics.CollectionsExt;
+using PowBasics.Geom;
 using PowMaybe;
 using UserEvents.Structs;
 
@@ -13,7 +14,8 @@ sealed class TWin : IWin
 	// IWin
 	// ====
 	public IObservable<IUserEvt> Evt { get; }
-	public Maybe<INode> HitFun(Pt pt) => Nodes.FirstOrMaybe(e => e.R.V.Contains(pt)).Select(e => (INode)e);
+	public INode[] HitFun(Pt pt) => Nodes.Where(e => e.R.V.Contains(pt)).SelectToArray(e => (INode)e);
+	public void Invalidate() { }
 
 	public TWin(IObservable<IUserEvt> evt)
 	{

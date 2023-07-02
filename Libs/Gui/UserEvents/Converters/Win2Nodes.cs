@@ -15,13 +15,13 @@ public static class UserEventConverter
 	public static IDisposable MakeForNodes<N>(
 		IObservable<IUserEvt> winEvt,
 		IObservable<IChangeSet<N>> nodes,
-		Func<Pt, Maybe<N>> hitFun
+		Func<Pt, N[]> hitFun
 	)
 		where N : INodeStateUserEventsSupport
 	{
 		var d = new Disp();
 		HandleMouseMoves(out var mayHovVar, out var mouseFun, winEvt, hitFun).D(d);
-		HandleMouseWheel(winEvt, mayHovVar).D(d);
+		HandleMouseWheel(winEvt, hitFun, mouseFun).D(d);
 		HandleMouseButtons(mayHovVar, winEvt).D(d);
 		HandleNodeChanges(mayHovVar, mouseFun, nodes, hitFun).D(d);
 		HandleMouseLeave(mayHovVar, winEvt).D(d);
@@ -33,7 +33,7 @@ public static class UserEventConverter
 		out IRwMayVar<N> mayHovVar,
 		out Func<Pt> mouseFun,
 		IObservable<IUserEvt> winEvt,
-		Func<Pt, Maybe<N>> hitFun
+		Func<Pt, N[]> hitFun
 	)
 		where N : INodeStateUserEventsSupport
 	{
@@ -50,7 +50,7 @@ public static class UserEventConverter
 		{
 			mouse = mouse_;
 
-			var mayHovNext = hitFun(mouse);
+			var mayHovNext = hitFun(mouse).FirstOrMaybe();
 			var isHovPrev = mayHovPrevVar.V.IsSome(out var hovPrev);
 			var isHovNext = mayHovNext.IsSome(out var hovNext);
 			switch (isHovPrev, isHovNext)
@@ -82,7 +82,8 @@ public static class UserEventConverter
 
 	private static IDisposable HandleMouseWheel<N>(
 		IObservable<IUserEvt> winEvt,
-		IRoMayVar<N> mayHovVar
+		Func<Pt, N[]> hitFun,
+		Func<Pt> mouseFun
 	)
 		where N : INodeStateUserEventsSupport
 	{
@@ -92,8 +93,10 @@ public static class UserEventConverter
 			.OfType<MouseWheelUserEvt>()
 			.Subscribe(e =>
 			{
-				if (mayHovVar.V.IsNone(out var hov)) return;
-				hov.DispatchEvt(e);
+				var pos = mouseFun();
+				var nodes = hitFun(pos).Distinct().ToArray();
+				var evt = e with { Pos = pos };
+				nodes.Send(evt);
 			}).D(d);
 
 		return d;
@@ -119,7 +122,7 @@ public static class UserEventConverter
 		IRwMayVar<N> mayHovVar,
 		Func<Pt> mouseFun,
 		IObservable<IChangeSet<N>> nodes,
-		Func<Pt, Maybe<N>> hitFun
+		Func<Pt, N[]> hitFun
 	)
 		where N : INodeStateUserEventsSupport
 	{
@@ -129,7 +132,7 @@ public static class UserEventConverter
 		void CheckEnterLeave()
 		{
 			var mouse = mouseFun();
-			var hovNodeNext = hitFun(mouse);
+			var hovNodeNext = hitFun(mouse).FirstOrMaybe();
 			var isHovPrev = mayHovVar.V.IsSome(out var hovPrev);
 			var isHovNext = hovNodeNext.IsSome(out var hovNext);
 			switch (isHovPrev, isHovNext)
@@ -191,9 +194,20 @@ public static class UserEventConverter
 		v.Send(evt);
 	}
 
-	private static void Send<N>(this N node, IUserEvt evt) where N : INodeStateUserEventsSupport
+	private static void Send<N>(this N[] nodes, IUserEvt evt) where N : INodeStateUserEventsSupport
 	{
-		if (node.D.IsDisposed) return;
-		node.DispatchEvt(evt.TranslateMouse(-node.R.V.Pos));
+		foreach (var node in nodes)
+		{
+			if (node.Send(evt))
+				break;
+		}
+	}
+
+	private static bool Send<N>(this N node, IUserEvt evt) where N : INodeStateUserEventsSupport
+	{
+		if (node.D.IsDisposed) return false;
+		var evtTr = evt.TranslateMouse(-node.R.V.Pos);
+		node.DispatchEvt(evtTr);
+		return evtTr.Handled;
 	}
 }

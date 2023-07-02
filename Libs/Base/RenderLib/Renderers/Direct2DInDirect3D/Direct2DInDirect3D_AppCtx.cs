@@ -196,6 +196,7 @@ public sealed class Direct2DInDirect3D_Gfx : IGfx
 	private readonly ISysWinRenderingSupport win;
 	private readonly Pencils pencils;
 	private readonly bool measureOnly;
+	//private readonly Stack<R> clipStack = new();
 
 	public Direct2DInDirect3D_AppCtx AppCtx { get; }
 	public Direct2DInDirect3D_WinCtx WinCtx { get; }
@@ -227,6 +228,19 @@ public sealed class Direct2DInDirect3D_Gfx : IGfx
 	}
 
 	private bool DrawDisabled => measureOnly || R.IsDegenerate || !win.IsInit.V;
+
+	public void PushClip(R clipR)
+	{
+		if (DrawDisabled) return;
+		//clipStack.Push(clipR);
+		//var totalClipR = clipStack.Union();
+	}
+
+	public void PopClip()
+	{
+		if (DrawDisabled) return;
+	}
+
 
 	public void FillR(R r, BrushDef brush)
 	{

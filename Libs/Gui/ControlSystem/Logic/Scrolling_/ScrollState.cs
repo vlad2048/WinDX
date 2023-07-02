@@ -111,10 +111,7 @@ public sealed class ScrollState : IDisposable
 		X = new ScrollDimState().D(d);
 		Y = new ScrollDimState().D(d);
 
-		WhenInvalidateRequired.Subscribe(_ =>
-		{
-			L($"ofs: {ScrollOfs}");
-		}).D(d);
+		//WhenInvalidateRequired.Subscribe(_ => L($"ofs: {ScrollOfs}")).D(d);
 	}
 
 	internal void UpdateFromLayout(ScrollNfo nfo)

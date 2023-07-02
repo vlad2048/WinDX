@@ -22,19 +22,21 @@ sealed class PopupMan : IDisposable
 	public void Dispose() => d.Dispose();
 
 	private readonly IWin parentWin;
+	private readonly Action invalidateAllAction;
 	private readonly SysWin parentSysWin;
 	private readonly SpectorWinDrawState spectorDrawState;
 	private readonly Dictionary<INode, PopupWin> map;
 
-	public PopupMan(IWin parentWin, SysWin parentSysWin, SpectorWinDrawState spectorDrawState)
+	public PopupMan(IWin parentWin, Action invalidateAllAction, SysWin parentSysWin, SpectorWinDrawState spectorDrawState)
 	{
 		this.parentWin = parentWin;
+		this.invalidateAllAction = invalidateAllAction;
 		this.parentSysWin = parentSysWin;
 		this.spectorDrawState = spectorDrawState;
 		map = new Dictionary<INode, PopupWin>().D(d);
 	}
 
-	public void InvalidatePopups() => map.Values.ForEach(e => e.Invalidate());
+	public void InvalidatePopups() => map.Values.ForEach(e => e.CallSysWinInvalidate());
 
 	public IWin GetWin(INode? nodeState) => nodeState switch
 	{
@@ -44,7 +46,7 @@ sealed class PopupMan : IDisposable
 
 	public PartitionSet CreatePopups(PartitionSet partitionSet)
 	{
-		var (partitionAdds, nodeStateDels) = map.GetAddDels(partitionSet.SubPartitions, e => e.Id ?? throw new ArgumentException("Should not be null for a subpartition"));
+		var (partitionAdds, nodeStateDels, partitionComs) = map.GetAddDelsComs(partitionSet.SubPartitions, e => e.Id ?? throw new ArgumentException("Should not be null for a subpartition"));
 		foreach (var nodeStateDel in nodeStateDels)
 		{
 			map[nodeStateDel].Dispose();
@@ -64,9 +66,16 @@ sealed class PopupMan : IDisposable
 			map[partitionAdd.Id] = new PopupWin(
 				partitionAdd,
 				parentSysWin,
+				invalidateAllAction,
 				popupParentHandle,
 				spectorDrawState
 			);
+		}
+
+		foreach (var partitionCom in partitionComs)
+		{
+			var win = map[partitionCom.Id!];
+			win.SetLayout(partitionCom);
 		}
 
 		return partitionSet;

@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ControlSystem.Logic.Scrolling_;
@@ -30,6 +31,8 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	// **********
 	// * Public *
 	// **********
+	public string Name { get; private set; }
+
 	/// <summary>
 	/// Rectangle in main window coordinates where the node is drawn. <br/>
 	/// ● Assigned during the window layout (PAINT event). <br/>
@@ -54,11 +57,25 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 
 	public IObservable<Unit> WhenInvalidateRequired => ScrollState.WhenInvalidateRequired;
 
-	public NodeState()
+	public NodeState(string? name = null)
 	{
+		Name = name ?? string.Empty;
 		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(D);
 		whenEvt = new Subject<IUserEvt>().D(D);
 		ScrollState = new ScrollState().D(D);
+
+		Disposable.Create(() =>
+		{
+			var abc = 123;
+		}).D(D);
+	}
+
+	public override string ToString() => Name;
+
+	internal void SetNameIFN(string name)
+	{
+		if (Name == string.Empty)
+			Name = name;
 	}
 }
 

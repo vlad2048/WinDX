@@ -50,41 +50,64 @@ static class ScrollUtils
 
 	public static PartitionSet ApplyScrollOffsets(this PartitionSet partitionSet, MixLayout mixLayout)
 	{
-		var ofsMap = partitionSet.Partitions.SelectMany(e => e.AllNodeStatesIncludingScrollBars).ToDictionary(e => e, _ => Pt.Empty);
-
 		var states = partitionSet.Partitions.SelectMany(e => e.AllNodeStates).ToArray();
-		foreach (var state in states)
+		var ofsMap = states.ToDictionary(e => e, _ => Pt.Empty);
+
+		var statesWithOfs = states.WhereToArray(e => e.ScrollState.ScrollOfs != Pt.Empty);
+
+		var extraStateLinks = partitionSet.Partitions.Select(e => e.ExtraStateLinks).Merge();
+
+		foreach (var state in statesWithOfs)
 		{
-			if (state.ScrollState.ScrollOfs != Pt.Empty)
-			{
-				var kidStates = mixLayout.NodeMap[state].Children
-					.Where(e => e.V is StFlexNode)
-					.SelectToArray(e => ((StFlexNode)e.V).State);
-				foreach (var kidState in kidStates)
+			var kidStates = mixLayout.NodeMap[state].Children
+				.SelectMany(e => e)
+				.Where(e => e.V is StFlexNode)
+				.Select(e => ((StFlexNode)e.V).State)
+				.SelectMany(e => extraStateLinks.TryGetValue(e, out var kids) switch
 				{
-					ofsMap[kidState] += state.ScrollState.ScrollOfs;
-				}
-			}
+					truer => kids.Prepend(e).ToArray(),
+					false => new[] { e },
+				})
+				.ToArray();
+
+			var kidStatesDistinct = kidStates.Distinct().ToArray();
+			if (kidStates.Length != kidStatesDistinct.Length) throw new ArgumentException("Impossible, they should all be distinct");
+
+			var scrollOfs = state.ScrollState.ScrollOfs;
+			foreach (var kidState in kidStates)
+				ofsMap[kidState] += scrollOfs;
 		}
 
 		return partitionSet with
 		{
-			Partitions = partitionSet.Partitions.SelectToArray(partition => partition with
-			{
-				RMap = partition.RMap.ToDictionary(
-					kv => kv.Key,
-					kv => kv.Value - ofsMap[kv.Key]
-				),
-				ScrollBars = partition.ScrollBars with
-				{
-					RMap = partition.ScrollBars.RMap.ToDictionary(
-						kv => kv.Key,
-						kv => kv.Value - ofsMap[partition.ScrollBars.StateLinkMap[kv.Key]]
-					)
-				}
-			})
+			Partitions = partitionSet.Partitions.SelectToArray(partition => partition.ApplyOfsMap(ofsMap))
 		};
 	}
+
+
+	private static Partition ApplyOfsMap(this Partition partition, IReadOnlyDictionary<NodeState, Pt> ofsMap) =>
+		partition with
+		{
+			RMap = partition.RMap.ToDictionary(
+				kv => kv.Key,
+				kv => kv.Value - ofsMap[kv.Key]
+			)
+		};
+
+
+	private static IReadOnlyDictionary<K, V[]> Merge<K, V>(this IEnumerable<IReadOnlyDictionary<K, V[]>> source) where K : notnull
+	{
+		var res = new Dictionary<K, List<V>>();
+		foreach (var dict in source)
+		{
+			foreach (var (key, vals) in dict)
+				foreach (var val in vals)
+					res.AddToDictionaryList(key, val);
+		}
+		return res.MapValues(e => e.ToArray());
+	}
+
+
 
 
 

@@ -83,7 +83,7 @@ sealed class DetachCtrlDemo : Win
 		state.Subscribe(s =>
 		{
 			L($"State <- {s}");
-			InvalidateAll();
+			Invalidate();
 		}).D(D);
 
 

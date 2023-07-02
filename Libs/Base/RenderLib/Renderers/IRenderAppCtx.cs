@@ -22,6 +22,8 @@ public interface IRenderWinCtx : IDisposable
 public interface IGfx : IDisposable
 {
 	R R { get; set; }
+	void PushClip(R clipR);
+	void PopClip();
 
 	void FillR(R r, BrushDef brush);
 	void DrawR(R r, PenDef pen);

@@ -8,24 +8,6 @@ using UserEvents;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
-/// <summary>
-/// ScrollBar controls info
-/// </summary>
-/// <param name="ControlMap">Map from the Dad NodeState to the scroll controls</param>
-/// <param name="RMap">Map from the Kids NodeStates to Rs</param>
-/// <param name="StateLinkMap">Map from the Kids NodesStates to the Dad NodeStates</param>
-sealed record PartitionScrollBars(
-	IReadOnlyDictionary<NodeState, Ctrl[]> ControlMap,
-	IReadOnlyDictionary<NodeState, R> RMap,
-	IReadOnlyDictionary<NodeState, NodeState> StateLinkMap
-)
-{
-	public static readonly PartitionScrollBars Empty = new(
-		new Dictionary<NodeState, Ctrl[]>(),
-		new Dictionary<NodeState, R>(),
-		new Dictionary<NodeState, NodeState>()
-	);
-}
 
 /// <summary>
 /// Represents a partition of the layout to be displayed on the main window or child popup window
@@ -39,6 +21,9 @@ sealed record PartitionScrollBars(
 /// ● Always a Ctrl <br/>
 /// ● This is the Ctrl that gets renderered to trigger the tree rendering
 /// </param>
+/// <param name="NodeMap">
+/// NodeMap
+/// </param>
 /// <param name="RMap">
 /// ● The keys represents which nodes logically belong in this partition <br/>
 /// ● The values are the rectangles from the layout
@@ -46,28 +31,27 @@ sealed record PartitionScrollBars(
 /// <param name="CtrlSet">
 /// The set of all the Ctrls contained in Root (these will be the ones we call Render for)
 /// </param>
+/// <param name="ExtraCtrlPopTriggers">
+/// Extra Ctrls to render when a NodeState is popped (used to add ScrollBars)
+/// </param>
+/// <param name="ExtraStateLinks">
+/// Indicates how the Extra States are parented (used to propagate ScrollOffsets)
+/// </param>
 sealed record Partition(
     NodeState? Id,
     MixNode Root,
 	IReadOnlyDictionary<NodeState, MixNode> NodeMap,
     IReadOnlyDictionary<NodeState, R> RMap,
     HashSet<Ctrl> CtrlSet,
-	PartitionScrollBars ScrollBars
+	IReadOnlyDictionary<NodeState, Ctrl[]> ExtraCtrlPopTriggers,
+	IReadOnlyDictionary<NodeState, NodeState[]> ExtraStateLinks
 )
 {
+	public override string ToString() => $"Id:{Id}  Nodes:{AllNodeStates.Length}  CtrlPopTriggers:{ExtraCtrlPopTriggers.Values.SelectMany(e => e).Count()}";
+
     public Ctrl RootCtrl => ((CtrlNode)Root.V).Ctrl;
 
-    public NodeState[] AllNodeStates =>
-        (
-            from node in Root
-            where node.V is StFlexNode
-            let state = ((StFlexNode)node.V).State
-            where RMap.ContainsKey(state)
-            select state
-        )
-        .ToArray();
-
-    public NodeState[] AllNodeStatesIncludingScrollBars => AllNodeStates.Concat(ScrollBars.RMap.Keys).ToArray();
+    public NodeState[] AllNodeStates => RMap.Keys.ToArray();
 
     
     private static readonly Ctrl emptyCtrl = new Ctrl().DisposeOnProgramExit();
@@ -78,40 +62,28 @@ sealed record Partition(
 		new Dictionary<NodeState, MixNode>(),
         new Dictionary<NodeState, R>(),
         new HashSet<Ctrl> { emptyCtrl },
-		PartitionScrollBars.Empty
+		new Dictionary<NodeState, Ctrl[]>(),
+		new Dictionary<NodeState, NodeState[]>()
     );
 }
 
 
 static class PartitionExt
 {
-	public static Maybe<INodeStateUserEventsSupport> FindNodeAtMouseCoordinates(this Partition partition, Pt pt) =>
-		partition.AllNodeStatesIncludingScrollBars
+	public static INodeStateUserEventsSupport[] FindNodesAtMouseCoordinates(this Partition partition, Pt pt) =>
+		partition.AllNodeStates
 			.Where(state => partition.GetNodeR(state).Ensure().Contains(pt))
 			.Reverse()
 			.OfType<INodeStateUserEventsSupport>()
-			.FirstOrMaybe();
+			.ToArray();
 
-	public static NodeState[] NodeStatesWithScrolling(this Partition partition) => partition.AllNodeStates.WhereToArray(e => ((StFlexNode)partition.NodeMap[e].V).Flex.Flags.Scroll != BoolVec.False);
-
-	public static Maybe<R> GetNodeR(this Partition partition, NodeState state) =>
-		PartitionLocalUtils.GetFirst(
-			() => partition.RMap.GetOrMaybe(state),
-			() => partition.ScrollBars.RMap.GetOrMaybe(state)
+	public static NodeState[] NodeStatesWithScrolling(this Partition partition) => partition.AllNodeStates
+		.WhereToArray(e => partition.NodeMap.TryGetValue(e, out var node) switch
+			{
+				truer => ((StFlexNode)node.V).Flex.Flags.Scroll != BoolVec.False,
+				false => false,
+			}
 		);
-}
 
-
-file static class PartitionLocalUtils
-{
-	public static Maybe<T> GetFirst<T>(params Func<Maybe<T>>[] funs)
-	{
-		foreach (var fun in funs)
-		{
-			var res = fun();
-			if (res.IsSome())
-				return res;
-		}
-		return May.None<T>();
-	}
+	public static Maybe<R> GetNodeR(this Partition partition, NodeState state) => partition.RMap.GetOrMaybe(state);
 }

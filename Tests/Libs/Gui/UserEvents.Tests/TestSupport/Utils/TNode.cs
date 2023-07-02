@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using PowBasics.Geom;
 using PowRxVar;
@@ -20,6 +21,7 @@ sealed class TNode : INode, IDisposable
     public IRoVar<R> R => RSrc.ToReadOnly();
     public IObservable<IUserEvt> Evt => whenEvt.AsObservable();
     public void DispatchEvt(IUserEvt evt) => whenEvt.OnNext(evt);
+    public IObservable<Unit> WhenInvalidateRequired => Obs.Never<Unit>();
 
     public TNode(R r, int depth, string name)
     {

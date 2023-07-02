@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using ControlSystem;
-using ControlSystem.Logic.Scrolling_;
 using ControlSystem.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
@@ -14,13 +13,10 @@ sealed class ScrollDemo : Win
 	public ScrollDemo() : base(opt => opt.R = new R(-400, 50, 300, 400))
 	{
 		var nodeRoot = new NodeState().D(D);
-		var nodeHorz = new NodeState().D(D);
-		var nodeScroll = new NodeState().D(D);
 		var nodeTop = new NodeState().D(D);
+		var nodeScroll = new NodeState().D(D);
 		var nodeBottom = new NodeState().D(D);
-		var nodesLines = Enumerable.Range(0, 9).SelectToArray(_ => new NodeState().D(D));
-
-		var scrollBar = new ScrollBarCtrl(Dir.Vert, nodeScroll.ScrollState.Y, nodeScroll.Evt).D(D);
+		var nodesLines = Enumerable.Range(0, 29).SelectToArray(_ => new NodeState().D(D));
 
 		WhenRender.Subscribe(r =>
 		{
@@ -44,26 +40,6 @@ sealed class ScrollDemo : Win
 						}
 					}
 				}
-
-				/*using (r[nodeHorz].StratStack(Dir.Horz).Marg(20).M)
-				{
-					using (r[nodeScroll].StratStack(Dir.Vert).M) // .ScrollY().M)
-					{
-						r.Gfx.FillR(Consts.ScrollBrush);
-						for (var i = 0; i < nodesLines.Length; i++)
-						{
-							var nodeLine = nodesLines[i];
-
-							using (r[nodeLine].DimFixFit(180).Marg(i > 0 ? 1 : 0, 0, 0, 0).M)
-							{
-								r.Gfx.FillR(Consts.LineBrush);
-								r.DrawText($"Line {i}", Consts.Font, Consts.TextColor);
-							}
-						}
-					}
-
-					using (r[scrollBar]) { }
-				}*/
 
 				using (r[nodeBottom].M) { }
 

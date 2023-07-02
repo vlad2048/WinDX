@@ -43,15 +43,16 @@ public sealed class GDIPlus_WinCtx : IRenderWinCtx
 
 public sealed class GDIPlus_Gfx : IGfx
 {
-	private const TextFormatFlags TextFormatFlags = 0;
+	private const TextFormatFlags TextFormatFlags = System.Windows.Forms.TextFormatFlags.PreserveGraphicsClipping;
 	private static readonly Size TextProposedSize = new(int.MaxValue, int.MaxValue);
 
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
 	private readonly Pencils pencils;
-	private readonly Graphics gfx;
+	public Graphics Gfx { get; }
 	private readonly bool measureOnly;
+	private readonly Stack<R> clipStack = new();
 
 	public R R { get; set; }
 
@@ -60,21 +61,36 @@ public sealed class GDIPlus_Gfx : IGfx
 		this.pencils = pencils;
 		this.measureOnly = measureOnly;
 		R = win.ClientR.V;
-		gfx = Graphics.FromHwnd(win.Handle).D(d);
+		Gfx = Graphics.FromHwnd(win.Handle).D(d);
 	}
 
 	private bool DrawDisabled => measureOnly || R.IsDegenerate;
 
+	public void PushClip(R clipR)
+	{
+		if (DrawDisabled) return;
+		clipStack.Push(clipR);
+		Gfx.SetClipStack(clipStack);
+	}
+
+	public void PopClip()
+	{
+		if (DrawDisabled) return;
+		clipStack.Pop();
+		Gfx.SetClipStack(clipStack);
+	}
+	
+
 	public void FillR(R r, BrushDef brush)
 	{
 		if (DrawDisabled) return;
-		gfx.FillRectangle(pencils.GetBrush(brush), r.ToDrawRect());
+		Gfx.FillRectangle(pencils.GetBrush(brush), r.ToDrawRect());
 	}
 
 	public void DrawR(R r, PenDef pen)
 	{
 		if (DrawDisabled) return;
-		gfx.DrawRectangle(pencils.GetPen(pen), r.ReduceDimsByOne().ToDrawRect());
+		Gfx.DrawRectangle(pencils.GetPen(pen), r.ReduceDimsByOne().ToDrawRect());
 	}
 
 	public void DrawLine(Pt a, Pt b, PenDef penDef)
@@ -101,13 +117,13 @@ public sealed class GDIPlus_Gfx : IGfx
 			}
 		}
 
-		gfx.DrawLine(pencils.GetPen(penDef), a.ToDrawPt(), b.ToDrawPt());
+		Gfx.DrawLine(pencils.GetPen(penDef), a.ToDrawPt(), b.ToDrawPt());
 	}
 
 	public void DrawBmp(Bitmap bmp)
 	{
 		if (DrawDisabled) return;
-		gfx.DrawImage(bmp, R.Pos.ToDrawPt());
+		Gfx.DrawImage(bmp, R.Pos.ToDrawPt());
 	}
 
 
@@ -124,7 +140,7 @@ public sealed class GDIPlus_Gfx : IGfx
 	{
 		if (DrawDisabled) return;
 		TextRenderer.DrawText(
-			gfx,
+			Gfx,
 			text,
 			pencils.GetFont(fontDef),
 			R.Pos.ToDrawPt(),
@@ -139,4 +155,12 @@ public sealed class GDIPlus_Gfx : IGfx
 file static class GfxUtils
 {
 	public static Sz ToSz(this Size sz) => new(sz.Width, sz.Height);
+
+	public static void SetClipStack(this Graphics gfx, Stack<R> clipStack)
+	{
+		if (clipStack.Any())
+			gfx.SetClip(clipStack.Intersection().ToDrawRect());
+		else
+			gfx.ResetClip();
+	}
 }

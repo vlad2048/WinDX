@@ -4,11 +4,8 @@ using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
-using PowMaybe;
 using PowRxVar;
 using RenderLib;
-using System.Reactive.Subjects;
-using System.Reactive;
 using SysWinLib;
 using SysWinLib.Structs;
 using UserEvents;
@@ -17,47 +14,42 @@ using UserEvents.Structs;
 using UserEvents.Utils;
 using WinAPI.User32;
 using WinAPI.Windows;
-using System.Reactive.Linq;
 
 namespace ControlSystem.Logic.Popup_;
 
 sealed class PopupWin : Ctrl, IWinUserEventsSupport
 {
+	private readonly Action invalidateAllAction;
 	private readonly SysWin sysWin;
 	private readonly IRwVar<R> layoutR;
-	private readonly ISubject<Unit> whenInvalidate;
 	private Partition subPartition;
 	private Partition subPartitionRebased;
-	private IObservable<Unit> WhenInvalidate => whenInvalidate.AsObservable();
 
 	public nint Handle => sysWin.Handle;
 
 	// IWinUserEventsSupport
 	// =====================
 	public IObservable<IUserEvt> Evt { get; }
-	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => subPartition.FindNodeAtMouseCoordinates(pt);
-	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
+	public INodeStateUserEventsSupport[] HitFun(Pt pt) => subPartition.FindNodesAtMouseCoordinates(pt);
 
+	public void Invalidate() => invalidateAllAction();
+
+	internal void CallSysWinInvalidate() => sysWin.Invalidate();
 
 	public PopupWin(
 		Partition subPartition,
 		SysWin parentWin,
+		Action invalidateAllAction,
 		nint winParentHandle,
 		SpectorWinDrawState spectorDrawState
 	)
 	{
-		whenInvalidate = new Subject<Unit>().D(D);
+		this.invalidateAllAction = invalidateAllAction;
 		layoutR = Var.Make(R.Empty).D(D);
 		(this.subPartition, subPartitionRebased) = SetLayout(subPartition);
 		sysWin = PopupWinUtils.MakeWin(layoutR.V, parentWin, winParentHandle).D(D);
 		this.D(sysWin.D);
 		Evt = UserEventGenerator.MakeForWin(sysWin).Translate(() => layoutR.V.Pos);
-
-		WhenInvalidate
-			.Subscribe(_ =>
-			{
-				sysWin.Invalidate();
-			}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 
@@ -84,6 +76,7 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 	{
 		subPartition = subPartition_;
 		(subPartitionRebased, layoutR.V) = subPartition_.SplitOffset();
+		Invalidate();
 		return (subPartition, subPartitionRebased);
 	}
 }
@@ -128,7 +121,10 @@ file static class PopupWinUtils
 	{
 		var r = part.RMap[part.Id ?? throw new ArgumentException("Should not be null for a subpartition")];
 		return (
-			part with { RMap = part.RMap.MapValues(e => e - r.Pos) },
+			part with
+			{
+				RMap = part.RMap.MapValues(e => e - r.Pos),
+			},
 			r
 		);
 	}

@@ -27,10 +27,15 @@ public sealed class ScrollBarCtrl : Ctrl
 
 		if (dir == Dir.Vert)
 		{
-			nodeEvt.WhenMouseWheel()
-				.Select(e => new WheelScrollCmd(e == -1 ? ScrollBtnDecInc.Dec : ScrollBtnDecInc.Inc))
-				.Where(state.CanRunScrollCmd)
-				.Subscribe(state.RunScrollCmd).D(D);
+			nodeEvt.OfType<MouseWheelUserEvt>()
+				.Select(e => (e, new WheelScrollCmd(Math.Sign(e.Direction) == -1 ? ScrollBtnDecInc.Dec : ScrollBtnDecInc.Inc)))
+				.Where(t => state.CanRunScrollCmd(t.Item2))
+				.Subscribe(t =>
+				{
+					t.e.Handled = true;
+					//L($"Cmd <- Wheel({t.e.Direction})");
+					state.RunScrollCmd(t.Item2);
+				}).D(D);
 		}
 
 		Obs.Merge(

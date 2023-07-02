@@ -52,6 +52,7 @@ class Program
 					new DemoNfo("PopNodeComplex", Wrap(() => new PopNodeComplexDemo())),
 					new DemoNfo("Text", Wrap(() => new TextDemo())),
 					new DemoNfo("Scroll", Wrap(() => new ScrollDemo())),
+					new DemoNfo("ScrollNested", Wrap(() => new ScrollNestedDemo())),
 
 					new DemoNfo("UserEvents", Wrap(() => new UserEventsDemoWin())),
 

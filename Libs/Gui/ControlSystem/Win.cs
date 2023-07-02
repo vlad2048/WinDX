@@ -32,10 +32,8 @@ namespace ControlSystem;
 public class Win : Ctrl, IWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
-	private readonly ISubject<Unit> whenInvalidateAll;
 	private readonly ISubject<Unit> whenInvalidate;
 	private PartitionSet partitionSet = PartitionSet.Empty;
-	private IObservable<Unit> WhenInvalidateAll => whenInvalidateAll.AsObservable();
 	private IObservable<Unit> WhenInvalidate => whenInvalidate.AsObservable();
 
 	internal SpectorWinDrawState SpectorDrawState { get; }
@@ -45,38 +43,36 @@ public class Win : Ctrl, IWinUserEventsSupport
 	// IWinUserEventsSupport
 	// =====================
 	public IObservable<IUserEvt> Evt { get; }
-	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => partitionSet.MainPartition.FindNodeAtMouseCoordinates(pt);
+	public INodeStateUserEventsSupport[] HitFun(Pt pt) => partitionSet.MainPartition.FindNodesAtMouseCoordinates(pt);
 	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
 
 	public override string ToString() => GetType().Name;
-	public void InvalidateAll() => whenInvalidateAll.OnNext(Unit.Default);
 	public nint Handle => sysWin.Handle;
 
 
 	public Win(Action<WinOpt>? optFun = null)
 	{
-		whenInvalidateAll = new Subject<Unit>().D(D);
 		whenInvalidate = new Subject<Unit>().D(D);
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
 		Evt = UserEventGenerator.MakeForWin(sysWin);
 		SpectorDrawState = new SpectorWinDrawState().D(D);
-		var popupMan = new PopupMan(this, sysWin, SpectorDrawState).D(D);
+		var popupMan = new PopupMan(this, Invalidate, sysWin, SpectorDrawState).D(D);
 		var eventDispatcher = new WinEventDispatcher().D(D);
 
 		var canSkipLayout = new TimedFlag();
 		SpectorDrawState.WhenChanged.Subscribe(_ =>
 		{
 			canSkipLayout.Set();
-			InvalidateAll();
+			Invalidate();
 		}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		var scrollMan = new ScrollMan(renderer).D(D);
 		G.WinMan.AddWin(this);
 
-		WhenInvalidateAll
+		WhenInvalidate
 			.Subscribe(_ =>
 			{
 				sysWin.Invalidate();
@@ -102,9 +98,9 @@ public class Win : Ctrl, IWinUserEventsSupport
 					.BuildCtrlTree(renderer)
 					.SolveTree(this, out var mixLayout)
 					.SplitPopups()
-					.CreatePopups(popupMan)
 					.AddScrollBars(scrollMan)
 					.ApplyScrollOffsets(mixLayout)
+					.CreatePopups(popupMan)
 					.DispatchNodeEvents(eventDispatcher, popupMan.GetWin)
 					.Assign_CtrlWins_and_NodeRs(this);
 
@@ -154,24 +150,6 @@ file static class WinUtils
 			select (nodeState, r: partition.RMap[nodeState])
 		)
 			.ForEach(t => t.nodeState.RSrc.V = t.r);
-
-
-
-		(
-			from partition in partitionSet.Partitions
-			from ctrl in partition.ScrollBars.ControlMap.Values.SelectMany(e => e)
-			select ctrl
-		)
-			.ForEach(ctrl => ctrl.WinSrc.V = May.Some(win));
-
-		(
-			from partition in partitionSet.Partitions
-			from nodeState in partition.ScrollBars.RMap.Keys
-			select (nodeState, r: partition.ScrollBars.RMap[nodeState])
-		)
-			.ForEach(t => t.nodeState.RSrc.V = t.r);
-
-
 
 		return partitionSet;
 	}
