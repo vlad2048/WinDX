@@ -41,11 +41,15 @@ static class MixTreeUtils
 		var layout = FlexSolver.Solve(flexRoot, freeSz);
 
 		var flex2st = flexRoot.Zip(stFlexRoot).ToDictionary(e => e.First, e => e.Second.V.State);
+		var nodeMap = tree.Root
+			.Where(e => e.V is StFlexNode)
+			.ToDictionary(e => ((StFlexNode)e.V).State);
 		return
 			new MixLayout(
 				win,
 				freeSz,
 				mixRoot,
+				nodeMap,
 				layout.RMap.MapKeys(flex2st),
 				layout.WarningMap.MapKeys(flex2st),
 

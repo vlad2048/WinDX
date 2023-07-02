@@ -20,7 +20,7 @@ sealed class ScrollDemo : Win
 		var nodeBottom = new NodeState().D(D);
 		var nodesLines = Enumerable.Range(0, 9).SelectToArray(_ => new NodeState().D(D));
 
-		var scrollBar = new ScrollBarCtrl(Dir.Vert, nodeScroll.ScrollState.Y).D(D);
+		var scrollBar = new ScrollBarCtrl(Dir.Vert, nodeScroll.ScrollState.Y, nodeScroll.Evt).D(D);
 
 		WhenRender.Subscribe(r =>
 		{

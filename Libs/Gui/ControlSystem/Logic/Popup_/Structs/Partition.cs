@@ -1,7 +1,6 @@
-﻿using ControlSystem.Logic.Scrolling_.Utils;
-using ControlSystem.Structs;
-using ControlSystem.Utils;
+﻿using ControlSystem.Structs;
 using LayoutSystem.Flex.Structs;
+using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
@@ -9,14 +8,22 @@ using UserEvents;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
+/// <summary>
+/// ScrollBar controls info
+/// </summary>
+/// <param name="ControlMap">Map from the Dad NodeState to the scroll controls</param>
+/// <param name="RMap">Map from the Kids NodeStates to Rs</param>
+/// <param name="StateLinkMap">Map from the Kids NodesStates to the Dad NodeStates</param>
 sealed record PartitionScrollBars(
 	IReadOnlyDictionary<NodeState, Ctrl[]> ControlMap,
-	IReadOnlyDictionary<NodeState, R> RMap
+	IReadOnlyDictionary<NodeState, R> RMap,
+	IReadOnlyDictionary<NodeState, NodeState> StateLinkMap
 )
 {
 	public static readonly PartitionScrollBars Empty = new(
 		new Dictionary<NodeState, Ctrl[]>(),
-		new Dictionary<NodeState, R>()
+		new Dictionary<NodeState, R>(),
+		new Dictionary<NodeState, NodeState>()
 	);
 }
 
@@ -85,21 +92,7 @@ static class PartitionExt
 			.OfType<INodeStateUserEventsSupport>()
 			.FirstOrMaybe();
 
-
-	public static BoolVec AreScrollBarsVisible(this Partition partition, NodeState state)
-	{
-		var node = partition.NodeMap[state];
-		var scrollEnabled = ((StFlexNode)node.V).Flex.Flags.Scroll;
-		var viewSz = partition.RMap[state].Size;
-		var contSz = node
-			.GetFirstChildrenWhere(e => e is StFlexNode st && partition.RMap.ContainsKey(st.State))
-			.Select(e => partition.RMap[((StFlexNode)e.V).State] + ((StFlexNode)e.V).Flex.Marg)
-			.Union()
-			.Size;
-		return ScrollUtils.IsScrollNeeded(scrollEnabled, viewSz, contSz);
-	}
-
-
+	public static NodeState[] NodeStatesWithScrolling(this Partition partition) => partition.AllNodeStates.WhereToArray(e => ((StFlexNode)partition.NodeMap[e].V).Flex.Flags.Scroll != BoolVec.False);
 
 	public static Maybe<R> GetNodeR(this Partition partition, NodeState state) =>
 		PartitionLocalUtils.GetFirst(

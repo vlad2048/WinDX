@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ControlSystem.Logic.Scrolling_;
 using PowBasics.Geom;
@@ -50,6 +51,8 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	public void DispatchEvt(IUserEvt evt) => whenEvt.OnNext(evt);
 
 	public ScrollState ScrollState { get; }
+
+	public IObservable<Unit> WhenInvalidateRequired => ScrollState.WhenInvalidateRequired;
 
 	public NodeState()
 	{

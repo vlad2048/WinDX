@@ -61,7 +61,7 @@ public static class CtrlExt
 	public static void Invalidate(this Ctrl ctrl)
 	{
 		if (!ctrl.Win.V.IsSome(out var win)) return;
-		win.Invalidate();
+		win.InvalidateAll();
 	}
 }
 

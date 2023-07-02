@@ -7,6 +7,8 @@ using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
 using RenderLib;
+using System.Reactive.Subjects;
+using System.Reactive;
 using SysWinLib;
 using SysWinLib.Structs;
 using UserEvents;
@@ -15,6 +17,7 @@ using UserEvents.Structs;
 using UserEvents.Utils;
 using WinAPI.User32;
 using WinAPI.Windows;
+using System.Reactive.Linq;
 
 namespace ControlSystem.Logic.Popup_;
 
@@ -22,8 +25,10 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
 	private readonly IRwVar<R> layoutR;
+	private readonly ISubject<Unit> whenInvalidate;
 	private Partition subPartition;
 	private Partition subPartitionRebased;
+	private IObservable<Unit> WhenInvalidate => whenInvalidate.AsObservable();
 
 	public nint Handle => sysWin.Handle;
 
@@ -31,6 +36,7 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 	// =====================
 	public IObservable<IUserEvt> Evt { get; }
 	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => subPartition.FindNodeAtMouseCoordinates(pt);
+	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
 
 
 	public PopupWin(
@@ -40,11 +46,18 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 		SpectorWinDrawState spectorDrawState
 	)
 	{
+		whenInvalidate = new Subject<Unit>().D(D);
 		layoutR = Var.Make(R.Empty).D(D);
 		(this.subPartition, subPartitionRebased) = SetLayout(subPartition);
 		sysWin = PopupWinUtils.MakeWin(layoutR.V, parentWin, winParentHandle).D(D);
 		this.D(sysWin.D);
 		Evt = UserEventGenerator.MakeForWin(sysWin).Translate(() => layoutR.V.Pos);
+
+		WhenInvalidate
+			.Subscribe(_ =>
+			{
+				sysWin.Invalidate();
+			}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 
@@ -73,8 +86,6 @@ sealed class PopupWin : Ctrl, IWinUserEventsSupport
 		(subPartitionRebased, layoutR.V) = subPartition_.SplitOffset();
 		return (subPartition, subPartitionRebased);
 	}
-
-	public void Invalidate() => sysWin.Invalidate();
 }
 
 

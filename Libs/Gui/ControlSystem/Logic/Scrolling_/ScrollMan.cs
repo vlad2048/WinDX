@@ -1,4 +1,5 @@
 ﻿using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Logic.Scrolling_.Utils;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using LayoutSystem.Flex.Structs;
@@ -36,6 +37,7 @@ sealed class ScrollMan : IDisposable
 	{
 		UpdateMap(partition);
 		var partitionScrollBars = Create(partition);
+		UpdateScrollStates(partition);
 
 		return partition with { ScrollBars = partitionScrollBars };
 	}
@@ -62,40 +64,39 @@ sealed class ScrollMan : IDisposable
 
 	private PartitionScrollBars Create(Partition partition)
 	{
-		(Dictionary<NodeState, List<Ctrl>> ctrlMap, Dictionary<NodeState, R> rMap) maps = (new Dictionary<NodeState, List<Ctrl>>(), new Dictionary<NodeState, R>());
+		(Dictionary<NodeState, List<Ctrl>> ctrlMap, Dictionary<NodeState, NodeState> linkMap, Dictionary<NodeState, R> rMap) maps = (new Dictionary<NodeState, List<Ctrl>>(), new Dictionary<NodeState, NodeState>(), new Dictionary<NodeState, R>());
 
-		var states = partition.AllNodeStates.WhereToArray(e => ((StFlexNode)partition.NodeMap[e].V).Flex.Flags.Scroll != BoolVec.False);
-
-		foreach (var state in states)
+		var nodeStates = partition.NodeStatesWithScrolling();
+		foreach (var nodeState in nodeStates)
 		{
-			var nodeR = partition.RMap[state];
-			var scrollBarsVisible = partition.AreScrollBarsVisible(state);
-			var both = scrollBarsVisible == BoolVec.True;
+			var nodeR = partition.RMap[nodeState];
+			var nfo = partition.GetScrollInfos(nodeState);
+			var both = nfo.Visible == BoolVec.True;
 			maps
 				.RenderIf(
-					scrollBarsVisible.Dir(Dir.Horz),
-					state,
+					nfo.Visible.Dir(Dir.Horz),
+					nodeState,
 					() => (
-						map[state].Get(Dir.Horz),
-						ScrollManLocalUtils.GetScrollBarR(nodeR, Dir.Horz, both)
+						map[nodeState].Get(Dir.Horz),
+						ScrollUtils.GetScrollBarR(nodeR, Dir.Horz, both)
 					),
 					renderer
 				)
 				.RenderIf(
-					scrollBarsVisible.Dir(Dir.Vert),
-					state,
+					nfo.Visible.Dir(Dir.Vert),
+					nodeState,
 					() => (
-						map[state].Get(Dir.Vert),
-						ScrollManLocalUtils.GetScrollBarR(nodeR, Dir.Vert, both)
+						map[nodeState].Get(Dir.Vert),
+						ScrollUtils.GetScrollBarR(nodeR, Dir.Vert, both)
 					),
 					renderer
 				)
 				.RenderIf(
 					both,
-					state,
+					nodeState,
 					() => (
-						map[state].GetCorner(),
-						ScrollManLocalUtils.GetScrollBarCornerR(nodeR)
+						map[nodeState].GetCorner(),
+						ScrollUtils.GetScrollBarCornerR(nodeR)
 					),
 					renderer
 				);
@@ -103,8 +104,19 @@ sealed class ScrollMan : IDisposable
 
 		return new PartitionScrollBars(
 			maps.ctrlMap.MapValues(e => e.ToArray()),
-			maps.rMap
+			maps.rMap,
+			maps.linkMap
 		);
+	}
+
+	private void UpdateScrollStates(Partition partition)
+	{
+		var nodeStates = partition.NodeStatesWithScrolling();
+		foreach (var nodeState in nodeStates)
+		{
+			var nfo = partition.GetScrollInfos(nodeState);
+			nfo.State.UpdateFromLayout(nfo);
+		}
 	}
 	
 
@@ -123,8 +135,8 @@ sealed class ScrollMan : IDisposable
 			var scroll = st.Flex.Flags.Scroll;
 			if (scroll == BoolVec.False) throw new ArgumentException("Impossible");
 
-			scrollBarX = scroll.X ? new ScrollBarCtrl(Dir.Horz, st.State.ScrollState.X).D(d) : null;
-			scrollBarY = scroll.Y ? new ScrollBarCtrl(Dir.Vert, st.State.ScrollState.Y).D(d) : null;
+			scrollBarX = scroll.X ? new ScrollBarCtrl(Dir.Horz, st.State.ScrollState.X, st.State.Evt).D(d) : null;
+			scrollBarY = scroll.Y ? new ScrollBarCtrl(Dir.Vert, st.State.ScrollState.Y, st.State.Evt).D(d) : null;
 			scrollBarCorner = (scroll == BoolVec.True) ? new ScrollBarCornerCtrl().D(d) : null;
 		}
 
@@ -141,8 +153,8 @@ sealed class ScrollMan : IDisposable
 
 file static class ScrollManLocalUtils
 {
-	public static (Dictionary<NodeState, List<Ctrl>>, Dictionary<NodeState, R>) RenderIf(
-		this (Dictionary<NodeState, List<Ctrl>> ctrlMap, Dictionary<NodeState, R> rMap) maps,
+	public static (Dictionary<NodeState, List<Ctrl>>, Dictionary<NodeState, NodeState>, Dictionary<NodeState, R>) RenderIf(
+		this (Dictionary<NodeState, List<Ctrl>> ctrlMap, Dictionary<NodeState, NodeState> linkMap, Dictionary<NodeState, R> rMap) maps,
 		bool condition,
 		NodeState state,
 		Func<(Ctrl, R)> makeFun,
@@ -154,7 +166,10 @@ file static class ScrollManLocalUtils
 		var (ctrl, ctrlR) = makeFun();
 		var ctrlRMap = RenderCtrl(ctrl, ctrlR, renderer);
 		foreach (var (key, val) in ctrlRMap)
+		{
 			maps.rMap[key] = val;
+			maps.linkMap[key] = state;
+		}
 
 		if (!maps.ctrlMap.TryGetValue(state, out var list))
 			list = maps.ctrlMap[state] = new List<Ctrl>();
@@ -171,60 +186,4 @@ file static class ScrollManLocalUtils
 			.ResolveCtrlTree(FreeSzMaker.FromSz(nodeR.Size), null!)
 			.Translate(nodeR.Pos)
 			.RMap;
-
-
-
-	public static R GetScrollBarR(R r, Dir dir, bool both)
-	{
-		var cross = FlexFlags.ScrollBarCrossDims;
-		var isX = r.Height >= cross.Height;
-		var isY = r.Width >= FlexFlags.ScrollBarCrossDims.Width;
-
-		if (both && (!isX || !isY)) throw new ArgumentException("Impossible");
-		if (dir == Dir.Horz && !isX) throw new ArgumentException("Impossible");
-		if (dir == Dir.Vert && !isY) throw new ArgumentException("Impossible");
-
-		return (dir, both) switch
-		{
-			(Dir.Horz, false) => new R(
-				r.X,
-				r.Y + r.Height - cross.Height,
-				r.Width,
-				cross.Height
-			),
-			(Dir.Horz, true) => new R(
-				r.X,
-				r.Y + r.Height - cross.Height,
-				r.Width - cross.Width,
-				cross.Height
-			),
-
-			(Dir.Vert, false) => new R(
-				r.X + r.Width - cross.Width,
-				r.Y,
-				cross.Width,
-				r.Height
-			),
-			(Dir.Vert, true) => new R(
-				r.X + r.Width - cross.Width,
-				r.Y,
-				cross.Width,
-				r.Height - cross.Height
-			)
-		};
-	}
-
-	public static R GetScrollBarCornerR(R r)
-	{
-		var cross = FlexFlags.ScrollBarCrossDims;
-		var isX = r.Height >= cross.Height;
-		var isY = r.Width >= FlexFlags.ScrollBarCrossDims.Width;
-		if (!isX || !isY) throw new ArgumentException("Impossible");
-		return new R(
-			r.X + r.Width - cross.Width,
-			r.Y + r.Height - cross.Height,
-			cross.Width,
-			cross.Height
-		);
-	}
 }

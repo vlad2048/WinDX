@@ -20,7 +20,7 @@ static partial class Setup
 		ListBoxSourceListViewer.View(out var selWin, G.WinMan.Wins, ui.winList).D(d);
 		selLayout = GetSelWinLayout(selWin).D(d);
 		ui.redrawWindowBtn.EnableWhenSome(selWin).D(d);
-		ui.redrawWindowBtn.Events().Click.Subscribe(_ => selWin.V.Ensure().Invalidate()).D(d);
+		ui.redrawWindowBtn.Events().Click.Subscribe(_ => selWin.V.Ensure().InvalidateAll()).D(d);
 		return d;
 	}
 

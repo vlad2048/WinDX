@@ -10,6 +10,7 @@ namespace ControlSystem.Structs;
 /// <param name="Win"></param>
 /// <param name="WinSize"></param>
 /// <param name="MixRoot"></param>
+/// <param name="NodeMap"></param>
 /// <param name="RMap">Guaranteed to have exactly one entry for every node in MixRoot</param>
 /// <param name="WarningMap"></param>
 /// <param name="UnbalancedCtrls"></param>
@@ -18,6 +19,7 @@ sealed record MixLayout(
 	Win Win,
 	FreeSz WinSize,
 	MixNode MixRoot,
+	IReadOnlyDictionary<NodeState, MixNode> NodeMap,
 	IReadOnlyDictionary<NodeState, R> RMap,
 	IReadOnlyDictionary<NodeState, FlexWarning> WarningMap,
 	IReadOnlyDictionary<Ctrl, IMixNode> UnbalancedCtrls,

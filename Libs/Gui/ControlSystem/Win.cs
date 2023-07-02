@@ -4,6 +4,7 @@ using System.Reactive.Subjects;
 using ControlSystem.Logic.Popup_;
 using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Logic.Scrolling_;
+using ControlSystem.Logic.Scrolling_.Utils;
 using ControlSystem.Logic.UserEvents_;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
@@ -31,8 +32,10 @@ namespace ControlSystem;
 public class Win : Ctrl, IWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
+	private readonly ISubject<Unit> whenInvalidateAll;
 	private readonly ISubject<Unit> whenInvalidate;
 	private PartitionSet partitionSet = PartitionSet.Empty;
+	private IObservable<Unit> WhenInvalidateAll => whenInvalidateAll.AsObservable();
 	private IObservable<Unit> WhenInvalidate => whenInvalidate.AsObservable();
 
 	internal SpectorWinDrawState SpectorDrawState { get; }
@@ -43,14 +46,16 @@ public class Win : Ctrl, IWinUserEventsSupport
 	// =====================
 	public IObservable<IUserEvt> Evt { get; }
 	public Maybe<INodeStateUserEventsSupport> HitFun(Pt pt) => partitionSet.MainPartition.FindNodeAtMouseCoordinates(pt);
+	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
 
 	public override string ToString() => GetType().Name;
-	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
+	public void InvalidateAll() => whenInvalidateAll.OnNext(Unit.Default);
 	public nint Handle => sysWin.Handle;
 
 
 	public Win(Action<WinOpt>? optFun = null)
 	{
+		whenInvalidateAll = new Subject<Unit>().D(D);
 		whenInvalidate = new Subject<Unit>().D(D);
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
@@ -64,18 +69,24 @@ public class Win : Ctrl, IWinUserEventsSupport
 		SpectorDrawState.WhenChanged.Subscribe(_ =>
 		{
 			canSkipLayout.Set();
-			Invalidate();
+			InvalidateAll();
 		}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		var scrollMan = new ScrollMan(renderer).D(D);
 		G.WinMan.AddWin(this);
 
-		WhenInvalidate
+		WhenInvalidateAll
 			.Subscribe(_ =>
 			{
 				sysWin.Invalidate();
 				popupMan.InvalidatePopups();
+			}).D(D);
+
+		WhenInvalidate
+			.Subscribe(_ =>
+			{
+				sysWin.Invalidate();
 			}).D(D);
 
 		
@@ -93,6 +104,7 @@ public class Win : Ctrl, IWinUserEventsSupport
 					.SplitPopups()
 					.CreatePopups(popupMan)
 					.AddScrollBars(scrollMan)
+					.ApplyScrollOffsets(mixLayout)
 					.DispatchNodeEvents(eventDispatcher, popupMan.GetWin)
 					.Assign_CtrlWins_and_NodeRs(this);
 

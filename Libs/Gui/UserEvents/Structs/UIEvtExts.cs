@@ -23,6 +23,11 @@ public static class IUIEvtExts
 			.Where(e => e.Btn == btn)
 			.Select(e => e.Pos);
 
+	public static IObservable<int> WhenMouseWheel(this IObservable<IUserEvt> evt) =>
+		evt
+			.OfType<MouseWheelUserEvt>()
+			.Select(e => e.Direction);
+
 	public static IObservable<Pt> WhenMouseMove(this IObservable<IUserEvt> evt) =>
 		evt
 			.OfType<MouseMoveUserEvt>()

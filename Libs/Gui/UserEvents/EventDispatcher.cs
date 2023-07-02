@@ -1,5 +1,4 @@
-﻿using System.Reactive.Linq;
-using DynamicData;
+﻿using DynamicData;
 using PowRxVar;
 using UserEvents.Converters;
 using IWin = UserEvents.IWinUserEventsSupport;
@@ -19,9 +18,13 @@ public sealed class EventDispatcher : IDisposable
 	{
 		Win = win;
 		nodesSrc = new SourceList<INode>().D(d);
-		var nodesChanges = nodesSrc.Connect();
+		var nodesChanges = nodesSrc.Connect().MakeHot(d);
 
 		UserEventConverter.MakeForNodes(Win.Evt, nodesChanges, Win.HitFun).D(d);
+
+		nodesChanges
+			.MergeMany(e => e.WhenInvalidateRequired)
+			.Subscribe(_ => Win.Invalidate()).D(d);
 	}
 
 	public void Update(INode[] nodeStates) => nodesSrc.EditDiff(nodeStates);

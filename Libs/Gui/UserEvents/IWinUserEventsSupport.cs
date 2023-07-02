@@ -8,4 +8,5 @@ public interface IWinUserEventsSupport
 {
 	IObservable<IUserEvt> Evt { get; }
 	Maybe<INodeStateUserEventsSupport> HitFun(Pt pt);
+	void Invalidate();
 }

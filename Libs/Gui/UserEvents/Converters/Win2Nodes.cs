@@ -21,6 +21,7 @@ public static class UserEventConverter
 	{
 		var d = new Disp();
 		HandleMouseMoves(out var mayHovVar, out var mouseFun, winEvt, hitFun).D(d);
+		HandleMouseWheel(winEvt, mayHovVar).D(d);
 		HandleMouseButtons(mayHovVar, winEvt).D(d);
 		HandleNodeChanges(mayHovVar, mouseFun, nodes, hitFun).D(d);
 		HandleMouseLeave(mayHovVar, winEvt).D(d);
@@ -75,6 +76,25 @@ public static class UserEventConverter
 
 		}).D(d);
 
+
+		return d;
+	}
+
+	private static IDisposable HandleMouseWheel<N>(
+		IObservable<IUserEvt> winEvt,
+		IRoMayVar<N> mayHovVar
+	)
+		where N : INodeStateUserEventsSupport
+	{
+		var d = new Disp();
+
+		winEvt
+			.OfType<MouseWheelUserEvt>()
+			.Subscribe(e =>
+			{
+				if (mayHovVar.V.IsNone(out var hov)) return;
+				hov.DispatchEvt(e);
+			}).D(d);
 
 		return d;
 	}

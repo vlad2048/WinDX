@@ -1,4 +1,5 @@
-﻿using ControlSystem.Logic.Scrolling_.Structs;
+﻿using System.Reactive.Linq;
+using ControlSystem.Logic.Scrolling_.Structs;
 using ControlSystem.Structs;
 using PowBasics.Geom;
 using PowRxVar;
@@ -9,7 +10,7 @@ namespace ControlSystem.Logic.Scrolling_;
 
 public sealed class ScrollBarCtrl : Ctrl
 {
-	public ScrollBarCtrl(Dir dir, ScrollDimState state)
+	public ScrollBarCtrl(Dir dir, ScrollDimState state, IObservable<IUserEvt> nodeEvt)
 	{
 		var nodeRoot = new NodeState().D(D);
 		var nodeStack = new NodeState().D(D);
@@ -21,12 +22,16 @@ public sealed class ScrollBarCtrl : Ctrl
 
 		var thumbPos = 0;
 
-		nodeRoot.Evt.Subscribe(e =>
-		{
-			var abc = 123;
-		}).D(D);
+		ScrollBarCtrlUtils.HookBtn(out var btnDecState, state, ScrollBtnDecInc.Dec, nodeBtnDec).D(D);
+		ScrollBarCtrlUtils.HookBtn(out var btnIncState, state, ScrollBtnDecInc.Inc, nodeBtnInc).D(D);
 
-		var btnDecState = nodeBtnDec.Evt.IsMouseOver().D(D).SelectVar(e => e ? ScrollBtnState.Hover : ScrollBtnState.Normal);
+		if (dir == Dir.Vert)
+		{
+			nodeEvt.WhenMouseWheel()
+				.Select(e => new WheelScrollCmd(e == -1 ? ScrollBtnDecInc.Dec : ScrollBtnDecInc.Inc))
+				.Where(state.CanRunScrollCmd)
+				.Subscribe(state.RunScrollCmd).D(D);
+		}
 
 		Obs.Merge(
 				btnDecState.ToUnit()
@@ -37,8 +42,8 @@ public sealed class ScrollBarCtrl : Ctrl
 		{
 			using (r[nodeRoot].DimFilFix(dir, 17).M)
 			{
-				var (ptInnerA, ptInnerB) = GetInnerLine(r.Gfx.R, dir);
-				var (ptOuterA, ptOuterB) = GetOuterLine(r.Gfx.R, dir);
+				var (ptInnerA, ptInnerB) = ScrollBarCtrlUtils.GetInnerLine(r.Gfx.R, dir);
+				var (ptOuterA, ptOuterB) = ScrollBarCtrlUtils.GetOuterLine(r.Gfx.R, dir);
 				r.Gfx.DrawLine(ptInnerA, ptInnerB, C.EdgeInnerColor);
 				r.Gfx.DrawLine(ptOuterA, ptOuterB, C.EdgeOuterColor);
 
@@ -63,8 +68,7 @@ public sealed class ScrollBarCtrl : Ctrl
 
 					using (r[nodeBtnInc].Dim(dir, 17, 15).M)
 					{
-						var stateInc = ScrollBtnState.Normal;
-						var (bmp, col) = C.GetBtnBmpCol(dir, ScrollBtnDecInc.Inc, stateInc);
+						var (bmp, col) = C.GetBtnBmpCol(dir, ScrollBtnDecInc.Inc, btnIncState.V);
 						r.Gfx.FillR(col);
 						r.Gfx.DrawBmp(bmp);
 					}
@@ -73,14 +77,39 @@ public sealed class ScrollBarCtrl : Ctrl
 			}
 		}).D(D);
 	}
+}
 
-	private static (Pt, Pt) GetInnerLine(R r, Dir dir) => dir switch
+
+
+file static class ScrollBarCtrlUtils
+{
+	public static IDisposable HookBtn(
+		out IRoVar<ScrollBtnState> btnState,
+		ScrollDimState state,
+		ScrollBtnDecInc decInc,
+		NodeState node
+	)
+	{
+		var d = new Disp();
+		btnState = node.Evt.IsMouseOver().D(d).SelectVar(e => e ? ScrollBtnState.Hover : ScrollBtnState.Normal);
+
+		node.Evt.WhenMouseDown(MouseBtn.Left)
+			.Select(_ => new UnitScrollCmd(decInc))
+			.Where(state.CanRunScrollCmd)
+			.Subscribe(state.RunScrollCmd).D(d);
+
+		return d;
+	}
+
+
+
+	public static (Pt, Pt) GetInnerLine(R r, Dir dir) => dir switch
 	{
 		Dir.Horz => (new Pt(r.X, r.Y), new Pt(r.X + r.Width, r.Y)),
 		Dir.Vert => (new Pt(r.X, r.Y), new Pt(r.X, r.Y + r.Height)),
 	};
 
-	private static (Pt, Pt) GetOuterLine(R r, Dir dir) => dir switch
+	public static (Pt, Pt) GetOuterLine(R r, Dir dir) => dir switch
 	{
 		Dir.Horz => (new Pt(r.X, r.Y + r.Height - 1), new Pt(r.X + r.Width, r.Y + r.Height - 1)),
 		Dir.Vert => (new Pt(r.X + r.Width - 1, r.Y), new Pt(r.X + r.Width - 1, r.Y + r.Height)),
