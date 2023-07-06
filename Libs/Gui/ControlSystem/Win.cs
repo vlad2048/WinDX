@@ -62,6 +62,9 @@ public class Win : Ctrl, IWinUserEventsSupport
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
+		// TODO: understand why MakeHot is needed, if removed:
+		// - MouseEnter event appears in log here
+		// - MouseEnter event does not appear in WinSpector
 		Evt = UserEventGenerator.MakeForWin(sysWin).MakeHot(D);
 		Evt.Subscribe(e => L($"{e}")).D(D);
 		SpectorDrawState = new SpectorWinDrawState().D(D);
