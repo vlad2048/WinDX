@@ -1,4 +1,4 @@
-﻿using PowBasics.Geom;
+﻿using PowBasics.StringsExt;
 using PowTrees.Algorithms;
 
 namespace TestBase;
@@ -53,7 +53,7 @@ public static class TestLogger
 	public static void LTree<T>(this TNod<T> root, string title, Func<T, string>? strFun = null)
 	{
 		LTitle(title);
-		L(root.LogToString(opt => opt.FormatFun = strFun));
+		L(root.Log(opt => opt.FmtFun = strFun ?? (e => $"{e}")).JoinLines());
 		L("");
 	}
 }

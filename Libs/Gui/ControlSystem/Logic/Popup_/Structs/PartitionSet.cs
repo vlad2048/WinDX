@@ -1,4 +1,5 @@
 ﻿using ControlSystem.Structs;
+using PowBasics.CollectionsExt;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
@@ -29,6 +30,27 @@ sealed record PartitionSet(
         )
         .Distinct()
         .ToArray();
+
+    public TNod<Partition> PartitionTree
+    {
+	    get
+	    {
+		    var root = Nod.Make(MainPartition);
+		    var nodes = SubPartitions.SelectToArray(e => Nod.Make(e));
+		    var nodeMap = nodes.ToDictionary(e => e.V.Id ?? throw new ArgumentException("Id cannot be null for a sub partition"));
+		    foreach (var (ns, nsParent) in ParentMapping)
+		    {
+			    var nodeKid = nodeMap[ns];
+			    var nodeDad = nsParent switch
+			    {
+				    null => root,
+				    not null => nodeMap[nsParent]
+			    };
+				nodeDad.AddChild(nodeKid);
+		    }
+		    return root;
+	    }
+    }
 
     public static readonly PartitionSet Empty = new(
         new[] { Partition.Empty },

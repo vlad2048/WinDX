@@ -253,13 +253,13 @@ static partial class Setup
 
 		ui.layoutTreeContextMenu.Events().Opening.Subscribe(e =>
 		{
-			if (selNode.V.IsNone(out var nod) || nod.V is not StFlexNode st)
+			if (!selNode.CanTrackNode(out var node))
 			{
 				e.Cancel = true;
 				return;
 			}
 
-			var isTracked = ui.eventDisplayer.IsNodeTracked(st);
+			var isTracked = ui.eventDisplayer.IsNodeTracked(node!);
 
 			ui.trackEventsMenuItem.Enabled = !isTracked;
 			ui.stopTrackingMenuItem.Enabled = isTracked;
@@ -270,17 +270,17 @@ static partial class Setup
 
 		ui.trackEventsMenuItem.Events().Click.Subscribe(_ =>
 		{
-			if (selNode.V.IsNone(out var nod) || nod.V is not StFlexNode st)
+			if (!selNode.CanTrackNode(out var node))
 				return;
-			ui.eventDisplayer.TrackNode(st);
+			ui.eventDisplayer.TrackNode(node!);
 			showEvents.V = true;
 		}).D(d);
 
 		ui.stopTrackingMenuItem.Events().Click.Subscribe(_ =>
 		{
-			if (selNode.V.IsNone(out var nod) || nod.V is not StFlexNode st)
+			if (!selNode.CanTrackNode(out var node))
 				return;
-			ui.eventDisplayer.StopTrackingNode(st);
+			ui.eventDisplayer.StopTrackingNode(node!);
 		}).D(d);
 
 		ui.stopAllTrackingMenuItem.Events().Click.Subscribe(_ =>
@@ -290,6 +290,30 @@ static partial class Setup
 
 		return d;
 	}
+
+
+
+	private static bool CanTrackNode(this IRoMayVar<MixNode> node, out IMixNode? n)
+	{
+		var res = node.CanTrackNode();
+		n = res switch
+		{
+			false => null,
+			true => node.V.Ensure().V
+		};
+		return res;
+	}
+
+	private static bool CanTrackNode(this IRoMayVar<MixNode> node) => node.V.IsSome(out var nod) switch
+	{
+		true => nod.V switch
+		{
+			StFlexNode => true,
+			CtrlNode when nod.Parent == null => true,
+			_ => false
+		},
+		false => false,
+	};
 }
 
 

@@ -36,7 +36,7 @@ sealed class WinEventDispatcher : IDisposable
 		{
 			var win = winFun(partition.Id);
 			var nodeTracker = wins.Lookup(win).Value;
-			var nodeStates = partition.AllNodeStates;
+			var nodeStates = partition.NodeStates.Concat(partition.SysPartition.RMap.Keys).ToArray();
 			nodeTracker.Update(nodeStates.OfType<INode>().ToArray());
 		}
 	}

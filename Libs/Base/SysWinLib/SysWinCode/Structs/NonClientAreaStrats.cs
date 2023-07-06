@@ -11,5 +11,10 @@ public sealed class NoneNCStrat : INCStrat { }
 
 public sealed class CustomNCStrat : INCStrat
 {
-	public NCHitTestDelegate HitTest { get; set; } = NcHitTestUtils.Make();
+	public NCHitTestDelegate HitTest { get; set; } = NcHitTestUtils.MakeCustom();
+}
+
+public sealed class PopupNCStrat : INCStrat
+{
+	public NCHitTestDelegate HitTest { get; set; } = NcHitTestUtils.MakePopup();
 }

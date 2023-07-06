@@ -4,6 +4,7 @@ using ControlSystem.Utils;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
+using PowMaybe;
 
 namespace ControlSystem.Logic.Scrolling_.Utils;
 
@@ -13,13 +14,28 @@ sealed record ScrollNfo(
 	BoolVec Visible,
 	Sz ViewSz,
 	Sz ContSz,
-	Sz TrakSz
-);
+	Sz TrakSz,
+	R ViewR
+)
+{
+	public static ScrollNfo MkEmpty(NodeState state) => new(
+		state.ScrollState,
+		BoolVec.False,
+		BoolVec.False,
+		Sz.Empty,
+		Sz.Empty,
+		Sz.Empty,
+		R.Empty
+	);
+}
 
 static class ScrollUtils
 {
 	public static ScrollNfo GetScrollInfos(this Partition partition, NodeState state)
 	{
+		if (!partition.NodeMap.ContainsKey(state))
+			return ScrollNfo.MkEmpty(state);
+
 		var node = partition.NodeMap[state];
 		var nodeR = partition.RMap[state];
 		var stNode = (StFlexNode)node.V;
@@ -43,19 +59,20 @@ static class ScrollUtils
 			scrollVisible,
 			viewSz,
 			contSz,
-			trakSz
+			trakSz,
+			new R(partition.GetNodeR(state).Ensure().Pos, viewSz)
 		);
 	}
 
 
 	public static PartitionSet ApplyScrollOffsets(this PartitionSet partitionSet, MixLayout mixLayout)
 	{
-		var states = partitionSet.Partitions.SelectMany(e => e.AllNodeStates).ToArray();
+		var states = partitionSet.Partitions.SelectMany(e => e.NodeStates).ToArray();
 		var ofsMap = states.ToDictionary(e => e, _ => Pt.Empty);
 
 		var statesWithOfs = states.WhereToArray(e => e.ScrollState.ScrollOfs != Pt.Empty);
 
-		var extraStateLinks = partitionSet.Partitions.Select(e => e.ExtraStateLinks).Merge();
+		var extraStateLinks = partitionSet.Partitions.Select(e => e.SysPartition.StateLinks).Merge();
 
 		foreach (var state in statesWithOfs)
 		{

@@ -1,5 +1,7 @@
 ﻿using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Logic.Scrolling_.Utils;
 using ControlSystem.Structs;
+using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
 using PowMaybe;
@@ -32,12 +34,10 @@ static class RenderUtils
 						ctrl.SignalRender(renderArgs);
 						break;
 					case StFlexNode { State: var state, Flex: var flex }:
-						var r = partition.GetNodeR(state).FailWith(R.Empty);
-						gfx.R = r;
-						if (flex.Flags.Scroll != BoolVec.False)
-						{
-							gfx.PushClip(r);
-						}
+						var nfo = GetRenderNfo(partition, state, flex);
+						gfx.R = nfo.R;
+						if (nfo.Clip)
+							gfx.PushClip(nfo.R);
 						break;
 				}
 			},
@@ -45,8 +45,7 @@ static class RenderUtils
 			onPop: mixNode =>
 			{
 				if (mixNode is not StFlexNode st) return;
-				var state = st.State;
-				if (!partition.ExtraCtrlPopTriggers.TryGetValue(state, out var ctrls)) return;
+				if (!partition.SysPartition.CtrlTriggers.TryGetValue(st.State, out var ctrls)) return;
 
 				gfx.PopClip();
 
@@ -60,6 +59,25 @@ static class RenderUtils
 			{
 				using (renderArgs[partition.RootCtrl]) { }
 			}
+		);
+	}
+
+
+	private sealed record FlexRenderNfo(
+		R R,
+		bool Clip
+	);
+
+	private static FlexRenderNfo GetRenderNfo(Partition partition, NodeState state, FlexNode flex)
+	{
+		var sys = partition.SysPartition;
+		if (sys.RMap.TryGetValue(state, out var r))
+			return new FlexRenderNfo(r, false);
+
+		var scrollNfo = partition.GetScrollInfos(state);
+		return new FlexRenderNfo(
+			scrollNfo.ViewR,
+			flex.Flags.Scroll != BoolVec.False
 		);
 	}
 }

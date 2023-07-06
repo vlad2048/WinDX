@@ -100,7 +100,7 @@ file static class PopupWinUtils
 					WindowStyles.WS_VISIBLE |
 					WindowStyles.WS_POPUP |
 					WindowStyles.WS_CLIPSIBLINGS |
-					WindowStyles.WS_CLIPCHILDREN |
+					//WindowStyles.WS_CLIPCHILDREN |
 					0,
 
 				ExStyles =
@@ -112,6 +112,7 @@ file static class PopupWinUtils
 
 				Parent = winParentHandle,
 			};
+			e.NCStrat = new PopupNCStrat();
 		});
 		win.Init();
 		return win;
@@ -124,6 +125,10 @@ file static class PopupWinUtils
 			part with
 			{
 				RMap = part.RMap.MapValues(e => e - r.Pos),
+				SysPartition = part.SysPartition with
+				{
+					RMap = part.SysPartition.RMap.MapValues(e => e - r.Pos),
+				}
 			},
 			r
 		);

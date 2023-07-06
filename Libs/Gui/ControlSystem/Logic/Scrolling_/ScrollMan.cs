@@ -7,6 +7,7 @@ using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
+using PowTrees.Algorithms;
 using RenderLib.Renderers;
 
 namespace ControlSystem.Logic.Scrolling_;
@@ -41,8 +42,8 @@ sealed class ScrollMan : IDisposable
 	private Partition AddScrollBars(Partition partition)
 	{
 		UpdateMap(partition);
-		var extrasNfo = Create(partition);
-		var partitionRes = partition.AddToPartition(extrasNfo);
+		var sysPartition = Create(partition);
+		var partitionRes = partition with { SysPartition = sysPartition };
 		UpdateScrollStates(partitionRes);
 		return partitionRes;
 	}
@@ -51,7 +52,7 @@ sealed class ScrollMan : IDisposable
 	private void UpdateMap(Partition partition)
 	{
 		var treeMap = partition.Root.Where(e => e.V is StFlexNode).ToDictionary(e => ((StFlexNode)e.V).State, e => (StFlexNode)e.V);
-		var states = partition.AllNodeStates.WhereToArray(e => treeMap[e].Flex.Flags.Scroll != BoolVec.False);
+		var states = partition.NodeStates.WhereToArray(e => treeMap[e].Flex.Flags.Scroll != BoolVec.False);
 		var map = stateMaps.GetOrCreate(new NKey(partition.Id), () => new Dictionary<NodeState, Duo>());
 		var (statesAdd, statesDel) = map.GetAddDels(states);
 
@@ -70,9 +71,10 @@ sealed class ScrollMan : IDisposable
 
 	
 
-	private ExtrasNfo Create(Partition partition)
+	private SysPartition Create(Partition partition)
 	{
-		var extrasNfo = new ExtrasNfo();
+		var sys = new SysPartitionMut();
+
 		var stateMap = stateMaps.GetOrCreate(new NKey(partition.Id), () => new Dictionary<NodeState, Duo>());
 
 		var nodeStates = partition.NodeStatesWithScrolling();
@@ -81,37 +83,43 @@ sealed class ScrollMan : IDisposable
 			var nodeR = partition.RMap[nodeState];
 			var nfo = partition.GetScrollInfos(nodeState);
 			var both = nfo.Visible == BoolVec.True;
-			extrasNfo
-				.RenderIf(
-					nfo.Visible.Dir(Dir.Horz),
-					nodeState,
-					() => (
-						stateMap[nodeState].Get(Dir.Horz),
-						ScrollUtils.GetScrollBarR(nodeR, Dir.Horz, both)
-					),
-					renderer
-				)
-				.RenderIf(
-					nfo.Visible.Dir(Dir.Vert),
-					nodeState,
-					() => (
-						stateMap[nodeState].Get(Dir.Vert),
-						ScrollUtils.GetScrollBarR(nodeR, Dir.Vert, both)
-					),
-					renderer
-				)
-				.RenderIf(
-					both,
-					nodeState,
-					() => (
-						stateMap[nodeState].GetCorner(),
-						ScrollUtils.GetScrollBarCornerR(nodeR)
-					),
-					renderer
-				);
+
+			ScrollManLocalUtils.RenderIf(
+				nfo.Visible.Dir(Dir.Horz),
+				sys,
+				nodeState,
+				() => (
+					stateMap[nodeState].Get(Dir.Horz),
+					ScrollUtils.GetScrollBarR(nodeR, Dir.Horz, both)
+				),
+				renderer
+			);
+
+			ScrollManLocalUtils.RenderIf(
+				nfo.Visible.Dir(Dir.Vert),
+				sys,
+				nodeState,
+				() => (
+					stateMap[nodeState].Get(Dir.Vert),
+					ScrollUtils.GetScrollBarR(nodeR, Dir.Vert, both)
+				),
+				renderer
+			);
+
+			ScrollManLocalUtils.RenderIf(
+				both,
+				sys,
+				nodeState,
+				() => (
+					stateMap[nodeState].GetCorner(),
+					ScrollUtils.GetScrollBarCornerR(nodeR)
+				),
+				renderer
+			);
+
 		}
 
-		return extrasNfo;
+		return sys.ToSysPartition();
 	}
 
 	private void UpdateScrollStates(Partition partition)
@@ -155,61 +163,64 @@ sealed class ScrollMan : IDisposable
 	}
 }
 
-
-
-sealed class ExtrasNfo
+sealed class SysPartitionMut
 {
-	//public Dictionary<NodeState, MixNode> NodeMap { get; } = new();
+	public Dictionary<NodeState, List<Ctrl>> CtrlTriggers { get; } = new();
 	public Dictionary<NodeState, R> RMap { get; } = new();
-	public List<Ctrl> Ctrls { get; } = new();
-	public Dictionary<NodeState, List<Ctrl>> ExtraCtrlPopTriggers { get; } = new();
-	public Dictionary<NodeState, List<NodeState>> ExtraStateLinks { get; } = new();
+	public Dictionary<NodeState, List<NodeState>> StateLinks { get; } = new();
+
+	public SysPartition ToSysPartition() => new(
+		CtrlTriggers.ToDictionary(e => e.Key, e => e.Value.ToArray()),
+		RMap,
+		StateLinks.ToDictionary(e => e.Key, e => e.Value.ToArray())
+	);
 }
 
 
-file static class ExtrasNfoExt
+
+file static class ScrollManLocalUtils
 {
-	public static Partition AddToPartition(this Partition partition, ExtrasNfo extrasNfo) => partition with
+	public static void RenderIf(
+		bool condition,
+		SysPartitionMut sys,
+		NodeState state,
+		Func<(Ctrl, R)> makeFun,
+		IRenderWinCtx renderer
+	)
 	{
-		RMap = partition.RMap.Merge(extrasNfo.RMap),
-		CtrlSet = partition.CtrlSet.Merge(extrasNfo.Ctrls),
-		ExtraCtrlPopTriggers = partition.ExtraCtrlPopTriggers.Merge(extrasNfo.ExtraCtrlPopTriggers),
-		ExtraStateLinks = partition.ExtraStateLinks.Merge(extrasNfo.ExtraStateLinks)
-	};
+		if (!condition) return;
 
+		var (ctrl, ctrlR) = makeFun();
+		var (ctrlRoot, ctrlRMap) = RenderCtrl(ctrl, ctrlR, renderer);
 
-	private static IReadOnlyDictionary<K, V> Merge<K, V>(this IReadOnlyDictionary<K, V> dict, IReadOnlyDictionary<K, V> mergeDict) where K : notnull
-	{
-		var dictRes = new Dictionary<K, V>();
-		foreach (var (key, val) in dict)
-			dictRes[key] = val;
-		foreach (var (key, val) in mergeDict)
-			dictRes[key] = val;
-		return dictRes;
+		sys.CtrlTriggers.AddToDictionaryList(state, ctrl);
+		foreach (var (key, val) in ctrlRMap)
+		{
+			sys.RMap[key] = val;
+			sys.StateLinks.AddToDictionaryList(state, key);
+		}
 	}
 
-	private static IReadOnlyDictionary<K, V[]> Merge<K, V>(this IReadOnlyDictionary<K, V[]> dict, IReadOnlyDictionary<K, List<V>> mergeDict) where K : notnull
-	{
-		var dictRes = new Dictionary<K, List<V>>();
-		foreach (var (key, vals) in dict)
-		foreach (var val in vals)
-			dictRes.AddToDictionaryList(key, val);
-		foreach (var (key, vals) in mergeDict)
-		foreach (var val in vals)
-			dictRes.AddToDictionaryList(key, val);
-		return dictRes.MapValues(e => e.ToArray());
-	}
 
-	private static HashSet<T> Merge<T>(this HashSet<T> set, List<T> list)
+
+	private static (MixNode, IReadOnlyDictionary<NodeState, R>) RenderCtrl(Ctrl ctrl, R nodeR, IRenderWinCtx renderer)
 	{
-		var setRes = new HashSet<T>();
-		foreach (var elt in set)
-			setRes.Add(elt);
-		foreach (var elt in list)
-			setRes.Add(elt);
-		return setRes;
+		var tree = ctrl
+			.BuildCtrlTree(renderer);
+
+		var rMap = tree
+			.ResolveCtrlTree(FreeSzMaker.FromSz(nodeR.Size), null!)
+			.Translate(nodeR.Pos)
+			.RMap;
+
+		return (
+			tree.Root,
+			rMap
+		);
 	}
 }
+
+
 
 
 static class ScrollManDictionaryExt
@@ -223,31 +234,8 @@ static class ScrollManDictionaryExt
 }
 
 
-file static class ScrollManLocalUtils
+file static class ScrollManDictionaryExtLocal
 {
-	public static ExtrasNfo RenderIf(
-		this ExtrasNfo extrasNfo,
-		bool condition,
-		NodeState state,
-		Func<(Ctrl, R)> makeFun,
-		IRenderWinCtx renderer
-	)
-	{
-		if (!condition) return extrasNfo;
-
-		var (ctrl, ctrlR) = makeFun();
-		var ctrlRMap = RenderCtrl(ctrl, ctrlR, renderer);
-		extrasNfo.Ctrls.Add(ctrl);
-		extrasNfo.ExtraCtrlPopTriggers.AddToDictionaryList(state, ctrl);
-		foreach (var (key, val) in ctrlRMap)
-		{
-			extrasNfo.RMap[key] = val;
-			extrasNfo.ExtraStateLinks.AddToDictionaryList(state, key);
-		}
-
-		return extrasNfo;
-	}
-
 	public static Dictionary<K1, Dictionary<K2, V>> D<K1, K2, V>(this Dictionary<K1, Dictionary<K2, V>> dicts, IRoDispBase d)
 		where K1 : notnull
 		where K2 : notnull
@@ -266,12 +254,43 @@ file static class ScrollManLocalUtils
 		return dicts;
 	}
 
+	public static IReadOnlyDictionary<K, V> Merge<K, V>(this IReadOnlyDictionary<K, V> dict, IReadOnlyDictionary<K, V> mergeDict) where K : notnull
+	{
+		var dictRes = new Dictionary<K, V>();
+		foreach (var (key, val) in dict)
+			dictRes[key] = val;
+		foreach (var (key, val) in mergeDict)
+			dictRes[key] = val;
+		return dictRes;
+	}
 
+	public static IReadOnlyDictionary<K, V[]> Merge<K, V>(this IReadOnlyDictionary<K, V[]> dict, IReadOnlyDictionary<K, List<V>> mergeDict) where K : notnull
+	{
+		var dictRes = new Dictionary<K, List<V>>();
+		foreach (var (key, vals) in dict)
+		foreach (var val in vals)
+			dictRes.AddToDictionaryList(key, val);
+		foreach (var (key, vals) in mergeDict)
+		foreach (var val in vals)
+			dictRes.AddToDictionaryList(key, val);
+		return dictRes.MapValues(e => e.ToArray());
+	}
 
-	private static IReadOnlyDictionary<NodeState, R> RenderCtrl(Ctrl ctrl, R nodeR, IRenderWinCtx renderer) =>
-		ctrl
-			.BuildCtrlTree(renderer)
-			.ResolveCtrlTree(FreeSzMaker.FromSz(nodeR.Size), null!)
-			.Translate(nodeR.Pos)
-			.RMap;
+	public static HashSet<T> Merge<T>(this HashSet<T> set, List<T> list)
+	{
+		var setRes = new HashSet<T>();
+		foreach (var elt in set)
+			setRes.Add(elt);
+		foreach (var elt in list)
+			setRes.Add(elt);
+		return setRes;
+	}
+
+	/*public static Dictionary<K, V> Clone<K, V>(this IReadOnlyDictionary<K, V> dict) where K : notnull
+	{
+		var res = new Dictionary<K, V>();
+		foreach (var (key, val) in dict)
+			res[key] = val;
+		return res;
+	}*/
 }

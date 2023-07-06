@@ -39,7 +39,8 @@ public sealed class ScrollBarCtrl : Ctrl
 		}
 
 		Obs.Merge(
-				btnDecState.ToUnit()
+				btnDecState.ToUnit(),
+				btnIncState.ToUnit()
 			)
 			.Subscribe(_ => this.Invalidate()).D(D);
 
@@ -98,7 +99,7 @@ file static class ScrollBarCtrlUtils
 		var d = new Disp();
 		btnState = node.Evt.IsMouseOver().D(d).SelectVar(e => e ? ScrollBtnState.Hover : ScrollBtnState.Normal);
 
-		node.Evt.WhenMouseDown(MouseBtn.Left)
+		node.Evt.WhenRepeatedClick(MouseBtn.Left)
 			.Select(_ => new UnitScrollCmd(decInc))
 			.Where(state.CanRunScrollCmd)
 			.Subscribe(state.RunScrollCmd).D(d);

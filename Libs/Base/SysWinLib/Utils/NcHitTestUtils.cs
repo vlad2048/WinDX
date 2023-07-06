@@ -5,7 +5,7 @@ namespace SysWinLib.Utils;
 
 static class NcHitTestUtils
 {
-	public static NCHitTestDelegate Make(int gripSize = 7, int captionBarSize = 38) => (winR, pt) =>
+	public static NCHitTestDelegate MakeCustom(int gripSize = 7, int captionBarSize = 38) => (winR, pt) =>
 	{
 		var sx = Math.Min(gripSize, winR.Width / 2);
 		var sy = Math.Min(gripSize, winR.Height / 2);
@@ -35,4 +35,6 @@ static class NcHitTestUtils
 		//L($"winR:{winR} pt:{pt}  {(left, right, top, bottom)}  -> {res}");
 		return res;
 	};
+	
+	public static NCHitTestDelegate MakePopup() => (_, _) => HitTestResult.HTCLIENT;
 }

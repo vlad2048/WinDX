@@ -53,6 +53,12 @@ public static class FlexSolver
 
 			var layNfo = LayKidsWithScrollHandling(node, freeSz, write);
 
+			pos += node.V.Flags.Pop switch
+			{
+				false => Pt.Empty,
+				truer => new Pt(node.V.Marg.Left, node.V.Marg.Top)
+			};
+
 			rMap[node] = new R(pos, layNfo.ResolvedSz);
 			write.FinalR(pos, layNfo.ResolvedSz, freeSz);
 

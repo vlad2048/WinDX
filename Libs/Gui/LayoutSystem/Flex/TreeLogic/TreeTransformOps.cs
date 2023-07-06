@@ -7,7 +7,7 @@ namespace LayoutSystem.Flex.TreeLogic;
 static class TreeTransformOps
 {
 	public static Node AddMargins(this Node root) =>
-		(root.V.Marg != Mg.Zero) switch
+		(root.V.Marg != Mg.Zero && !root.V.Flags.Pop) switch
 		{
 			truer =>
 				Nod.Make(

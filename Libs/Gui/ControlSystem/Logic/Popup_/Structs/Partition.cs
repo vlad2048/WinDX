@@ -8,6 +8,24 @@ using UserEvents;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
+/// <summary>
+/// Represents the portion of the partition added by the system (used for ScrollBars)
+/// </summary>
+sealed record SysPartition(
+	IReadOnlyDictionary<NodeState, Ctrl[]> CtrlTriggers,
+	IReadOnlyDictionary<NodeState, R> RMap,
+	IReadOnlyDictionary<NodeState, NodeState[]> StateLinks
+)
+{
+	public NodeState[] NodeStates => RMap.Keys.ToArray();
+
+	public static readonly SysPartition Empty = new(
+		new Dictionary<NodeState, Ctrl[]>(),
+		new Dictionary<NodeState, R>(),
+		new Dictionary<NodeState, NodeState[]>()
+	);
+}
+
 
 /// <summary>
 /// Represents a partition of the layout to be displayed on the main window or child popup window
@@ -19,7 +37,8 @@ namespace ControlSystem.Logic.Popup_.Structs;
 /// <param name="Root">
 /// Tree root <br/>
 /// ● Always a Ctrl <br/>
-/// ● This is the Ctrl that gets renderered to trigger the tree rendering
+/// ● This is the Ctrl that gets renderered to trigger the tree rendering <br/>
+/// ● Does not contain the Extra Ctrls and NodeStates (used to add ScrollBars)
 /// </param>
 /// <param name="NodeMap">
 /// NodeMap
@@ -31,27 +50,23 @@ namespace ControlSystem.Logic.Popup_.Structs;
 /// <param name="CtrlSet">
 /// The set of all the Ctrls contained in Root (these will be the ones we call Render for)
 /// </param>
-/// <param name="ExtraCtrlPopTriggers">
-/// Extra Ctrls to render when a NodeState is popped (used to add ScrollBars)
-/// </param>
-/// <param name="ExtraStateLinks">
-/// Indicates how the Extra States are parented (used to propagate ScrollOffsets)
+/// <param name="SysPartition">
+/// Represents the portion of the partition added by the system (used for ScrollBars)
 /// </param>
 sealed record Partition(
     NodeState? Id,
     MixNode Root,
 	IReadOnlyDictionary<NodeState, MixNode> NodeMap,
     IReadOnlyDictionary<NodeState, R> RMap,
-    HashSet<Ctrl> CtrlSet,
-	IReadOnlyDictionary<NodeState, Ctrl[]> ExtraCtrlPopTriggers,
-	IReadOnlyDictionary<NodeState, NodeState[]> ExtraStateLinks
+    IReadOnlySet<Ctrl> CtrlSet,
+	SysPartition SysPartition
 )
 {
-	public override string ToString() => $"Id:{Id}  Nodes:{AllNodeStates.Length}  CtrlPopTriggers:{ExtraCtrlPopTriggers.Values.SelectMany(e => e).Count()}";
+	public override string ToString() => $"Id:{Id}  Nodes:{NodeStates.Length}";
 
     public Ctrl RootCtrl => ((CtrlNode)Root.V).Ctrl;
 
-    public NodeState[] AllNodeStates => RMap.Keys.ToArray();
+    public NodeState[] NodeStates => RMap.Keys.ToArray();
 
     
     private static readonly Ctrl emptyCtrl = new Ctrl().DisposeOnProgramExit();
@@ -62,8 +77,7 @@ sealed record Partition(
 		new Dictionary<NodeState, MixNode>(),
         new Dictionary<NodeState, R>(),
         new HashSet<Ctrl> { emptyCtrl },
-		new Dictionary<NodeState, Ctrl[]>(),
-		new Dictionary<NodeState, NodeState[]>()
+		SysPartition.Empty
     );
 }
 
@@ -71,13 +85,14 @@ sealed record Partition(
 static class PartitionExt
 {
 	public static INodeStateUserEventsSupport[] FindNodesAtMouseCoordinates(this Partition partition, Pt pt) =>
-		partition.AllNodeStates
+		partition.NodeStates.Concat(partition.SysPartition.NodeStates)
 			.Where(state => partition.GetNodeR(state).Ensure().Contains(pt))
 			.Reverse()
 			.OfType<INodeStateUserEventsSupport>()
 			.ToArray();
 
-	public static NodeState[] NodeStatesWithScrolling(this Partition partition) => partition.AllNodeStates
+
+	public static NodeState[] NodeStatesWithScrolling(this Partition partition) => partition.NodeStates
 		.WhereToArray(e => partition.NodeMap.TryGetValue(e, out var node) switch
 			{
 				truer => ((StFlexNode)node.V).Flex.Flags.Scroll != BoolVec.False,
@@ -85,5 +100,11 @@ static class PartitionExt
 			}
 		);
 
-	public static Maybe<R> GetNodeR(this Partition partition, NodeState state) => partition.RMap.GetOrMaybe(state);
+
+	public static Maybe<R> GetNodeR(this Partition partition, NodeState state)
+	{
+		if (partition.SysPartition.RMap.TryGetValue(state, out var sysR)) return May.Some(sysR);
+		if (partition.RMap.TryGetValue(state, out var r)) return May.Some(r);
+		return May.None<R>();
+	}
 }

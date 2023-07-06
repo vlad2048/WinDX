@@ -2,6 +2,7 @@
 using LayoutSystem.Flex.Structs;
 using LayoutSystem.Flex.TreeLogic;
 using PowBasics.Geom;
+using PowBasics.StringsExt;
 using PowTrees.Algorithms;
 using Shouldly;
 
@@ -45,7 +46,7 @@ static class SolverChecker
 						false => $" {node}".PadRight(32) + "  (!)"
 					};
 				})
-				.LogToString()
+				.Log().JoinLines()
 				.LWithTitle($"Differences {diffCnt} / {tree.Count()}");
 
 		}

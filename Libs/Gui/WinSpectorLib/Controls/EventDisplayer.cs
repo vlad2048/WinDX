@@ -1,7 +1,9 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
+using ControlSystem;
 using ControlSystem.Structs;
 using DynamicData;
+using PowMaybe;
 using PowRxVar;
 using PowWinForms;
 using UserEvents.Structs;
@@ -14,8 +16,28 @@ sealed partial class EventDisplayer : UserControl
 {
 	private const int MAX_ITEMS = 20;
 
-	private readonly ISourceCache<TrackedNode, StFlexNode> nodesSrc;
-	private readonly IObservableCache<TrackedNode, StFlexNode> nodes;
+	private interface ITrk {
+		string Name { get;  }
+		IObservable<IUserEvt> Evt { get; }
+		bool IsState(NodeState state);
+		bool IsCtrl(Ctrl ctrl);
+	}
+	private sealed record NodeStateTrk(string Name, NodeState NodeState) : ITrk
+	{
+		public IObservable<IUserEvt> Evt => NodeState.Evt;
+		public bool IsState(NodeState state) => NodeState == state;
+		public bool IsCtrl(Ctrl ctrl) => false;
+	}
+	private sealed record WinTrk(string Name, Win Win) : ITrk
+	{
+		public IObservable<IUserEvt> Evt => Win.Evt;
+		public bool IsState(NodeState state) => false;
+		public bool IsCtrl(Ctrl ctrl) => ctrl.Win.V.IsSome(out var w) && w == Win;
+	}
+
+	private readonly ISourceList<ITrk> trksSrc;
+	private readonly IObservableList<ITrk> trks;
+
 	private readonly IRwVar<bool> isEmpty;
 	private IRwVar<bool> showEvents = null!;
 	private IRoMayVar<MixLayout> selLayout = null!;
@@ -24,13 +46,13 @@ sealed partial class EventDisplayer : UserControl
 	{
 		InitializeComponent();
 
-		nodesSrc = new SourceCache<TrackedNode, StFlexNode>(e => e.Node).D(this);
-		nodes = nodesSrc.AsObservableCache().D(this);
+		trksSrc = new SourceList<ITrk>().D(this);
+		trks = trksSrc.AsObservableList().D(this);
 		var isPaused = Var.Make(false).D(this);
 		isEmpty = Var.Make(false).D(this);
 
 		this.InitRX(d => {
-			var ctrlsObs = nodesSrc.Connect();
+			var trksObs = trksSrc.Connect();
 
 			var winEvt = selLayout.SelectMaySwitch(e => e.Win.Evt);
 
@@ -51,13 +73,15 @@ sealed partial class EventDisplayer : UserControl
 
 			hideBtn.Events().Click.Subscribe(_ => showEvents.V = false).D(d);
 
-			var evt = ctrlsObs
-				.MergeManyItems(trackedNode => PrettyPrintAggregator.Transform(trackedNode.Node.State.Evt))
+			//var objLock = new object();
+
+			var evt = trksObs
+				.MergeMany(trk => PrettyPrintAggregator.Transform(trk.Evt/*.Synchronize(objLock)*/).Select(e => (trk, e)))
 				.Where(_ => !isPaused.V);
 
 			evt.Subscribe(e => {
-				var str = $"[{e.Item.Name}] - {e.Value}";
-				if (e.Value is MouseMoveUpdatePrettyUserEvt { IsSubsequent: true } && eventListBox.Items.Count > 0) {
+				var str = $"[{e.trk.Name}] - {e.e}";
+				if (e.e is MouseMoveUpdatePrettyUserEvt { IsSubsequent: true } && eventListBox.Items.Count > 0) {
 					eventListBox.Items[^1] = str;
 				} else {
 					eventListBox.Items.Add(str);
@@ -84,54 +108,75 @@ sealed partial class EventDisplayer : UserControl
 		isEmpty.V = true;
 	}
 
-	public bool IsAnyNodeTracked() => nodes.Count > 0;
+	public bool IsAnyNodeTracked() => trks.Count > 0;
 
-	public bool IsNodeTracked(StFlexNode node) => nodes.Items.Any(e => e.Node == node);
-
-	public string GetTrackedNodeName(StFlexNode node)
+	public bool IsNodeTracked(IMixNode node) => node switch
 	{
-		var trackedNode = nodes.Items.FirstOrDefault(e => e.Node == node);
-		return trackedNode switch {
+		StFlexNode {State: var state} => trks.Items.Any(e => e.IsState(state)),
+		CtrlNode {Ctrl: var ctrl} => trks.Items.Any(e => e.IsCtrl(ctrl)),
+		_ => false
+	};
+
+	public string GetTrackedNodeName(IMixNode node)
+	{
+		var trk = GetTrk(node);
+		return trk switch
+		{
 			null => string.Empty,
-			not null => trackedNode.Name
+			not null => trk.Name
 		};
 	}
 
-	public void TrackNode(StFlexNode node)
+
+	public void TrackNode(IMixNode node)
 	{
 		if (IsNodeTracked(node)) return;
-		var trackedNode = new TrackedNode(GetNewName(node), node);
-		nodesSrc.AddOrUpdate(trackedNode);
+		var name = GetNewName(node);
+		ITrk trk = node switch
+		{
+			StFlexNode { State: var state } => new NodeStateTrk(name, state),
+			CtrlNode { Ctrl.Win.V: var mayWin } => new WinTrk(name, mayWin.Ensure()),
+			_ => throw new ArgumentException()
+		};
+
+		trksSrc.Add(trk);
 	}
 
-	public void StopTrackingNode(StFlexNode node)
+	public void StopTrackingNode(IMixNode node)
 	{
-		if (!IsNodeTracked(node)) return;
-		nodesSrc.Remove(node);
+		var trk = GetTrk(node);
+		if (trk == null) return;
+		trksSrc.Edit(upd => upd.Remove(trk));
 	}
 
 	public void StopAllTracking()
 	{
 		if (!IsAnyNodeTracked()) return;
-		nodesSrc.Clear();
+		trksSrc.Clear();
 	}
 
-
-	private sealed record TrackedNode(
-		string Name,
-		StFlexNode Node
-	)
+		
+	private ITrk? GetTrk(IMixNode node) => node switch
 	{
-		public override string ToString() => Name;
-	}
+		StFlexNode { State: var state } => trks.Items.FirstOrDefault(e => e.IsState(state)),
+		CtrlNode { Ctrl: var ctrl } => trks.Items.FirstOrDefault(e => e.IsCtrl(ctrl)),
+		_ => null
+	};
 
-	private string GetNewName(StFlexNode node)
+	private string GetNewName(IMixNode node)
 	{
-		var arr = nodes.Items.ToArray();
+		var baseName = node switch
+		{
+			StFlexNode { State: var state } => "N",
+			CtrlNode => "Win",
+			_ => throw new ArgumentException()
+		};
+
+		var arr = trks.Items.ToArray();
 		var idx = 0;
-		var name = $"N_{idx}";
+		var name = $"{baseName}_{idx}";
 		while (arr.Any(e => e.Name == name))
-			name = $"N_{++idx}";
+			name = $"{baseName}_{++idx}";
 		return name;
 	}
 }

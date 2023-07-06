@@ -38,8 +38,7 @@ static class PopupSplitter
 					nodeMap,
 					partitionRMap,
 					ctrlSet,
-					new Dictionary<NodeState, Ctrl[]>(),
-					new Dictionary<NodeState, NodeState[]>()
+					SysPartition.Empty
 				);
 			});
 

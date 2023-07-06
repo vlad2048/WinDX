@@ -2,7 +2,6 @@
 using Demos.Categories.Layout;
 using Demos.Categories.Ownership;
 using Demos.Categories.UserEvents;
-using Demos.Logic;
 using Demos.Structs;
 using PowRxVar;
 using PowWinForms;
@@ -26,14 +25,14 @@ class Program
 
 		if (RunSingleDemo)
 		{
-			using (new ScrollDemo()) App.Run();
+			using (new ScrollNestedDemo()) App.Run();
 		}
 		else
 		{
 			using (var d = new Disp())
 			{
 				var userPrefs = new UserPrefs().Track();
-				Setup.InitConsole(userPrefs).D(d);
+				//Setup.InitConsole(userPrefs).D(d);
 				var serD = new SerialDisp<Disp>().D(d);
 
 				Action Wrap(Func<IDisposable> fun) => () =>

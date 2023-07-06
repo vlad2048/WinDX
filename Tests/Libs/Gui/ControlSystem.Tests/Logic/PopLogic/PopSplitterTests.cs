@@ -6,6 +6,7 @@ using LayoutSystem.Flex.Structs;
 using LayoutSystem.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
+using PowBasics.StringsExt;
 using PowRxVar;
 using PowTrees.Algorithms;
 using Shouldly;
@@ -414,7 +415,7 @@ sealed class PopSplitterTests : RxTest
 	{
 		if (title != null)
 			LTitle(title);
-		var lines = root.LogToStrings(opt => opt.FormatFun = Fmt);
+		var lines = root.Log(opt => opt.FmtFun = Fmt);
 		var pad = new string(' ', spaceCount);
 		foreach (var line in lines)
 			L($"{pad}{line}");
@@ -424,7 +425,7 @@ sealed class PopSplitterTests : RxTest
 	{
 		if (title != null)
 			LTitle(title);
-		var lines = root.LogToStrings(opt => opt.FormatFun = e => $"{Fmt(e.MixNode)}/{e.Enabled}");
+		var lines = root.Log(opt => opt.FmtFun = e => $"{Fmt(e.MixNode)}/{e.Enabled}");
 		var pad = new string(' ', spaceCount);
 		foreach (var line in lines)
 			L($"{pad}{line}");
@@ -540,7 +541,7 @@ sealed class PopSplitterTests : RxTest
 		{
 			L(title);
 			L(new string('=', title.Length));
-			L(r.LogToString(opt => opt.FormatFun = Fmt));
+			L(r.Log(opt => opt.FmtFun = Fmt).JoinLines());
 			L("");
 		}
 
