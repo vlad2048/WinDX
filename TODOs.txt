@@ -1,17 +1,8 @@
-Events2Tree.ToTree()
-====================
-In case of unbalanced push/pop:
-	- return the rest of the tree
-	- return the unbalanced nodes
-	- return all the nodes that were not added as a result (unbalanced nodes + descendents)
-	- test all that
-
-UserEvtGenerator.GenerateForNodes()
-===================================
-Correctly generate MouseEnter/MouseLeave events:
-	- when the mouse goes from one node to another, always generate MouseLeave before MouseEnter
-	- if node is deleted and the mouse was over it -> generate MouseLeave
-	- test all that
+Abstract away PopupWindows from Win.Evt
+=======================================
+	- Win.Evt should pretend there's no popup windows
+	- No MouseLeave/Enter events when the mouse goes over a popup window
+	- Pipe PopupWindow events to Win.Evt
 
 Think about how to handle Ctrls changing between the 2 rendering passes
 =======================================================================
