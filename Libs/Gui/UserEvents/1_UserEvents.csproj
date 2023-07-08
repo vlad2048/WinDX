@@ -19,6 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\Base\Logging\1_Logging.csproj" />
 		<ProjectReference Include="..\..\Base\SysWinInterfaces\2_SysWinInterfaces.csproj" />
 	</ItemGroup>
 

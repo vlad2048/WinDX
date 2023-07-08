@@ -12,6 +12,7 @@ using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Structs;
 using ControlSystem.WinSpectorLogic.Utils;
+using DynamicData;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.ColorCode;
@@ -28,13 +29,16 @@ using TreePusherLib.ConvertExts.Structs;
 using UserEvents;
 using UserEvents.Generators;
 using UserEvents.Structs;
+using UserEvents.Utils;
+using WinAPI.Gdi32;
 using WinAPI.User32;
+using WinAPI.Utils.Exts;
 using WinAPI.Windows;
 
 namespace ControlSystem;
 
 
-public class Win : Ctrl, IWinUserEventsSupport
+public class Win : Ctrl, IMainWinUserEventsSupport
 {
 	private readonly SysWin sysWin;
 	private readonly ISubject<Unit> whenInvalidate;
@@ -43,16 +47,24 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 	internal SpectorWinDrawState SpectorDrawState { get; }
 	internal IRoVar<R> ClientR => sysWin.ClientR;
-	internal IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
 
 	// IWinUserEventsSupport
 	// =====================
-	public IObservable<IUserEvt> Evt { get; }
+	public nint Handle => sysWin.Handle;
+	public IObservable<IPacket> SysEvt => sysWin.WhenMsg;
+	public IObservable<IUserEvt> SysWinEvt { get; }
+	public Pt PopupOffset => Pt.Empty;
+	public IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
+	public IRoVar<R> ScreenR => sysWin.ScreenR;
+	public IObservable<IChangeSet<INodeStateUserEventsSupport>> Nodes { get; }
 	public INodeStateUserEventsSupport[] HitFun(Pt pt) => partitionSet.MainPartition.FindNodesAtMouseCoordinates(pt);
 	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
 
+	// IMainWinUserEventsSupport
+	// =========================
+	public IObservable<IUserEvt> Evt { get; }
+
 	public override string ToString() => GetType().Name;
-	public nint Handle => sysWin.Handle;
 	private int cnt;
 
 
@@ -62,14 +74,20 @@ public class Win : Ctrl, IWinUserEventsSupport
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
+		SysWinEvt = UserEventGenerator.MakeForSysWin(sysWin.WhenMsg);
 		// TODO: understand why MakeHot is needed, if removed:
 		// - MouseEnter event appears in log here
 		// - MouseEnter event does not appear in WinSpector
-		Evt = UserEventGenerator.MakeForWin(sysWin).MakeHot(D);
-		Evt.Subscribe(e => L($"{e}")).D(D);
 		SpectorDrawState = new SpectorWinDrawState().D(D);
-		var popupMan = new PopupMan(this, Invalidate, sysWin, SpectorDrawState).D(D);
-		var eventDispatcher = new WinEventDispatcher().D(D);
+		var popupMan = new PopupMan(this, Invalidate, SpectorDrawState).D(D);
+		var nodeTracker = new RxTracker<INodeStateUserEventsSupport>().D(D);
+		Nodes = nodeTracker.Items;
+
+
+		Evt = UserEventGenerator.MakeForWin(popupMan.PopupTracker, false).D(D);
+
+		// TODO: have the event dispatcher use popupMan.WinTracker instead of creating its own
+		var eventDispatcher = new WinEventDispatcher(popupMan.PopupTracker, this).D(D);
 
 		var canSkipLayout = new TimedFlag();
 		SpectorDrawState.WhenChanged.Subscribe(_ =>
@@ -80,6 +98,8 @@ public class Win : Ctrl, IWinUserEventsSupport
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		var scrollMan = new ScrollMan(renderer).D(D);
+		//var winTracker = new WinTracker().D(D);
+
 		G.WinMan.AddWin(this);
 
 		WhenInvalidate
@@ -89,7 +109,9 @@ public class Win : Ctrl, IWinUserEventsSupport
 				popupMan.InvalidatePopups();
 			}).D(D);
 
-		
+
+
+
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
@@ -105,8 +127,11 @@ public class Win : Ctrl, IWinUserEventsSupport
 					.AddScrollBars(scrollMan)
 					.ApplyScrollOffsets(mixLayout)
 					.CreatePopups(popupMan)
-					.DispatchNodeEvents(eventDispatcher, popupMan.GetWin)
+					//.DispatchNodeEvents(eventDispatcher, popupMan.GetWin)
 					.Assign_CtrlWins_and_NodeRs(this);
+
+				//winTracker.Update(popupMan.GetAllWinsForWinTracker());
+				nodeTracker.Update(partitionSet.MainPartition.NodeStates.OfType<INodeStateUserEventsSupport>().ToArray());
 
 				if (cnt++ == 0)
 					WinUtils.LogPartitionSet(partitionSet);

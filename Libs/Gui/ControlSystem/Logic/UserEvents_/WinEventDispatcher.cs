@@ -16,6 +16,37 @@ sealed class WinEventDispatcher : IDisposable
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
+	public WinEventDispatcher(RxTracker<IWin> popups, IMainWinUserEventsSupport mainWin)
+	{
+		popups.Items
+			.Transform(win => new EventDispatcher(win, mainWin))
+			.DisposeMany()
+			.MakeHot(d);
+	}
+
+	/*public void DispatchNodeEvents(PartitionSet partitionSet, Func<NodeState?, IWin> winFun)
+	{
+		var winsNext = partitionSet.Partitions.SelectToArray(e => winFun(e.Id));
+
+		winsSrc.EditDiffKeys(wins, winsNext, win => new EventDispatcher(win));
+
+		foreach (var partition in partitionSet.Partitions)
+		{
+			var win = winFun(partition.Id);
+			var nodeTracker = wins.Lookup(win).Value;
+			var nodeStates = partition.NodeStates.Concat(partition.SysPartition.RMap.Keys).ToArray();
+			nodeTracker.Update(nodeStates.OfType<INode>().ToArray());
+		}
+	}*/
+}
+
+
+/*
+ sealed class WinEventDispatcher : IDisposable
+{
+	private readonly Disp d = new();
+	public void Dispose() => d.Dispose();
+
 	private readonly ISourceCache<EventDispatcher, IWin> winsSrc;
 	private readonly IObservableCache<EventDispatcher, IWin> wins;
 
@@ -51,3 +82,4 @@ static class WinEventDispatcherExts
 		return partitionSet;
 	}
 }
+*/

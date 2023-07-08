@@ -15,7 +15,7 @@ namespace Demos;
 
 class Program
 {
-	private const bool RunSingleDemo = false;
+	private const bool RunSingleDemo = true;
 
 	static void Main()
 	{
@@ -25,7 +25,7 @@ class Program
 
 		if (RunSingleDemo)
 		{
-			using (new ScrollNestedDemo()) App.Run();
+			using (new UserEventsDemo()) App.Run();
 		}
 		else
 		{
@@ -53,7 +53,8 @@ class Program
 					new DemoNfo("Scroll", Wrap(() => new ScrollDemo())),
 					new DemoNfo("ScrollNested", Wrap(() => new ScrollNestedDemo())),
 
-					new DemoNfo("UserEvents", Wrap(() => new UserEventsDemoWin())),
+					new DemoNfo("WinEvents", Wrap(() => new WinEventsDemo())),
+					new DemoNfo("UserEvents", Wrap(() => new UserEventsDemo())),
 
 					new DemoNfo("DetachCtrl", Wrap(() => new DetachCtrlDemo()))
 				);

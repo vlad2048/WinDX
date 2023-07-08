@@ -13,8 +13,8 @@ namespace UserEvents.Converters;
 public static class UserEventConverter
 {
 	public static IDisposable MakeForNodes<N>(
-		IObservable<IUserEvt> winEvt,
 		IObservable<IChangeSet<N>> nodes,
+		IObservable<IUserEvt> winEvt,
 		Func<Pt, N[]> hitFun
 	)
 		where N : INodeStateUserEventsSupport

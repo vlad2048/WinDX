@@ -20,4 +20,8 @@
 		<ProjectReference Include="..\..\..\TestBase\TestBase.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="MakeForWinTesting\TestSupport\" />
+	</ItemGroup>
+
 </Project>

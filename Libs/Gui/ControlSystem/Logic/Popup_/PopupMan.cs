@@ -2,10 +2,10 @@
 using ControlSystem.WinSpectorLogic;
 using PowBasics.CollectionsExt;
 using PowRxVar;
-using SysWinLib;
+using ControlSystem.Logic.Popup_.Structs;
+using UserEvents;
 using IWin = UserEvents.IWinUserEventsSupport;
 using INode = UserEvents.INodeStateUserEventsSupport;
-using ControlSystem.Logic.Popup_.Structs;
 
 namespace ControlSystem.Logic.Popup_;
 
@@ -21,26 +21,29 @@ sealed class PopupMan : IDisposable
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
-	private readonly IWin parentWin;
+	private readonly IWin mainWin;
 	private readonly Action invalidateAllAction;
-	private readonly SysWin parentSysWin;
 	private readonly SpectorWinDrawState spectorDrawState;
 	private readonly Dictionary<INode, PopupWin> map;
 
-	public PopupMan(IWin parentWin, Action invalidateAllAction, SysWin parentSysWin, SpectorWinDrawState spectorDrawState)
+	public RxTracker<IWin> PopupTracker { get; }
+
+	public PopupMan(IWin mainWin, Action invalidateAllAction, SpectorWinDrawState spectorDrawState)
 	{
-		this.parentWin = parentWin;
+		this.mainWin = mainWin;
 		this.invalidateAllAction = invalidateAllAction;
-		this.parentSysWin = parentSysWin;
 		this.spectorDrawState = spectorDrawState;
 		map = new Dictionary<INode, PopupWin>().D(d);
+		PopupTracker = new RxTracker<IWin>().D(d);
 	}
+
+	//public IWin[] GetAllWinsForWinTracker() => map.Values.Prepend(parentWin).ToArray();
 
 	public void InvalidatePopups() => map.Values.ForEach(e => e.CallSysWinInvalidate());
 
 	public IWin GetWin(INode? nodeState) => nodeState switch
 	{
-		null => parentWin,
+		null => mainWin,
 		not null => map[nodeState]
 	};
 
@@ -60,12 +63,12 @@ sealed class PopupMan : IDisposable
 
 			var popupParentHandle = parentNodeState switch
 			{
-				null => parentSysWin.Handle,
+				null => mainWin.Handle,
 				not null => map[parentNodeState].Handle
 			};
 			map[partitionAdd.Id] = new PopupWin(
 				partitionAdd,
-				parentSysWin,
+				mainWin,
 				invalidateAllAction,
 				popupParentHandle,
 				spectorDrawState
@@ -77,6 +80,8 @@ sealed class PopupMan : IDisposable
 			var win = map[partitionCom.Id!];
 			win.SetLayout(partitionCom);
 		}
+
+		PopupTracker.Update(map.Values.Prepend(mainWin).ToArray());
 
 		return partitionSet;
 	}

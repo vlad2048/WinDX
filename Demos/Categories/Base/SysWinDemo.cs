@@ -27,8 +27,10 @@ static class SysWinDemo
 				Width = 256,
 				Height = 128,
 			};
+			opt.NCStrat = NCStrats.Custom();
 		});
 
+		/*
 		win.WhenMsg.WhenKEYDOWN().Where(e => e.Key == VirtualKey.D1).Subscribe(_ =>
 		{
 			L("-> Sending DestroyWindow");
@@ -47,6 +49,7 @@ static class SysWinDemo
 			var r = new R(-280, 200, 250, 120);
 			win.SetR(r, 0);
 		});
+		*/
 
 		win.WhenMsg.WhenPAINT().Subscribe(e =>
 		{

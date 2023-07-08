@@ -9,21 +9,17 @@ public sealed class EventDispatcher : IDisposable
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
-	public IWin Win { get; }
-	private readonly ISourceList<INode> nodesSrc;
-
-	public EventDispatcher(IWin win)
+	public EventDispatcher(
+		IWin win,
+		IMainWin mainWin
+	)
 	{
-		Win = win;
-		nodesSrc = new SourceList<INode>().D(d);
-		var nodesChanges = nodesSrc.Connect().MakeHot(d);
+		UserEventConverter.MakeForNodes(win.Nodes, mainWin.Evt, mainWin.HitFun).D(d);
 
-		UserEventConverter.MakeForNodes(Win.Evt, nodesChanges, Win.HitFun).D(d);
-
-		nodesChanges
+		win.Nodes
 			.MergeMany(e => e.WhenInvalidateRequired)
-			.Subscribe(_ => Win.Invalidate()).D(d);
+			.Subscribe(_ => mainWin.Invalidate()).D(d);
 	}
 
-	public void Update(INode[] nodeStates) => nodesSrc.EditDiff(nodeStates);
+	//public void Update(INode[] nodeStates) => nodesSrc.EditDiff(nodeStates);
 }

@@ -1,4 +1,4 @@
-﻿namespace SysWinLib.Utils;
+﻿namespace Logging;
 
 public static class LogUtils
 {
@@ -19,7 +19,8 @@ public static class LogUtils
 		get
 		{
 			var thread = System.Threading.Thread.CurrentThread;
-			return $"[{thread.ManagedThreadId}/{thread.Name}]";
+			var str = $"{thread.ManagedThreadId}/{thread.Name}".PadRight(24);
+			return $"[{str}]";
 		}
 	}
 

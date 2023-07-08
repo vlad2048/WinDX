@@ -1,6 +1,6 @@
 ﻿using PowBasics.Geom;
 
-namespace UserEvents.Tests.TestSupport.Utils;
+namespace UserEvents.Tests.EventDispatcherTesting.TestSupport.Utils;
 
 /* X╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶┐
    ╷                                     ╷

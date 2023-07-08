@@ -5,7 +5,7 @@ using PowBasics.Geom;
 using PowRxVar;
 using UserEvents.Structs;
 
-namespace UserEvents.Tests.TestSupport.Utils;
+namespace UserEvents.Tests.EventDispatcherTesting.TestSupport.Utils;
 
 sealed class TNode : INode, IDisposable
 {
@@ -25,7 +25,7 @@ sealed class TNode : INode, IDisposable
 
     public TNode(R r, int depth, string name)
     {
-	    this.name = name;
+        this.name = name;
         Depth = depth;
         RSrc = Var.Make(r).D(D);
         whenEvt = new Subject<IUserEvt>().D(D);

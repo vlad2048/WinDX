@@ -9,7 +9,7 @@ public sealed class SysWinOpt
 {
 	public string WinClass { get; set; } = WinClasses.MainWindow;
 	public CreateWindowParams CreateWindowParams = new();
-	public INCStrat NCStrat { get; set; } = new CustomNCStrat();
+	public INCStrat NCStrat { get; set; } = NCStrats.Custom();
 	public bool GenerateMouseLeaveMessages { get; set; } = true;
 
 	private SysWinOpt()

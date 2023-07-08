@@ -1,9 +1,9 @@
-﻿using PowRxVar;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using PowBasics.Geom;
+using PowRxVar;
 using SysWinInterfaces;
 using SysWinLib.Utils;
 using WinAPI.User32;
@@ -49,6 +49,7 @@ public sealed class SysWin : ISysWin
 	public IRoVar<bool> IsInit { get; }
 	public IRoVar<R> ClientR { get; }
 	public IRoVar<Pt> ScreenPt { get; }
+	public IRoVar<R> ScreenR { get; }
 
 	public SysWin(
 		Action<SysWinOpt>? optFun = null
@@ -80,14 +81,19 @@ public sealed class SysWin : ISysWin
 			Pt.Empty,
 			WhenMsg.WhenWINDOWPOSCHANGED().Select(e => new Pt(e.Position.X, e.Position.Y))
 		).D(D);
+		ScreenR = Var.Expr(() => ClientR.V + ScreenPt.V);
 		IsInit = Var.Make(false, WhenMsg.WhenCREATE().Select(_ => true)).D(D);
 
 		gcHandle = GCHandle.Alloc(this);
 		Disposable.Create(gcHandle.Free).D(D);
 
-		this.SetupCustomNCAreaIFN(opt);
+		this.ApplyNCStrat(opt.NCStrat).D(D);
 		this.GenerateMouseLeaveMessagesIFN(opt);
 		WhenMsg.WhenERASEBKGND().Subscribe(e => e.MarkAsHandled()).D(D);
+
+		//WhenMsg
+		//	.Where(e => e.MsgId == WM.MOUSEMOVE)
+		//	.Subscribe(e => Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] sys: {e.MsgId}")).D(D);
 	}
 
 	public void Init()
@@ -111,7 +117,7 @@ public sealed class SysWin : ISysWin
 		}
 		finally
 		{
-			Check(Handle, "CreateWindowEx");
+			//Check(Handle, "CreateWindowEx");
 		}
 	}
 

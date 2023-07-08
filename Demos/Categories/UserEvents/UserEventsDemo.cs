@@ -1,18 +1,15 @@
 ﻿using System.Drawing;
 using ControlSystem;
 using ControlSystem.Structs;
-using LayoutSystem.Flex.LayStrats;
-using LayoutSystem.Flex;
-using LayoutSystem.Utils;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Structs;
 
 namespace Demos.Categories.UserEvents;
 
-public class UserEventsDemoWin : Win
+sealed class UserEventsDemo : Win
 {
-	public UserEventsDemoWin() : base(opt => opt.R = new R(-250, 100, 230, 120))
+	public UserEventsDemo() : base(opt => opt.R = new R(-250, 100, 230, 120))
 	{
 		var nodeRoot = new NodeState().D(D);
 		var nodeFill1 = new NodeState().D(D);
@@ -26,14 +23,14 @@ public class UserEventsDemoWin : Win
 		{
 			using (r[nodeRoot].StratStack(Dir.Horz).M)
 			{
-				r.Gfx.FillR(r.Gfx.R, Consts.BrushRoot);
+				r.Gfx.FillR(Consts.BrushRoot);
 				using (r[nodeFill1].Marg(10).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill1);
+					r.Gfx.FillR(Consts.BrushFill1);
 				}
 				using (r[nodeFill2].Marg(10).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill2);
+					r.Gfx.FillR(Consts.BrushFill2);
 				}
 			}
 		}).D(D);

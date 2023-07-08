@@ -63,11 +63,6 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(D);
 		whenEvt = new Subject<IUserEvt>().D(D);
 		ScrollState = new ScrollState().D(D);
-
-		Disposable.Create(() =>
-		{
-			var abc = 123;
-		}).D(D);
 	}
 
 	public override string ToString() => Name;
