@@ -3,6 +3,7 @@ using PowRxVar;
 using RenderLib.Renderers.GDIPlus.Utils;
 using RenderLib.Structs;
 using SysWinInterfaces;
+using WinAPI.User32;
 using WinAPI.Utils.Exts;
 
 namespace RenderLib.Renderers.GDIPlus;
@@ -62,6 +63,9 @@ public sealed class GDIPlus_Gfx : IGfx
 		this.measureOnly = measureOnly;
 		R = win.ClientR.V;
 		Gfx = Graphics.FromHwnd(win.Handle).D(d);
+
+		//var hdc = User32Methods.GetWindowDC(win.Handle);
+		//Gfx = Graphics.FromHdc(hdc).D(d);
 	}
 
 	private bool DrawDisabled => measureOnly || R.IsDegenerate;

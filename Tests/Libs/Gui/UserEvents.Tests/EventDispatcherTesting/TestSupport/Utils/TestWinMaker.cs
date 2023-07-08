@@ -54,8 +54,8 @@ static class TestWinMaker
 			.Setup(e => e.Evt)
 			.Returns(evt);
 
-		winMock
-			.Setup(e => e.Invalidate());
+		//winMock
+		//	.Setup(e => e.Invalidate());
 
 
 		return new WinWrapper(winMock.Object, nodes, d);

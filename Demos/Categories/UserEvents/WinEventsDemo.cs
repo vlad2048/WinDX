@@ -20,7 +20,7 @@ sealed class WinEventsDemo : Win
 		var childCtrl = new ChildCtrl(pref).D(D);
 		var nodeBottom = new NodeState("bottom").D(D);
 
-		nodePop.Evt.Log($"nodeOuter({pref}): ").D(D);
+		//nodePop.Evt.Log($"nodeOuter({pref}): ").D(D);
 
 		WhenRender.Subscribe(r =>
 		{
@@ -50,7 +50,7 @@ sealed class WinEventsDemo : Win
 		{
 			var nodeTopInner = new NodeState("topInner").D(D);
 			var nodePopInner = new NodeState("popInner").D(D);
-			nodePopInner.Evt.Log($"nodeInner({pref}): ").D(D);
+			//nodePopInner.Evt.Log($"nodeInner({pref}): ").D(D);
 
 			WhenRender.Subscribe(r =>
 			{

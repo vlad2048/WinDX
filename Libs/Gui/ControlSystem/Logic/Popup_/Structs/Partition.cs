@@ -4,6 +4,7 @@ using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
+using UserEvents;
 using UserEvents.Structs;
 
 namespace ControlSystem.Logic.Popup_.Structs;
@@ -18,6 +19,7 @@ sealed record SysPartition(
 )
 {
 	public NodeState[] NodeStates => RMap.Keys.ToArray();
+	public ICtrl[] Ctrls => CtrlTriggers.Values.SelectMany(e => e).OfType<ICtrl>().ToArray();
 
 	public static readonly SysPartition Empty = new(
 		new Dictionary<NodeState, Ctrl[]>(),
@@ -82,9 +84,22 @@ sealed record Partition(
 				    .ToArray();
 	    }
     }
-	    
-	    
-	    //=> RMap.Keys.OfType<INode>().Concat(SysPartition.RMap.Keys).ToArray();
+
+    public ICtrl[] AllCtrls =>
+	    (
+		    Id switch
+		    {
+			    null => Root.GetCtrls(),
+			    not null => Root.GetCtrls().Skip(1).ToArray(),
+		    }
+	    )
+	    .Concat(
+		    SysPartition.Ctrls
+	    )
+	    .ToArray();
+
+
+    public bool IsEmpty => RMap.Count == 0;
 
     
     private static readonly Ctrl emptyCtrl = new Ctrl().DisposeOnProgramExit();
@@ -103,12 +118,11 @@ sealed record Partition(
 
 static class PartitionExt
 {
-	/*public static INodeStateUserEventsSupport[] FindNodesAtMouseCoordinates(this Partition partition, Pt pt) =>
-		partition.NodeStates.Concat(partition.SysPartition.NodeStates)
-			.Where(state => partition.GetNodeR(state).Ensure().Contains(pt))
-			.Reverse()
-			.OfType<INodeStateUserEventsSupport>()
-			.ToArray();*/
+	public static void UpdateFromPartition(this (IRwTracker<NodeZ> nodes, IRwTracker<ICtrl> ctrls) trackers, Partition partition)
+	{
+		trackers.nodes.Update(partition.AllNodeStates);
+		trackers.ctrls.Update(partition.AllCtrls);
+	}
 
 
 	public static NodeState[] NodeStatesWithScrolling(this Partition partition) => partition.NodeStates
@@ -140,4 +154,14 @@ static class PartitionExt
 		rMap.Keys
 			.Select((n, i) => (n, i))
 			.ToDictionary(t => t.n, t => t.i);
+}
+
+
+file static class PartitionExtLocal
+{
+	public static ICtrl[] GetCtrls(this MixNode root) =>
+		root
+			.Select(e => e.V)
+			.OfType<CtrlNode>()
+			.SelectToArray(e => e.Ctrl);
 }

@@ -5,6 +5,8 @@ namespace ControlSystem.Utils;
 
 static class RxExts
 {
+	public static IDisposable Trigger<T>(this IObservable<T> obs, Action action) => obs.Subscribe(_ => action());
+
 	public static IObservable<V> OfType<U, V>(this IObservable<object> obs, Func<U, V> mapFun) => obs.OfType<U>().Select(mapFun);
 
 	public static void EditDiffKeys<K, V>(

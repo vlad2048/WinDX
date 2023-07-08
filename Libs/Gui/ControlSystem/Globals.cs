@@ -7,6 +7,7 @@ global using MixNode = TNod<ControlSystem.Structs.IMixNode>;
 global using IWin = UserEvents.IWinUserEventsSupport;
 global using IMainWin = UserEvents.IMainWinUserEventsSupport;
 global using INode = UserEvents.INodeStateUserEventsSupport;
+global using ICtrl = UserEvents.ICtrlUserEventsSupport;
 global using static Logging.LogUtils;
 global using static LayoutSystem.FmtConstants;
 

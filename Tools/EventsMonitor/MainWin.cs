@@ -23,6 +23,14 @@ sealed partial class MainWin : Form
 					ctrlEventDisplayer2.Clear();
 				}).D(d);
 
+			this.Events().KeyDown
+				.Where(e => e.KeyCode == Keys.P)
+				.Subscribe(_ => {
+					formEventDisplayer.Pause();
+					ctrlEventDisplayer1.Pause();
+					ctrlEventDisplayer2.Pause();
+				}).D(d);
+
 
 			this.Events().KeyDown
 				.Where(e => e.KeyCode == Keys.R)
@@ -46,13 +54,23 @@ sealed partial class MainWin : Form
 
 			var y1 = basicControl2.Top;
 			var y2 = y1 - 50;
+			var y3 = y1 - 310;
 
 
 			this.Events().KeyDown
 				.Where(e => e.KeyCode == Keys.T)
 				.Subscribe(_ => {
 					var yPrev = basicControl2.Top;
-					var yNext = yPrev == y1 ? y2 : y1;
+					var yNext = yPrev == y2 ? y1 : y2;
+					basicControl2.Top = yNext;
+				}).D(d);
+
+
+			this.Events().KeyDown
+				.Where(e => e.KeyCode == Keys.Y)
+				.Subscribe(_ => {
+					var yPrev = basicControl2.Top;
+					var yNext = yPrev == y3 ? y1 : y3;
 					basicControl2.Top = yNext;
 				}).D(d);
 		});

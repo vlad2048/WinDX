@@ -11,14 +11,18 @@ sealed class SpectorWinDrawState : IDisposable
 
     public IRwMayVar<MixNode> SelNode { get; }
     public IRwMayVar<MixNode> HovNode { get; }
+    public IRwMayVar<INode> LockedNode { get; }
     public IObservable<Unit> WhenChanged { get; }
 
     public SpectorWinDrawState()
     {
         SelNode = VarMay.Make<MixNode>().D(d);
         HovNode = VarMay.Make<MixNode>().D(d);
-        WhenChanged = SelNode.Skip(1).Merge(
-            HovNode.Skip(1)
-        ).ToUnit();
+        LockedNode = VarMay.Make<INode>().D(d);
+        WhenChanged = Obs.Merge(
+	        SelNode.Skip(1).ToUnit(),
+            HovNode.Skip(1).ToUnit(),
+            LockedNode.Skip(1).ToUnit()
+        );
     }
 }

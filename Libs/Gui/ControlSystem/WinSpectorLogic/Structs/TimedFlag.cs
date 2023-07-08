@@ -1,4 +1,5 @@
-﻿namespace ControlSystem.WinSpectorLogic.Structs;
+﻿/*
+namespace ControlSystem.WinSpectorLogic.Structs;
 
 sealed class TimedFlag
 {
@@ -18,3 +19,4 @@ sealed class TimedFlag
 		return !value;
 	}
 }
+*/

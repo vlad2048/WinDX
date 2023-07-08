@@ -18,10 +18,10 @@ namespace ControlSystem.Logic.Popup_;
 
 sealed class PopupWin : Ctrl, IWin
 {
-	private readonly Action invalidateAllAction;
 	private readonly SysWin sysWin;
 	private readonly IRwVar<R> layoutR;
 	private readonly IRwTracker<NodeZ> rwNodes;
+	private readonly IRwTracker<ICtrl> rwCtrls;
 	private Partition subPartition;
 	private Partition subPartitionRebased;
 
@@ -33,22 +33,21 @@ sealed class PopupWin : Ctrl, IWin
 	public IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
 	public IRoVar<R> ScreenR => sysWin.ScreenR;
 	public IRoTracker<NodeZ> Nodes => rwNodes;
-	public void Invalidate() => invalidateAllAction();
+	public IRoTracker<ICtrl> Ctrls => rwCtrls;
+	public void SysInvalidate() => sysWin.Invalidate();
 
-	public void CallSysWinInvalidate() => sysWin.Invalidate();
 	public ISysWinUserEventsSupport SysWin => sysWin;
 
 	public PopupWin(
 		Partition subPartition,
 		IWin mainWin,
-		Action invalidateAllAction,
 		nint winParentHandle,
 		SpectorWinDrawState spectorDrawState
 	)
 	{
 		rwNodes = Tracker.Make<NodeZ>().D(D);
+		rwCtrls = Tracker.Make<ICtrl>().D(D);
 
-		this.invalidateAllAction = invalidateAllAction;
 		layoutR = Var.Make(R.Empty).D(D);
 		(this.subPartition, subPartitionRebased) = SetLayout(subPartition);
 		sysWin = PopupWinUtils.MakeWin(layoutR.V, mainWin, winParentHandle).D(D);
@@ -83,8 +82,7 @@ sealed class PopupWin : Ctrl, IWin
 	{
 		subPartition = subPartition_;
 		(subPartitionRebased, layoutR.V) = subPartition_.SplitOffset();
-		rwNodes.Update(subPartition.AllNodeStates);
-		Invalidate();
+		(rwNodes, rwCtrls).UpdateFromPartition(subPartition);
 		return (subPartition, subPartitionRebased);
 	}
 }

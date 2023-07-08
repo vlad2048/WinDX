@@ -90,7 +90,7 @@ public static class UserEventGenerator
 				evt.OfType<MouseButtonUpUserEvt>().Subscribe(_ =>
 				{
 					var res = User32Methods.ReleaseCapture();
-					L($"{prefix} - ReleaseCapture   (res:{res})");
+					//L($"{prefix} - ReleaseCapture   (res:{res})");
 				}).D(serD.Value);
 
 
@@ -105,7 +105,7 @@ public static class UserEventGenerator
 					}
 				};
 
-				L($"{prefix} - MouseCapture   (prev:{prevWinName})");
+				//L($"{prefix} - MouseCapture   (prev:{prevWinName})");
 
 			}).D(d);
 

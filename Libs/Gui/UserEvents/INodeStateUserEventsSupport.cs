@@ -13,3 +13,8 @@ public interface INodeStateUserEventsSupport
 	void DispatchEvt(IUserEvt evt);
 	IObservable<Unit> WhenInvalidateRequired { get; }
 }
+
+public interface ICtrlUserEventsSupport
+{
+	IObservable<Unit> WhenChanged { get; }
+}

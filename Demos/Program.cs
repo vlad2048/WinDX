@@ -15,13 +15,14 @@ namespace Demos;
 
 class Program
 {
-	private const bool RunSingleDemo = false;
+	private const bool RunSingleDemo = true;
 
 	private static IDisposable Mk()
 	{
 		var d = new Disp();
+		//new UserEventsDemo().D(d);
 		new WinEventsDemo().D(d);
-		new WinEventsDemo().D(d);
+		//new WinEventsDemo().D(d);
 		return d;
 	}
 

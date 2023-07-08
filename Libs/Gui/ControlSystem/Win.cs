@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using ControlSystem.Logic.Invalidate_;
 using ControlSystem.Logic.Popup_;
 using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Logic.Scrolling_;
@@ -9,7 +10,6 @@ using ControlSystem.Logic.Scrolling_.Utils;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
-using ControlSystem.WinSpectorLogic.Structs;
 using ControlSystem.WinSpectorLogic.Utils;
 using DynamicData;
 using LayoutSystem.Flex.Structs;
@@ -37,9 +37,11 @@ namespace ControlSystem;
 public class Win : Ctrl, IMainWin
 {
 	private readonly SysWin sysWin;
-	private readonly ISubject<Unit> whenInvalidate;
 	private PartitionSet partitionSet = PartitionSet.Empty;
-	private IObservable<Unit> WhenInvalidate => whenInvalidate.AsObservable();
+	private readonly Invalidator fullInvalidator;
+	private readonly IRwTracker<NodeZ> rwNodes;
+	private readonly IRwTracker<ICtrl> rwCtrls;
+	private readonly IRwTracker<IWin> rwWins;
 
 	internal SpectorWinDrawState SpectorDrawState { get; }
 	internal IRoVar<R> ClientR => sysWin.ClientR;
@@ -51,13 +53,15 @@ public class Win : Ctrl, IMainWin
 	public Pt PopupOffset => Pt.Empty;
 	public IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
 	public IRoVar<R> ScreenR => sysWin.ScreenR;
-	public IRoTracker<NodeZ> Nodes { get; }
-	//public INodeStateUserEventsSupport[] HitFun(Pt pt) => partitionSet.MainPartition.FindNodesAtMouseCoordinates(pt);
-	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
+	public IRoTracker<NodeZ> Nodes => rwNodes;
+	public IRoTracker<ICtrl> Ctrls => rwCtrls;
+	public void SysInvalidate() => sysWin.Invalidate();
 
 	// IMainWinUserEventsSupport
 	// =========================
 	public IObservable<IUserEvt> Evt { get; }
+	public IRoTracker<IWin> Wins => rwWins;
+	public IInvalidator Invalidator => fullInvalidator;
 
 	public override string ToString() => GetType().Name;
 	private int cnt;
@@ -65,55 +69,55 @@ public class Win : Ctrl, IMainWin
 
 	public Win(Action<WinOpt>? optFun = null)
 	{
-		whenInvalidate = new Subject<Unit>().D(D);
+		rwNodes = Tracker.Make<NodeZ>().D(D);
+		rwCtrls = Tracker.Make<ICtrl>().D(D);
+		rwWins = Tracker.Make<IWin>().D(D);
+		fullInvalidator = new Invalidator().D(D);
+
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
-		// TODO: understand why MakeHot is needed, if removed:
-		// - MouseEnter event appears in log here
-		// - MouseEnter event does not appear in WinSpector
 		SpectorDrawState = new SpectorWinDrawState().D(D);
-		var popupMan = new PopupMan(this, Invalidate, SpectorDrawState).D(D);
-		var rwNodes = Tracker.Make<NodeZ>().D(D);
-		Nodes = rwNodes;
+		var popupMan = new PopupMan(this, rwWins, SpectorDrawState).D(D);
 
 
-		Evt = UserEventGenerator.MakeForWin(popupMan.PopupTracker, true).D(D);
+		Evt = UserEventGenerator.MakeForWin(Wins, false).D(D);
 
-		//popupMan.PopupTracker.Items.Transform(this.DispatchEvents).DisposeMany().MakeHot(D);
+		Wins.MergeManyTrackers(e => e.Nodes).SelectTracker(e => e.Item).DispatchEvents(out var nodeLock, this).D(D);
 
-		popupMan.PopupTracker.MergeManyTrackers(e => e.Nodes).SelectTracker(e => e.Item).DispatchEvents(this).D(D);
-
-
-		var canSkipLayout = new TimedFlag();
-		SpectorDrawState.WhenChanged.Subscribe(_ =>
-		{
-			canSkipLayout.Set();
-			Invalidate();
-		}).D(D);
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		var scrollMan = new ScrollMan(renderer).D(D);
 
 		G.WinMan.AddWin(this);
 
-		WhenInvalidate
+
+		// Invalidate Triggers
+		// ===================
+		ClientR.Trigger(fullInvalidator.SetLayoutRequired).D(D);
+		nodeLock.PipeTo(SpectorDrawState.LockedNode);
+		SpectorDrawState.WhenChanged.Trigger(Invalidator.InvalidateRender).D(D);
+
+		Wins.MergeManyTrackers(e => e.Ctrls)
+			.SelectTracker(e => e.Item).Items
+			.MergeMany(e => e.WhenChanged)
+			.Trigger(Invalidator.InvalidateLayout).D(D);
+		
+		fullInvalidator.WhenChanged
 			.Subscribe(_ =>
 			{
-				sysWin.Invalidate();
-				popupMan.InvalidatePopups();
+				foreach (var win in Wins.ItemsArr)
+					win.SysInvalidate();
 			}).D(D);
 
 
-
-
+		// Layout / Render
+		// ===============
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
-			using var d = new Disp();
-
-			// Layout
-			// ======
-			if (canSkipLayout.IsNotSet())
+			var isLayoutRequired = fullInvalidator.IsLayoutRequired();
+			//L($"Paint (layout:{isLayoutRequired})");
+			if (isLayoutRequired)
 			{
 				partitionSet = this
 					.BuildCtrlTree(renderer)
@@ -122,23 +126,22 @@ public class Win : Ctrl, IMainWin
 					.AddScrollBars(scrollMan)
 					.ApplyScrollOffsets(mixLayout)
 					.CreatePopups(popupMan)
-					.Assign_CtrlWins_and_NodeRs(this);
-
-				rwNodes.Update(partitionSet.MainPartition.AllNodeStates);
+					.Assign_CtrlWins_and_NodeRs(this, popupMan);
+				(rwNodes, rwCtrls).UpdateFromPartition(partitionSet.MainPartition);
 
 				if (cnt++ == 0) WinUtils.LogPartitionSet(partitionSet);
 				G.WinMan.SetWinLayout(mixLayout);
 			}
 
-			// Render
-			// ======
+
+			using var d = new Disp();
 			var gfx = renderer.GetGfx(false).D(d);
 			RenderUtils.RenderTree(partitionSet.MainPartition, gfx);
 			SpectorWinRenderUtils.Render(SpectorDrawState, partitionSet.MainPartition, gfx);
-
 		}).D(D);
 	}
 }
+
 
 
 file static class WinUtils
@@ -158,14 +161,22 @@ file static class WinUtils
 
 	
 
-	public static PartitionSet Assign_CtrlWins_and_NodeRs(this PartitionSet partitionSet, Win win)
+	public static PartitionSet Assign_CtrlWins_and_NodeRs(
+		this PartitionSet partitionSet,
+		Win win,
+		PopupMan popupMan
+	)
 	{
 		(
 			from partition in partitionSet.Partitions
 			from ctrl in partition.CtrlSet
-			select ctrl
+			select (ctrl, partition)
 		)
-			.ForEach(ctrl => ctrl.WinSrc.V = May.Some(win));
+			.ForEach(t =>
+			{
+				t.ctrl.WinSrc.V = May.Some(win);
+				t.ctrl.PopupWinSrc.V = May.Some(popupMan.GetWin(t.partition.Id));
+			});
 
 		(
 			from partition in partitionSet.Partitions
@@ -179,9 +190,13 @@ file static class WinUtils
 			from partition in partitionSet.Partitions
 			from ctrls in partition.SysPartition.CtrlTriggers.Values
 			from ctrl in ctrls
-			select ctrl
+			select (ctrl, partition)
 		)
-			.ForEach(ctrl => ctrl.WinSrc.V = May.Some(win));
+			.ForEach(t =>
+			{
+				t.ctrl.WinSrc.V = May.Some(win);
+				t.ctrl.PopupWinSrc.V = May.Some(popupMan.GetWin(t.partition.Id));
+			});
 
 		(
 			from partition in partitionSet.Partitions

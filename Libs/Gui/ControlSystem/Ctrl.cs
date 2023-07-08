@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using ControlSystem.Structs;
 using PowBasics.Geom;
@@ -10,7 +11,7 @@ using RenderLib.Structs;
 namespace ControlSystem;
 
 
-public class Ctrl : IDisposable
+public class Ctrl : ICtrl, IDisposable
 {
 	public Disp D { get; } = new();
 	public void Dispose() => D.Dispose();
@@ -19,6 +20,7 @@ public class Ctrl : IDisposable
 	// ***********
 	// * Private *
 	// ***********
+	private readonly ISubject<Unit> whenChanged;
 	private readonly ISubject<RenderArgs> whenRender;
 
 
@@ -35,7 +37,9 @@ public class Ctrl : IDisposable
 	// * Internal *
 	// ************
 	internal IRwMayVar<Win> WinSrc { get; }
+	internal IRwMayVar<IWin> PopupWinSrc { get; }
 
+	internal void SignalChanged() => whenChanged.OnNext(Unit.Default);
 	internal void SignalRender(RenderArgs e) => whenRender.OnNext(e);
 
 
@@ -46,24 +50,22 @@ public class Ctrl : IDisposable
 	/// Points to the window this Ctrl is attached to
 	/// </summary>
 	public IRoMayVar<Win> Win => WinSrc.ToReadOnlyMay();
+	public IRoMayVar<IWin> PopupWin => PopupWinSrc.ToReadOnlyMay();
+
+	// ICtrlUserEventsSupport
+	// ======================
+	public IObservable<Unit> WhenChanged => whenChanged.AsObservable();
 
 
 	public Ctrl()
 	{
 		WinSrc = VarMay.Make<Win>().D(D);
+		PopupWinSrc = VarMay.Make<IWin>().D(D);
+		whenChanged = new Subject<Unit>().D(D);
 		whenRender = new Subject<RenderArgs>().D(D);
 	}
 }
 
-
-public static class CtrlExt
-{
-	public static void Invalidate(this Ctrl ctrl)
-	{
-		if (!ctrl.Win.V.IsSome(out var win)) return;
-		win.Invalidate();
-	}
-}
 
 
 

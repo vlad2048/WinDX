@@ -7,18 +7,23 @@ namespace UserEvents;
 
 public static class EventDispatcher
 {
-	public static IDisposable DispatchEvents(this IRoTracker<NodeZ> nodes, IMainWin mainWin)
+	public static IDisposable DispatchEvents(
+		this IRoTracker<NodeZ> nodes,
+		out IRoMayVar<INode> nodeLock,
+		IMainWin mainWin
+	)
 	{
 		var d = new Disp();
 
 		UserEventConverter.MakeForNodes(
+			out nodeLock,
 			nodes,
 			mainWin.Evt
 		).D(d);
 
-		nodes.Items
+		/*nodes.Items
 			.MergeMany(e => e.Node.WhenInvalidateRequired)
-			.Subscribe(_ => mainWin.Invalidate()).D(d);
+			.Subscribe(_ => mainWin.Invalidate()).D(d);*/
 
 		return d;
 	}

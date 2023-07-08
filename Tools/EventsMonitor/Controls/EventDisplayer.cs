@@ -11,6 +11,7 @@ sealed partial class EventDisplayer : UserControl
 	private const int MAX_ITEMS = 256;
 
 	private readonly IRwVar<bool> isEmpty;
+	private readonly IRwVar<bool> isPaused;
 	private readonly IRwMayVar<Control> trackedCtrl;
 
 	public EventDisplayer()
@@ -18,12 +19,11 @@ sealed partial class EventDisplayer : UserControl
 		InitializeComponent();
 
 		isEmpty = Var.Make(true).D(this);
+		isPaused = Var.Make(false).D(this);
 		trackedCtrl = VarMay.Make<Control>().D(this);
 
 		this.InitRX(d =>
 		{
-			var isPaused = Var.Make(false).D(d);
-
 			isPaused.Subscribe(paused => pauseBtn.Text = paused ? "Resume" : "Pause").D(d);
 			trackedCtrl.Subscribe(e => pauseBtn.Enabled = e.IsSome()).D(d);
 			pauseBtn.Events().Click.Subscribe(_ => isPaused.V = !isPaused.V).D(d);
@@ -70,4 +70,6 @@ sealed partial class EventDisplayer : UserControl
 		eventListBox.Items.Clear();
 		isEmpty.V = true;
 	}
+
+	public void Pause() => isPaused.V = !isPaused.V;
 }

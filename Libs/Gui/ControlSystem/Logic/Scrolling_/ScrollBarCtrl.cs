@@ -42,7 +42,7 @@ public sealed class ScrollBarCtrl : Ctrl
 				btnDecState.ToUnit(),
 				btnIncState.ToUnit()
 			)
-			.Subscribe(_ => this.Invalidate()).D(D);
+			.Subscribe(_ => SignalChanged()).D(D);
 
 		WhenRender.Subscribe(r =>
 		{

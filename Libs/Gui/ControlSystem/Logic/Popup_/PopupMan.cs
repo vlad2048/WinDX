@@ -20,25 +20,17 @@ sealed class PopupMan : IDisposable
 	public void Dispose() => d.Dispose();
 
 	private readonly IWin mainWin;
-	private readonly Action invalidateAllAction;
 	private readonly SpectorWinDrawState spectorDrawState;
 	private readonly Dictionary<INode, PopupWin> map;
-	private readonly IRwTracker<IWin> rwPopupTracker;
+	private readonly IRwTracker<IWin> rwWins;
 
-	public IRoTracker<IWin> PopupTracker => rwPopupTracker;
-
-	public PopupMan(IWin mainWin, Action invalidateAllAction, SpectorWinDrawState spectorDrawState)
+	public PopupMan(IWin mainWin, IRwTracker<IWin> rwWins, SpectorWinDrawState spectorDrawState)
 	{
 		this.mainWin = mainWin;
-		this.invalidateAllAction = invalidateAllAction;
+		this.rwWins = rwWins;
 		this.spectorDrawState = spectorDrawState;
 		map = new Dictionary<INode, PopupWin>().D(d);
-		rwPopupTracker = Tracker.Make<IWin>().D(d);
 	}
-
-	//public IWin[] GetAllWinsForWinTracker() => map.Values.Prepend(parentWin).ToArray();
-
-	public void InvalidatePopups() => map.Values.ForEach(e => e.CallSysWinInvalidate());
 
 	public IWin GetWin(INode? nodeState) => nodeState switch
 	{
@@ -68,7 +60,6 @@ sealed class PopupMan : IDisposable
 			map[partitionAdd.Id] = new PopupWin(
 				partitionAdd,
 				mainWin,
-				invalidateAllAction,
 				popupParentHandle,
 				spectorDrawState
 			);
@@ -80,7 +71,7 @@ sealed class PopupMan : IDisposable
 			win.SetLayout(partitionCom);
 		}
 
-		rwPopupTracker.Update(map.Values.Prepend(mainWin).ToArray());
+		rwWins.Update(map.Values.Prepend(mainWin).ToArray());
 
 		return partitionSet;
 	}

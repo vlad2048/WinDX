@@ -15,6 +15,7 @@ public static class WinClasses
 				WindowClassStyles.CS_HREDRAW |
 				WindowClassStyles.CS_VREDRAW |
 				WindowClassStyles.CS_DBLCLKS |
+				WindowClassStyles.CS_OWNDC |
 				0
 			,
 			WinProc = SysWin.WndProc,

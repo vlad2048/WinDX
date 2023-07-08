@@ -12,18 +12,49 @@ namespace UserEvents.Converters;
 public static class UserEventConverter
 {
 	public static IDisposable MakeForNodes(
+		out IRoMayVar<INode> nodeLock,
 		IRoTracker<NodeZ> nodes,
 		IObservable<IUserEvt> winEvt
 	)
 	{
-		NodeZ[] HitFun(Pt pt) => nodes.ItemsArr.Where(e => e.Node.R.V.Contains(pt)).OrderBy(e => e.ZOrder).ToArray();
-
 		var d = new Disp();
-		HandleMouseMoves(out var mayHovVar, out var mouseFun, winEvt, HitFun).D(d);
-		HandleMouseWheel(winEvt, HitFun, mouseFun).D(d);
-		HandleMouseButtons(mayHovVar, winEvt).D(d);
-		HandleNodeChanges(mayHovVar, mouseFun, nodes, HitFun).D(d);
-		HandleMouseLeave(mayHovVar, winEvt).D(d);
+		NodeZ[] HitFun(Pt pt) => nodes.ItemsArr.Where(e => e.Node.R.V.Contains(pt)).OrderBy(e => e.ZOrder).ToArray();
+		var rwNodeLock = VarMay.Make<INode>().D(d);
+		nodeLock = rwNodeLock;
+
+		HandleMouseMoves(
+			out var mayHovVar,
+			out var mouseFun,
+			winEvt,
+			HitFun,
+			rwNodeLock
+		).D(d);
+
+		HandleMouseWheel(
+			winEvt,
+			HitFun,
+			mouseFun
+		).D(d);
+
+		HandleMouseButtons(
+			mayHovVar,
+			winEvt,
+			rwNodeLock
+		).D(d);
+
+		HandleNodeChanges(
+			mayHovVar,
+			mouseFun,
+			nodes,
+			HitFun
+		).D(d);
+
+		HandleMouseLeave(
+			mayHovVar,
+			winEvt,
+			rwNodeLock
+		).D(d);
+
 		return d;
 	}
 
@@ -32,7 +63,8 @@ public static class UserEventConverter
 		out IRwMayVar<NodeZ> mayHovVar,
 		out Func<Pt> mouseFun,
 		IObservable<IUserEvt> winEvt,
-		Func<Pt, NodeZ[]> hitFun
+		Func<Pt, NodeZ[]> hitFun,
+		IRoMayVar<INode> nodeLock
 	)
 	{
 		var d = new Disp();
@@ -48,29 +80,36 @@ public static class UserEventConverter
 		{
 			mouse = mouse_;
 
-			var mayHovNext = hitFun(mouse).FirstOrMaybe();
-			var isHovPrev = mayHovPrevVar.V.IsSome(out var hovPrev);
-			var isHovNext = mayHovNext.IsSome(out var hovNext);
-			switch (isHovPrev, isHovNext)
+			if (nodeLock.V.IsSome(out var nodeLockVal))
 			{
-				case (false, true):
-					hovNext.Send(new MouseEnterUserEvt(mouse));
-					hovNext.Send(new MouseMoveUserEvt(mouse));
-					break;
-				case (true, false):
-					hovPrev.Send(new MouseLeaveUserEvt());
-					break;
-				case (true, true) when !hovNext.Equals(hovPrev):
-					hovPrev.Send(new MouseLeaveUserEvt());
-					hovNext.Send(new MouseEnterUserEvt(mouse));
-					hovNext.Send(new MouseMoveUserEvt(mouse));
-					break;
-				case (true, true):
-					hovNext.Send(new MouseMoveUserEvt(mouse));
-					break;
+				nodeLockVal.Send(new MouseMoveUserEvt(mouse));
 			}
+			else
+			{
+				var mayHovNext = hitFun(mouse).FirstOrMaybe();
+				var isHovPrev = mayHovPrevVar.V.IsSome(out var hovPrev);
+				var isHovNext = mayHovNext.IsSome(out var hovNext);
+				switch (isHovPrev, isHovNext)
+				{
+					case (false, true):
+						hovNext.Send(new MouseEnterUserEvt(mouse));
+						hovNext.Send(new MouseMoveUserEvt(mouse));
+						break;
+					case (true, false):
+						hovPrev.Send(new MouseLeaveUserEvt());
+						break;
+					case (true, true) when !hovNext.Equals(hovPrev):
+						hovPrev.Send(new MouseLeaveUserEvt());
+						hovNext.Send(new MouseEnterUserEvt(mouse));
+						hovNext.Send(new MouseMoveUserEvt(mouse));
+						break;
+					case (true, true):
+						hovNext.Send(new MouseMoveUserEvt(mouse));
+						break;
+				}
 
-			mayHovPrevVar.V = mayHovNext;
+				mayHovPrevVar.V = mayHovNext;
+			}
 
 		}).D(d);
 
@@ -101,13 +140,22 @@ public static class UserEventConverter
 
 	private static IDisposable HandleMouseButtons(
 		IRoMayVar<NodeZ> mayHovVar,
-		IObservable<IUserEvt> winEvt
+		IObservable<IUserEvt> winEvt,
+		IRwMayVar<INode> nodeLock
 	)
 	{
 		var d = new Disp();
 
-		winEvt.Where(_ => mayHovVar.V.IsSome()).OfType<MouseButtonDownUserEvt>().Subscribe(mayHovVar.Send).D(d);
-		winEvt.Where(_ => mayHovVar.V.IsSome()).OfType<MouseButtonUpUserEvt>().Subscribe(mayHovVar.Send).D(d);
+		winEvt.Where(_ => mayHovVar.V.IsSome()).OfType<MouseButtonDownUserEvt>().Subscribe(evt =>
+		{
+			nodeLock.V = May.Some(mayHovVar.V.Ensure().Node);
+			mayHovVar.Send(evt);
+		}).D(d);
+		winEvt.Where(_ => mayHovVar.V.IsSome()).OfType<MouseButtonUpUserEvt>().Subscribe(evt =>
+		{
+			nodeLock.V = May.None<INode>();
+			mayHovVar.Send(evt);
+		}).D(d);
 
 		return d;
 	}
@@ -166,7 +214,8 @@ public static class UserEventConverter
 
 	private static IDisposable HandleMouseLeave(
 		IRwMayVar<NodeZ> mayHovVar,
-		IObservable<IUserEvt> winEvt
+		IObservable<IUserEvt> winEvt,
+		IRoMayVar<INode> nodeLock
 	)
 	{
 		var d = new Disp();
@@ -197,11 +246,38 @@ public static class UserEventConverter
 		}
 	}
 
-	private static bool Send(this NodeZ node, IUserEvt evt)
+	private static bool Send(this INode node, IUserEvt evt)
+	{
+		if (node.D.IsDisposed) return false;
+		var evtTr = evt.TranslateMouse(-node.R.V.Pos);
+		node.DispatchEvt(evtTr);
+		return evtTr.Handled;
+	}
+
+	private static bool Send(this NodeZ node, IUserEvt evt) => node.Node.Send(evt);
+
+	private static bool SendIfNoLock(this NodeZ node, IUserEvt evt, IRoMayVar<INode> nodeLock)
 	{
 		if (node.Node.D.IsDisposed) return false;
+		if (nodeLock.V.IsSome()) return false;
 		var evtTr = evt.TranslateMouse(-node.Node.R.V.Pos);
 		node.Node.DispatchEvt(evtTr);
 		return evtTr.Handled;
 	}
+
+	private static bool SendIfLockMatches(this NodeZ node, IUserEvt evt, IRoMayVar<INode> nodeLock)
+	{
+		if (node.Node.D.IsDisposed) return false;
+		if (node.IsLocked(nodeLock)) return false;
+		var evtTr = evt.TranslateMouse(-node.Node.R.V.Pos);
+		node.Node.DispatchEvt(evtTr);
+		return evtTr.Handled;
+	}
+
+
+	private static bool IsLocked(this NodeZ node, IRoMayVar<INode> nodeLock) => nodeLock.V.IsSome(out var nodeLockState) switch
+	{
+		true => node.Node != nodeLockState,
+		false => true
+	};
 }

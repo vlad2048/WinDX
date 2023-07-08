@@ -18,25 +18,26 @@ public interface IWinFormsEvtWindow : IWinFormsEvt { }
 
 
 // @formatter:off
-public sealed record MouseButtonDownWinFormsEvt(Pt Pos, MouseBtn Btn)		: IWinFormsEvtMousePos			{ public override string ToString() => $"{Btn} down ({Pos})";							}
-public sealed record   MouseButtonUpWinFormsEvt(Pt Pos, MouseBtn Btn)		: IWinFormsEvtMousePos			{ public override string ToString() => $"{Btn} up ({Pos})";								}
-public sealed record       MouseMoveWinFormsEvt(Pt Pos)					: IWinFormsEvtMousePos			{ public override string ToString() => $"Move {Pos}";									}
-public sealed record      MouseEnterWinFormsEvt							: IWinFormsEvtMouse				{ public override string ToString() => "Enter";											}
-public sealed record      MouseLeaveWinFormsEvt							: IWinFormsEvtMouse				{ public override string ToString() => "Leave";											}
+public sealed record MouseButtonDownWinFormsEvt(Pt Pos, MouseBtn Btn)		: IWinFormsEvtMousePos			{ public override string ToString() => $"{Btn} down ({Pos})";									}
+public sealed record   MouseButtonUpWinFormsEvt(Pt Pos, MouseBtn Btn)		: IWinFormsEvtMousePos			{ public override string ToString() => $"{Btn} up ({Pos})";										}
+public sealed record      MouseWheelWinFormsEvt(Pt Pos, int Direction)		: IWinFormsEvtMousePos          { public override string ToString() => $"Wheel {(Direction == -1 ? "Up" : "Down")} ({Pos})";	}
+public sealed record       MouseMoveWinFormsEvt(Pt Pos)						: IWinFormsEvtMousePos			{ public override string ToString() => $"Move {Pos}";											}
+public sealed record      MouseEnterWinFormsEvt								: IWinFormsEvtMouse				{ public override string ToString() => "Enter";													}
+public sealed record      MouseLeaveWinFormsEvt								: IWinFormsEvtMouse				{ public override string ToString() => "Leave";													}
 
-public sealed record         KeyDownWinFormsEvt(Keys Key)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Key}' down";									}
-public sealed record           KeyUpWinFormsEvt(Keys Key)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Key}' up";									}
-public sealed record         KeyCharWinFormsEvt(char Char)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Char}' char";								}
+public sealed record         KeyDownWinFormsEvt(Keys Key)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Key}' down";											}
+public sealed record           KeyUpWinFormsEvt(Keys Key)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Key}' up";											}
+public sealed record         KeyCharWinFormsEvt(char Char)					: IWinFormsEvtKeyboard			{ public override string ToString() => $"'{Char}' char";										}
 
-public sealed record        GotFocusWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Got focus";										}
-public sealed record       LostFocusWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Lost focus";									}
-public sealed record        ActivateWinFormsEvt(bool WithMouseClick)		: IWinFormsEvtWindow			{ public override string ToString() => "Activate" + (WithMouseClick ? " (mouse)" : "");	}
-public sealed record      InactivateWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "Inactivate";									}
-public sealed record     ActivateAppWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "ActivateApp";									}
-public sealed record   InactivateAppWinFormsEvt							: IWinFormsEvtWindow			{ public override string ToString() => "InactivateApp";									}
+public sealed record        GotFocusWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "Got focus";												}
+public sealed record       LostFocusWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "Lost focus";											}
+public sealed record        ActivateWinFormsEvt(bool WithMouseClick)		: IWinFormsEvtWindow			{ public override string ToString() => "Activate" + (WithMouseClick ? " (mouse)" : "");			}
+public sealed record      InactivateWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "Inactivate";											}
+public sealed record     ActivateAppWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "ActivateApp";											}
+public sealed record   InactivateAppWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "InactivateApp";											}
 
-public sealed record        EnterWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "CtrlEnter";										}
-public sealed record        LeaveWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "CtrlLeave";										}
+public sealed record        EnterWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "CtrlEnter";												}
+public sealed record        LeaveWinFormsEvt								: IWinFormsEvtWindow			{ public override string ToString() => "CtrlLeave";												}
 // @formatter:on
 
 
@@ -44,22 +45,23 @@ public static class WinFormsEvtGenerator
 {
 // @formatter:off
 	public static IObservable<IWinFormsEvt> MakeForControl(Control ctrl) => Obs.Merge<IWinFormsEvt>(
-		ctrl.Events().MouseDown		.Select(e => new MouseButtonDownWinFormsEvt		(e.GetPt(), e.GetBtn()	)),
-		ctrl.Events().MouseUp		.Select(e => new MouseButtonUpWinFormsEvt		(e.GetPt(), e.GetBtn()	)),
+		ctrl.Events().MouseDown		.Select(e => new MouseButtonDownWinFormsEvt		(e.GetPt(), e.GetBtn()				)),
+		ctrl.Events().MouseUp		.Select(e => new MouseButtonUpWinFormsEvt		(e.GetPt(), e.GetBtn()				)),
+		ctrl.Events().MouseWheel	.Select(e => new MouseWheelWinFormsEvt			(e.GetPt(), -Math.Sign(e.Delta))	),
 
-		ctrl.Events().MouseMove		.Select(e => new MouseMoveWinFormsEvt			(e.GetPt()				)),
-		ctrl.Events().MouseEnter	.Select(_ => new MouseEnterWinFormsEvt			(						)),
-		ctrl.Events().MouseLeave	.Select(_ => new MouseLeaveWinFormsEvt			(						)),
+		ctrl.Events().MouseMove		.Select(e => new MouseMoveWinFormsEvt			(e.GetPt()							)),
+		ctrl.Events().MouseEnter	.Select(_ => new MouseEnterWinFormsEvt			(									)),
+		ctrl.Events().MouseLeave	.Select(_ => new MouseLeaveWinFormsEvt			(									)),
 
-		ctrl.Events().KeyDown		.Select(e => new KeyDownWinFormsEvt				(e.KeyCode				)),
-		ctrl.Events().KeyUp			.Select(e => new KeyUpWinFormsEvt				(e.KeyCode				)),
-		ctrl.Events().KeyPress		.Select(e => new KeyCharWinFormsEvt				(e.KeyChar				)),
+		ctrl.Events().KeyDown		.Select(e => new KeyDownWinFormsEvt				(e.KeyCode							)),
+		ctrl.Events().KeyUp			.Select(e => new KeyUpWinFormsEvt				(e.KeyCode							)),
+		ctrl.Events().KeyPress		.Select(e => new KeyCharWinFormsEvt				(e.KeyChar							)),
 
-		ctrl.Events().GotFocus		.Select(_ => new GotFocusWinFormsEvt			(						)),
-		ctrl.Events().LostFocus		.Select(_ => new LostFocusWinFormsEvt			(						)),
+		ctrl.Events().GotFocus		.Select(_ => new GotFocusWinFormsEvt			(									)),
+		ctrl.Events().LostFocus		.Select(_ => new LostFocusWinFormsEvt			(									)),
 
-		ctrl.Events().Enter			.Select(_ => new EnterWinFormsEvt				(						)),
-		ctrl.Events().Leave			.Select(_ => new LeaveWinFormsEvt				(						))
+		ctrl.Events().Enter			.Select(_ => new EnterWinFormsEvt				(									)),
+		ctrl.Events().Leave			.Select(_ => new LeaveWinFormsEvt				(									))
 	);
 // @formatter:on
 

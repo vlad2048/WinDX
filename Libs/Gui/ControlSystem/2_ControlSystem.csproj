@@ -19,6 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="Logic\Invalidate_\" />
 		<Folder Include="Logic\Scrolling_\Structs\" />
 		<Folder Include="Singletons\WinMan_\" />
 		<Folder Include="WinSpectorLogic\Utils\" />

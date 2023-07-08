@@ -17,17 +17,27 @@ static class SpectorWinRenderUtils
 		IGfx gfx
 	)
 	{
+		if (layout.IsEmpty) return;
+
 		gfx.R = layout.RMap.Values.First().WithZeroPos();
 
-		bool GetR(IRoMayVar<MixNode> nod, out R nodeR)
+		bool GetRMix(IRoMayVar<MixNode> nod, out R nodeR)
 		{
 			nodeR = R.Empty;
 			if (nod.V.IsNone(out var node) || node.V is not StFlexNode { State: var nodeState }) return false;
 			return layout.RMap.TryGetValue(nodeState, out nodeR);
 		}
 
-		var isSel = GetR(state.SelNode, out var selR);
-		var isHov = GetR(state.HovNode, out var hovR);
+		bool GetR(IRoMayVar<INode> nod, out R nodeR)
+		{
+			nodeR = R.Empty;
+			if (nod.V.IsNone(out var nodeState)) return false;
+			return layout.RMap.TryGetValue((NodeState)nodeState, out nodeR);
+		}
+
+		var isSel = GetRMix(state.SelNode, out var selR);
+		var isHov = GetRMix(state.HovNode, out var hovR);
+		var isLock = GetR(state.LockedNode, out var lockR);
 		if (isSel && isHov)
 		{
 			gfx.DrawSelHov(selR);
@@ -39,12 +49,23 @@ static class SpectorWinRenderUtils
 			if (isHov)
 				gfx.DrawHov(hovR);
 		}
+
+		if (isLock)
+		{
+			gfx.DrawLock(lockR);
+		}
 	}
 }
 
 
 file static class Consts
 {
+	public static void DrawLock(this IGfx gfx, R r)
+	{
+		gfx.FillR(r, LockBrush);
+	}
+
+
 	public static void DrawSelHov(this IGfx gfx, R r)
 	{
 		gfx.DrawR(r.Enlarge(-2), SelPen);
@@ -68,6 +89,7 @@ file static class Consts
 		gfx.DrawR(r.Enlarge(-1), HoverPenMiddle);
 	}
 
+	private static readonly BrushDef LockBrush = new SolidBrushDef(Color.FromArgb(127, 0, 0, 0));
 	private static readonly PenDef SelPen = new(Color.DeepPink, 1);
 	private static readonly PenDef HoverPen = new(Color.Black, 1);
 	private static readonly PenDef HoverPenMiddle = new(Color.White, 1)
