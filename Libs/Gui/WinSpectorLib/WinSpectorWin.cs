@@ -1,7 +1,4 @@
 ﻿using System.Reactive.Linq;
-using ControlSystem;
-using DynamicData;
-using PowMaybe;
 using PowRxVar;
 using PowWinForms;
 using WinSpectorLib.Logic;

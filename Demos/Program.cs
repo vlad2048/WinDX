@@ -15,7 +15,7 @@ namespace Demos;
 
 class Program
 {
-	private const bool RunSingleDemo = true;
+	private const bool RunSingleDemo = false;
 
 	static void Main()
 	{
@@ -29,36 +29,35 @@ class Program
 		}
 		else
 		{
-			using (var d = new Disp())
+			using var d = new Disp();
+			// ReSharper disable once UnusedVariable
+			var userPrefs = new UserPrefs().Track();
+			//Setup.InitConsole(userPrefs).D(d);
+			var serD = new SerialDisp<Disp>().D(d);
+
+			Action Wrap(Func<IDisposable> fun) => () =>
 			{
-				var userPrefs = new UserPrefs().Track();
-				//Setup.InitConsole(userPrefs).D(d);
-				var serD = new SerialDisp<Disp>().D(d);
+				serD.Value = null;
+				serD.Value = new Disp();
+				fun().D(serD.Value);
+			};
 
-				Action Wrap(Func<IDisposable> fun) => () =>
-				{
-					serD.Value = null;
-					serD.Value = new Disp();
-					fun().D(serD.Value);
-				};
+			WinSpector.RunInternal(
+				new DemoNfo("SysWin", Wrap(SysWinDemo.Run)),
 
-				WinSpector.RunInternal(
-					new DemoNfo("SysWin", Wrap(SysWinDemo.Run)),
+				new DemoNfo("UnbalancedCtrlHandling", Wrap(() => new UnbalancedCtrlHandlingDemo())),
+				new DemoNfo("BalancedCtrlHandling", Wrap(() => new BalancedCtrlHandlingDemo())),
+				new DemoNfo("PopNode", Wrap(() => new PopNodeDemo())),
+				new DemoNfo("PopNodeComplex", Wrap(() => new PopNodeComplexDemo())),
+				new DemoNfo("Text", Wrap(() => new TextDemo())),
+				new DemoNfo("Scroll", Wrap(() => new ScrollDemo())),
+				new DemoNfo("ScrollNested", Wrap(() => new ScrollNestedDemo())),
 
-					new DemoNfo("UnbalancedCtrlHandling", Wrap(() => new UnbalancedCtrlHandlingDemo())),
-					new DemoNfo("BalancedCtrlHandling", Wrap(() => new BalancedCtrlHandlingDemo())),
-					new DemoNfo("PopNode", Wrap(() => new PopNodeDemo())),
-					new DemoNfo("PopNodeComplex", Wrap(() => new PopNodeComplexDemo())),
-					new DemoNfo("Text", Wrap(() => new TextDemo())),
-					new DemoNfo("Scroll", Wrap(() => new ScrollDemo())),
-					new DemoNfo("ScrollNested", Wrap(() => new ScrollNestedDemo())),
+				new DemoNfo("WinEvents", Wrap(() => new WinEventsDemo())),
+				new DemoNfo("UserEvents", Wrap(() => new UserEventsDemo())),
 
-					new DemoNfo("WinEvents", Wrap(() => new WinEventsDemo())),
-					new DemoNfo("UserEvents", Wrap(() => new UserEventsDemo())),
-
-					new DemoNfo("DetachCtrl", Wrap(() => new DetachCtrlDemo()))
-				);
-			}
+				new DemoNfo("DetachCtrl", Wrap(() => new DetachCtrlDemo()))
+			);
 		}
 
 

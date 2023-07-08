@@ -4,7 +4,6 @@ using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
-using UserEvents;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
@@ -67,6 +66,7 @@ sealed record Partition(
     public Ctrl RootCtrl => ((CtrlNode)Root.V).Ctrl;
 
     public NodeState[] NodeStates => RMap.Keys.ToArray();
+    public INode[] AllNodeStates => RMap.Keys.OfType<INode>().Concat(SysPartition.RMap.Keys).ToArray();
 
     
     private static readonly Ctrl emptyCtrl = new Ctrl().DisposeOnProgramExit();
@@ -84,12 +84,12 @@ sealed record Partition(
 
 static class PartitionExt
 {
-	public static INodeStateUserEventsSupport[] FindNodesAtMouseCoordinates(this Partition partition, Pt pt) =>
+	/*public static INodeStateUserEventsSupport[] FindNodesAtMouseCoordinates(this Partition partition, Pt pt) =>
 		partition.NodeStates.Concat(partition.SysPartition.NodeStates)
 			.Where(state => partition.GetNodeR(state).Ensure().Contains(pt))
 			.Reverse()
 			.OfType<INodeStateUserEventsSupport>()
-			.ToArray();
+			.ToArray();*/
 
 
 	public static NodeState[] NodeStatesWithScrolling(this Partition partition) => partition.NodeStates

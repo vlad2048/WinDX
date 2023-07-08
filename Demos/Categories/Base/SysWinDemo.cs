@@ -1,10 +1,7 @@
 ﻿using System.Drawing;
-using System.Reactive.Linq;
-using System.Reflection.Metadata;
 using PowBasics.Geom;
 using SysWinLib;
 using SysWinLib.Structs;
-using WinAPI.User32;
 using WinAPI.Utils.Exts;
 using WinAPI.Windows;
 

@@ -1,7 +1,5 @@
-﻿using LayoutSystem.Flex.LayStrats;
-using LayoutSystem.Flex.Structs;
+﻿using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
-using PowBasics.Geom;
 using PowTrees.Algorithms;
 
 namespace LayoutSystem.Flex.TreeLogic;

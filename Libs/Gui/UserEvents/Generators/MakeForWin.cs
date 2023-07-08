@@ -1,10 +1,8 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Xml;
 using DynamicData;
 using PowBasics.Geom;
 using PowRxVar;
-using SysWinInterfaces;
 using UserEvents.Structs;
 using UserEvents.Utils;
 using WinAPI.User32;
@@ -24,8 +22,6 @@ public static class UserEventGenerator
 
 		var sysEvtsItems = popups.Items.MergeMany(win => MakeForSysWin(win.SysEvt).Translate(() => win.PopupOffset).Select(e => (win, e)));
 		var sysEvts = sysEvtsItems.Select(e => e.e);
-		var wins = popups.Items.AsObservableList().D(d);
-		//var sysEvts = MakeForSysWin(main.SysEvt);
 
 
 		if (log)
@@ -137,24 +133,13 @@ public static class UserEventGenerator
 	}
 	
 
-	private static IObservable<T> DoIf<T>(this IObservable<T> obs, bool cond, Action<T> action) => cond switch
-	{
-		false => obs,
-		true => obs.Do(action)
-	};
 	private static readonly string Pad = new(' ', 40);
-	private static void L(string s) => Console.WriteLine(s);
 
 
 
 
-	public static IObservable<IUserEvt> MakeForSysWin(IObservable<IPacket> msg)
-	{
-		msg.Subscribe(p =>
-		{
-			var abc = 123;
-		});
-		return Obs.Merge<IUserEvt>(
+	public static IObservable<IUserEvt> MakeForSysWin(IObservable<IPacket> msg) =>
+		Obs.Merge<IUserEvt>(
 // @formatter:off
 			msg.WhenLBUTTONDOWN	().Select(e => new MouseButtonDownUserEvt	(e.Point.ToPt(), MouseBtn.Left		     )),
 			msg.WhenLBUTTONUP	().Select(e => new MouseButtonUpUserEvt		(e.Point.ToPt(), MouseBtn.Left		     )),
@@ -182,7 +167,6 @@ public static class UserEventGenerator
 			msg.WhenACTIVATEAPP	().Where(e => !e.IsActive			).Select(_ => new InactivateAppUserEvt	(						))
 // @formatter:on
 		);
-	}
 
 
 	private static bool IsActive		(this WindowActivateFlag flag) => flag is WindowActivateFlag.WA_ACTIVE or WindowActivateFlag.WA_CLICKACTIVE;

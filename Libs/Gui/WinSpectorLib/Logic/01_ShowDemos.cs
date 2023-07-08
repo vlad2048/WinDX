@@ -2,8 +2,6 @@
 using BrightIdeasSoftware;
 using PowMaybe;
 using PowRxVar;
-using PowWinForms;
-using PowWinForms.Utils;
 using WinSpectorLib.Structs;
 
 namespace WinSpectorLib.Logic;

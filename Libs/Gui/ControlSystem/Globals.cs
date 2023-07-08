@@ -4,6 +4,9 @@ global using Vec = LayoutSystem.Flex.Structs.DimVecMaker;
 global using Obs = System.Reactive.Linq.Observable;
 global using Node = TNod<LayoutSystem.Flex.FlexNode>;
 global using MixNode = TNod<ControlSystem.Structs.IMixNode>;
+global using IWin = UserEvents.IWinUserEventsSupport;
+global using IMainWin = UserEvents.IMainWinUserEventsSupport;
+global using INode = UserEvents.INodeStateUserEventsSupport;
 global using static Logging.LogUtils;
 global using static LayoutSystem.FmtConstants;
 

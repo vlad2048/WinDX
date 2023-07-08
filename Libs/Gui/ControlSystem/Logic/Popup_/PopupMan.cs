@@ -4,8 +4,6 @@ using PowBasics.CollectionsExt;
 using PowRxVar;
 using ControlSystem.Logic.Popup_.Structs;
 using UserEvents;
-using IWin = UserEvents.IWinUserEventsSupport;
-using INode = UserEvents.INodeStateUserEventsSupport;
 
 namespace ControlSystem.Logic.Popup_;
 

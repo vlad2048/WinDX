@@ -1,7 +1,6 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using PowBasics.CollectionsExt;
-using PowBasics.Geom;
 using PowRxVar;
 using TestBase;
 using UserEvents.Structs;
@@ -46,7 +45,7 @@ sealed class EventTester : IDisposable
         ).D(d);
         winWrapper = TestWinMaker.Make(whenEvt.AsObservable()).D(d);
 
-        new EventDispatcher(winWrapper.Win, winWrapper.Win).D(d);
+        winWrapper.Win.DispatchEvents(winWrapper.Win).D(d);
     }
 
 

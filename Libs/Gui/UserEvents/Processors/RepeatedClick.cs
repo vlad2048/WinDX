@@ -1,6 +1,4 @@
 ﻿using System.Reactive;
-using System.Reactive.Linq;
-using PowBasics.Geom;
 using PowRxVar;
 
 // ReSharper disable once CheckNamespace

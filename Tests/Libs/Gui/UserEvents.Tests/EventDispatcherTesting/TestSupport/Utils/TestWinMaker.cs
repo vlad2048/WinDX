@@ -1,10 +1,6 @@
-﻿using DynamicData;
-using Moq;
-using PowBasics.CollectionsExt;
-using PowBasics.Geom;
+﻿using Moq;
 using PowRxVar;
 using UserEvents.Structs;
-using WinAPI.Windows;
 
 namespace UserEvents.Tests.EventDispatcherTesting.TestSupport.Utils;
 
@@ -13,44 +9,34 @@ class WinWrapper : IDisposable
 	private readonly Disp d;
 	public void Dispose() => d.Dispose();
 
-	private readonly ISourceList<INode> nodesSrc;
+	private readonly RxTracker<INode> nodes;
+	private readonly List<INode> list = new();
 
 	public IMainWinUserEventsSupport Win { get; }
 
-	public WinWrapper(IMainWinUserEventsSupport win, ISourceList<INode> nodesSrc, Disp d)
+	public WinWrapper(IMainWinUserEventsSupport win, RxTracker<INode> nodes, Disp d)
 	{
 		this.d = d;
 		Win = win;
-		this.nodesSrc = nodesSrc;
+		this.nodes = nodes;
 	}
 
-	public void AddNodes(TNode[] arr) => nodesSrc.AddRange(arr);
+	public void AddNodes(TNode[] arr)
+	{
+		list.AddRange(arr);
+		nodes.Update(list.ToArray());
+	}
+
 	public void DelNodes(TNode[] arr)
 	{
 		foreach (var elt in arr)
-			nodesSrc.Remove(elt);
+			list.Remove(elt);
+		nodes.Update(list.ToArray());
 	}
 }
 
 static class TestWinMaker
 {
-	/*public static IMainWinUserEventsSupport MakeMainWin(
-		IObservable<IUserEvt> evt,
-		Func<Pt, INode[]> hitFun
-	)
-	{
-		var winMock = new Mock<IMainWinUserEventsSupport>();
-		winMock
-			.Setup(e => e.Evt)
-			.Returns(evt);
-		winMock
-			.Setup(e => e.HitFun(It.IsAny<Pt>()))
-			.Returns(hitFun);
-		winMock
-			.Setup(e => e.Invalidate());
-		return winMock.Object;
-	}*/
-
 	public static WinWrapper Make(
 		IObservable<IUserEvt> evt
 	)
@@ -58,9 +44,7 @@ static class TestWinMaker
 		var d = new Disp();
 		var winMock = new Mock<IMainWinUserEventsSupport>();
 
-		var nodesSrc = new SourceList<INode>().D(d);
-		var nodes = nodesSrc.Connect();
-		var nodesList = nodes.AsObservableList().D(d);
+		var nodes = new RxTracker<INode>().D(d);
 
 		winMock
 			.Setup(e => e.Nodes)
@@ -70,47 +54,10 @@ static class TestWinMaker
 			.Setup(e => e.Evt)
 			.Returns(evt);
 
-		INode[] HitFun(Pt pt) => nodesList.Items.Where(e => e.R.V.Contains(pt)).Reverse().ToArray();
-		winMock
-			.Setup(e => e.HitFun(It.IsAny<Pt>()))
-			.Returns(HitFun);
 		winMock
 			.Setup(e => e.Invalidate());
 
 
-		return new WinWrapper(winMock.Object, nodesSrc, d);
+		return new WinWrapper(winMock.Object, nodes, d);
 	}
 }
-
-/*
-sealed class TestWinMaker : IWin
-{
-    private readonly List<TNode> nodes = new();
-
-    public TNode[] Nodes => nodes.OrderByDescending(e => e.Depth).ToArray();
-
-    // IWin
-    // ====
-    public nint Handle => nint.Zero;
-    public IObservable<IPacket> SysEvt => Obs.Never<IPacket>();
-    public Pt PopupOffset => Pt.Empty;
-    public IRoVar<Pt> ScreenPt => Var.MakeConst(Pt.Empty);
-    public IRoVar<R> ScreenR => Var.MakeConst(R.Empty);
-    public IObservable<IUserEvt> Evt { get; }
-    public INode[] HitFun(Pt pt) => Nodes.Where(e => e.R.V.Contains(pt)).SelectToArray(e => (INode)e);
-    public void Invalidate() { }
-
-    public TestWinMaker(IObservable<IUserEvt> evt)
-    {
-        Evt = evt;
-    }
-
-    public void AddNodes(TNode[] arr) => nodes.AddRange(arr);
-
-    public void DelNodes(TNode[] arr)
-    {
-        foreach (var elt in arr)
-            nodes.Remove(elt);
-    }
-}
-*/

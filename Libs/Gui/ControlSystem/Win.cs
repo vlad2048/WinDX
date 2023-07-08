@@ -6,7 +6,6 @@ using ControlSystem.Logic.Popup_;
 using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Logic.Scrolling_;
 using ControlSystem.Logic.Scrolling_.Utils;
-using ControlSystem.Logic.UserEvents_;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
@@ -29,16 +28,13 @@ using TreePusherLib.ConvertExts.Structs;
 using UserEvents;
 using UserEvents.Generators;
 using UserEvents.Structs;
-using UserEvents.Utils;
-using WinAPI.Gdi32;
 using WinAPI.User32;
-using WinAPI.Utils.Exts;
 using WinAPI.Windows;
 
 namespace ControlSystem;
 
 
-public class Win : Ctrl, IMainWinUserEventsSupport
+public class Win : Ctrl, IMainWin
 {
 	private readonly SysWin sysWin;
 	private readonly ISubject<Unit> whenInvalidate;
@@ -52,12 +48,11 @@ public class Win : Ctrl, IMainWinUserEventsSupport
 	// =====================
 	public nint Handle => sysWin.Handle;
 	public IObservable<IPacket> SysEvt => sysWin.WhenMsg;
-	public IObservable<IUserEvt> SysWinEvt { get; }
 	public Pt PopupOffset => Pt.Empty;
 	public IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
 	public IRoVar<R> ScreenR => sysWin.ScreenR;
-	public IObservable<IChangeSet<INodeStateUserEventsSupport>> Nodes { get; }
-	public INodeStateUserEventsSupport[] HitFun(Pt pt) => partitionSet.MainPartition.FindNodesAtMouseCoordinates(pt);
+	public RxTracker<INode> Nodes { get; }
+	//public INodeStateUserEventsSupport[] HitFun(Pt pt) => partitionSet.MainPartition.FindNodesAtMouseCoordinates(pt);
 	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
 
 	// IMainWinUserEventsSupport
@@ -74,20 +69,17 @@ public class Win : Ctrl, IMainWinUserEventsSupport
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
-		SysWinEvt = UserEventGenerator.MakeForSysWin(sysWin.WhenMsg);
 		// TODO: understand why MakeHot is needed, if removed:
 		// - MouseEnter event appears in log here
 		// - MouseEnter event does not appear in WinSpector
 		SpectorDrawState = new SpectorWinDrawState().D(D);
 		var popupMan = new PopupMan(this, Invalidate, SpectorDrawState).D(D);
-		var nodeTracker = new RxTracker<INodeStateUserEventsSupport>().D(D);
-		Nodes = nodeTracker.Items;
+		Nodes = new RxTracker<INodeStateUserEventsSupport>().D(D);
 
 
-		Evt = UserEventGenerator.MakeForWin(popupMan.PopupTracker, false).D(D);
+		Evt = UserEventGenerator.MakeForWin(popupMan.PopupTracker).D(D);
 
-		// TODO: have the event dispatcher use popupMan.WinTracker instead of creating its own
-		var eventDispatcher = new WinEventDispatcher(popupMan.PopupTracker, this).D(D);
+		popupMan.PopupTracker.Items.Transform(this.DispatchEvents).DisposeMany().MakeHot(D);
 
 		var canSkipLayout = new TimedFlag();
 		SpectorDrawState.WhenChanged.Subscribe(_ =>
@@ -98,7 +90,6 @@ public class Win : Ctrl, IMainWinUserEventsSupport
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		var scrollMan = new ScrollMan(renderer).D(D);
-		//var winTracker = new WinTracker().D(D);
 
 		G.WinMan.AddWin(this);
 
@@ -127,14 +118,11 @@ public class Win : Ctrl, IMainWinUserEventsSupport
 					.AddScrollBars(scrollMan)
 					.ApplyScrollOffsets(mixLayout)
 					.CreatePopups(popupMan)
-					//.DispatchNodeEvents(eventDispatcher, popupMan.GetWin)
 					.Assign_CtrlWins_and_NodeRs(this);
 
-				//winTracker.Update(popupMan.GetAllWinsForWinTracker());
-				nodeTracker.Update(partitionSet.MainPartition.NodeStates.OfType<INodeStateUserEventsSupport>().ToArray());
+				Nodes.Update(partitionSet.MainPartition.AllNodeStates);
 
-				if (cnt++ == 0)
-					WinUtils.LogPartitionSet(partitionSet);
+				if (cnt++ == 0) WinUtils.LogPartitionSet(partitionSet);
 				G.WinMan.SetWinLayout(mixLayout);
 			}
 
@@ -329,7 +317,7 @@ file static class WinUtils
 		{
 			var txt = partition.Root.LogColored(
 				(n, w) => WriteNode(n, w, partition),
-				opt =>
+				_ =>
 				{
 				}
 			);

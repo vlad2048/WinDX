@@ -1,5 +1,4 @@
-﻿using LayoutSystem.Flex.LayStrats;
-using PowBasics.Geom;
+﻿using PowBasics.Geom;
 
 // ReSharper disable once CheckNamespace
 namespace LayoutSystem.Flex.Structs;

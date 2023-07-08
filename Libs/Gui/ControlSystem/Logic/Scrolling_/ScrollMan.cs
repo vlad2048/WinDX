@@ -7,7 +7,6 @@ using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
-using PowTrees.Algorithms;
 using RenderLib.Renderers;
 
 namespace ControlSystem.Logic.Scrolling_;
@@ -20,6 +19,7 @@ sealed class ScrollMan : IDisposable
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
+	// ReSharper disable once NotAccessedPositionalProperty.Local
 	private sealed record NKey(NodeState? Id);
 
 	private readonly IRenderWinCtx renderer;
@@ -191,7 +191,7 @@ file static class ScrollManLocalUtils
 		if (!condition) return;
 
 		var (ctrl, ctrlR) = makeFun();
-		var (ctrlRoot, ctrlRMap) = RenderCtrl(ctrl, ctrlR, renderer);
+		var ctrlRMap = RenderCtrl(ctrl, ctrlR, renderer);
 
 		sys.CtrlTriggers.AddToDictionaryList(state, ctrl);
 		foreach (var (key, val) in ctrlRMap)
@@ -203,7 +203,7 @@ file static class ScrollManLocalUtils
 
 
 
-	private static (MixNode, IReadOnlyDictionary<NodeState, R>) RenderCtrl(Ctrl ctrl, R nodeR, IRenderWinCtx renderer)
+	private static IReadOnlyDictionary<NodeState, R> RenderCtrl(Ctrl ctrl, R nodeR, IRenderWinCtx renderer)
 	{
 		var tree = ctrl
 			.BuildCtrlTree(renderer);
@@ -213,10 +213,7 @@ file static class ScrollManLocalUtils
 			.Translate(nodeR.Pos)
 			.RMap;
 
-		return (
-			tree.Root,
-			rMap
-		);
+		return rMap;
 	}
 }
 
@@ -253,44 +250,4 @@ file static class ScrollManDictionaryExtLocal
 		}).D(d);
 		return dicts;
 	}
-
-	public static IReadOnlyDictionary<K, V> Merge<K, V>(this IReadOnlyDictionary<K, V> dict, IReadOnlyDictionary<K, V> mergeDict) where K : notnull
-	{
-		var dictRes = new Dictionary<K, V>();
-		foreach (var (key, val) in dict)
-			dictRes[key] = val;
-		foreach (var (key, val) in mergeDict)
-			dictRes[key] = val;
-		return dictRes;
-	}
-
-	public static IReadOnlyDictionary<K, V[]> Merge<K, V>(this IReadOnlyDictionary<K, V[]> dict, IReadOnlyDictionary<K, List<V>> mergeDict) where K : notnull
-	{
-		var dictRes = new Dictionary<K, List<V>>();
-		foreach (var (key, vals) in dict)
-		foreach (var val in vals)
-			dictRes.AddToDictionaryList(key, val);
-		foreach (var (key, vals) in mergeDict)
-		foreach (var val in vals)
-			dictRes.AddToDictionaryList(key, val);
-		return dictRes.MapValues(e => e.ToArray());
-	}
-
-	public static HashSet<T> Merge<T>(this HashSet<T> set, List<T> list)
-	{
-		var setRes = new HashSet<T>();
-		foreach (var elt in set)
-			setRes.Add(elt);
-		foreach (var elt in list)
-			setRes.Add(elt);
-		return setRes;
-	}
-
-	/*public static Dictionary<K, V> Clone<K, V>(this IReadOnlyDictionary<K, V> dict) where K : notnull
-	{
-		var res = new Dictionary<K, V>();
-		foreach (var (key, val) in dict)
-			res[key] = val;
-		return res;
-	}*/
 }

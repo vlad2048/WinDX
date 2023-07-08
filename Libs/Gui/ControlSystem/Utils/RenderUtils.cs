@@ -4,7 +4,6 @@ using ControlSystem.Structs;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using PowBasics.Geom;
-using PowMaybe;
 using PowRxVar;
 using RenderLib.Renderers;
 using TreePusherLib;
@@ -25,7 +24,7 @@ static class RenderUtils
 		var renderArgs = new RenderArgs(gfx, pusher).D(d);
 
 
-		var reconstructedTree = treeEvtObs.ToTree(
+		treeEvtObs.ToTree(
 			onPush: mixNode =>
 			{
 				switch (mixNode)

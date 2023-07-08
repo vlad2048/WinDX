@@ -13,17 +13,18 @@ namespace UserEvents.Converters;
 public static class UserEventConverter
 {
 	public static IDisposable MakeForNodes<N>(
-		IObservable<IChangeSet<N>> nodes,
-		IObservable<IUserEvt> winEvt,
-		Func<Pt, N[]> hitFun
+		RxTracker<N> nodes,
+		IObservable<IUserEvt> winEvt
 	)
 		where N : INodeStateUserEventsSupport
 	{
+		N[] HitFun(Pt pt) => nodes.ItemsArr.Where(e => e.R.V.Contains(pt)).Reverse().ToArray();
+
 		var d = new Disp();
-		HandleMouseMoves(out var mayHovVar, out var mouseFun, winEvt, hitFun).D(d);
-		HandleMouseWheel(winEvt, hitFun, mouseFun).D(d);
+		HandleMouseMoves(out var mayHovVar, out var mouseFun, winEvt, HitFun).D(d);
+		HandleMouseWheel(winEvt, HitFun, mouseFun).D(d);
 		HandleMouseButtons(mayHovVar, winEvt).D(d);
-		HandleNodeChanges(mayHovVar, mouseFun, nodes, hitFun).D(d);
+		HandleNodeChanges(mayHovVar, mouseFun, nodes, HitFun).D(d);
 		HandleMouseLeave(mayHovVar, winEvt).D(d);
 		return d;
 	}
@@ -121,7 +122,7 @@ public static class UserEventConverter
 	private static IDisposable HandleNodeChanges<N>(
 		IRwMayVar<N> mayHovVar,
 		Func<Pt> mouseFun,
-		IObservable<IChangeSet<N>> nodes,
+		RxTracker<N> nodes,
 		Func<Pt, N[]> hitFun
 	)
 		where N : INodeStateUserEventsSupport
@@ -155,8 +156,8 @@ public static class UserEventConverter
 		}
 
 		Obs.Merge(
-				nodes.ToUnit(),
-				nodes.MergeMany(e => e.R).ToUnit()
+				nodes.Items.ToUnit(),
+				nodes.Items.MergeMany(e => e.R).ToUnit()
 			)
 			.Subscribe(_ =>
 			{

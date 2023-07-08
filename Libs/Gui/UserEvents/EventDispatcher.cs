@@ -4,22 +4,17 @@ using UserEvents.Converters;
 
 namespace UserEvents;
 
-public sealed class EventDispatcher : IDisposable
+public static class EventDispatcher
 {
-	private readonly Disp d = new();
-	public void Dispose() => d.Dispose();
-
-	public EventDispatcher(
-		IWin win,
-		IMainWin mainWin
-	)
+	public static IDisposable DispatchEvents(this IMainWin mainWin, IWin win)
 	{
-		UserEventConverter.MakeForNodes(win.Nodes, mainWin.Evt, mainWin.HitFun).D(d);
+		var d = new Disp();
+		UserEventConverter.MakeForNodes(win.Nodes, mainWin.Evt).D(d);
 
-		win.Nodes
+		win.Nodes.Items
 			.MergeMany(e => e.WhenInvalidateRequired)
 			.Subscribe(_ => mainWin.Invalidate()).D(d);
-	}
 
-	//public void Update(INode[] nodeStates) => nodesSrc.EditDiff(nodeStates);
+		return d;
+	}
 }
