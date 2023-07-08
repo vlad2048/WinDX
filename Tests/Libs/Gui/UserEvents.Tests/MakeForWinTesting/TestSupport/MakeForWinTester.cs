@@ -51,29 +51,68 @@ sealed class MakeForWinTester : IDisposable
 
 	private static Pt mousePos = Pt.Empty;
 
-	public void Send_ActivateApp(Dst dst) => Send(dst, WM.ACTIVATEAPP, n(1));
-	public void Send_InactivateApp(Dst dst) => Send(dst, WM.ACTIVATEAPP, n(0));
-	public void Send_Activate(Dst dst, bool withMouseClick) => Send(dst, WM.ACTIVATE, n((int)(withMouseClick ? WindowActivateFlag.WA_CLICKACTIVE : WindowActivateFlag.WA_ACTIVE)));
-	public void Send_Inactivate(Dst dst) => Send(dst, WM.ACTIVATE, n((int)WindowActivateFlag.WA_INACTIVE));
-	public void Send_GotFocus(Dst dst) => Send(dst, WM.SETFOCUS);
-	public void Send_LostFocus(Dst dst) => Send(dst, WM.KILLFOCUS);
+	public void Send_ActivateApp(Dst dst)
+	{
+		LogEvt(dst, "ActivateApp");
+		Send(dst, WM.ACTIVATEAPP, n(1));
+	}
 
-	public void Send_BtnDown(Dst dst) => Send(dst, WM.LBUTTONDOWN);
-	public void Send_BtnUp(Dst dst) => Send(dst, WM.LBUTTONUP);
+	public void Send_InactivateApp(Dst dst)
+	{
+		LogEvt(dst, "InactivateApp");
+		Send(dst, WM.ACTIVATEAPP, n(0));
+	}
+
+	public void Send_Activate(Dst dst, bool withMouseClick)
+	{
+		LogEvt(dst, "Activate" + (withMouseClick ? " (mouse)" : ""));
+		Send(dst, WM.ACTIVATE, n((int)(withMouseClick ? WindowActivateFlag.WA_CLICKACTIVE : WindowActivateFlag.WA_ACTIVE)));
+	}
+
+	public void Send_Inactivate(Dst dst)
+	{
+		LogEvt(dst, "Inactivate");
+		Send(dst, WM.ACTIVATE, n((int)WindowActivateFlag.WA_INACTIVE));
+	}
+
+	public void Send_GotFocus(Dst dst)
+	{
+		LogEvt(dst, "Got focus");
+		Send(dst, WM.SETFOCUS);
+	}
+
+	public void Send_LostFocus(Dst dst)
+	{
+		LogEvt(dst, "Lost focus");
+		Send(dst, WM.KILLFOCUS);
+	}
+
+	public void Send_BtnDown(Dst dst)
+	{
+		LogEvt(dst, $"Left down ({mousePos})");
+		Send(dst, WM.LBUTTONDOWN);
+	}
+
+	public void Send_BtnUp(Dst dst)
+	{
+		LogEvt(dst, $"Left up ({mousePos})");
+		Send(dst, WM.LBUTTONUP);
+	}
+
 	public void Send_Move(Dst dst, Pt pt)
 	{
 		mousePos = pt;
-		var ofs = dst switch
-		{
-			Dst.Main => Pt.Empty,
-			Dst.Pop0 => rPop0.Pos,
-			Dst.Pop1 => rPop1.Pos,
-		};
-		var ptOfs = pt + ofs;
-		Send(dst, WM.MOUSEMOVE, null, nxy(ptOfs.X, ptOfs.Y));
+		LogEvt(dst, $"Move {pt}");
+		Send(dst, WM.MOUSEMOVE, null, nxy(pt.X, pt.Y));
 	}
 
-	public void Send_Leave(Dst dst) => Send(dst, WM.MOUSELEAVE);
+	public void Send_Leave(Dst dst)
+	{
+		LogEvt(dst, "Leave");
+		Send(dst, WM.MOUSELEAVE);
+	}
+	
+	private void LogEvt(Dst dst, string s) => L($"<- [{dst}] {s}");
 
 	private static nint n(int v) => new(v);
 	private static nint n(uint v) => new(v);
@@ -81,11 +120,16 @@ sealed class MakeForWinTester : IDisposable
 	{
 		var xf = (uint)x & 0xFFFF;
 		var yf = (uint)y & 0xFFFF;
-		return n(xf + yf << 16);
+		return n(xf + (yf << 16));
 	}
 
 
-	private void Send(Dst dst, WM wm, nint? wParam = null, nint? lParam = null) => GetEvt(dst).OnNext(MkMsg(wm, wParam ?? nint.Zero, lParam ?? nint.Zero));
+	private void Send(Dst dst, WM wm, nint? wParam = null, nint? lParam = null)
+	{
+		var winMsg = new WindowMessage(IntPtr.Zero, wm, wParam ?? nint.Zero, lParam ?? nint.Zero);
+		var msg = Packetizer.MakePacket(ref winMsg);
+		GetEvt(dst).OnNext(msg);
+	}
 
 	private ISubject<IPacket> GetEvt(Dst dst) => dst switch
 	{
@@ -93,12 +137,6 @@ sealed class MakeForWinTester : IDisposable
 		Dst.Pop0 => evtPop0,
 		Dst.Pop1 => evtPop1,
 	};
-
-	private static IPacket MkMsg(WM wm, nint wParam, nint lParam)
-	{
-		var msg = new WindowMessage(IntPtr.Zero, wm, wParam, lParam);
-		return Packetizer.MakePacket(ref msg);
-	}
 
 
 	private static IWin MakeWin(R r, IObservable<IPacket> sysEvt)

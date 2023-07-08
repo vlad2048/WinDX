@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowWinForms" Version="0.0.46" />
+		<PackageReference Include="PowWinForms" Version="0.0.47" />
 	</ItemGroup>
 
 </Project>

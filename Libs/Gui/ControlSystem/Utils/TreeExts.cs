@@ -3,7 +3,7 @@
 static class TreeExts
 {
 	/// <summary>
-	///
+	/// <![CDATA[
 	///    ┌──n1
 	///    │
 	///C1──┤
@@ -16,7 +16,7 @@ static class TreeExts
 	/// 
 	/// if node = n3 returns C1──n2──n3 along with a pointer to n3 in the new tree
 	/// if node = C3 returns C3         along with a pointer to C3 in the new (single node) tree
-	/// 
+	/// ]]>
 	/// </summary>
 	public static (TNod<T> root, TNod<T> child) ExtendUpAndIncluding<T>(this TNod<T> node, Func<T, bool> predicate)
 	{

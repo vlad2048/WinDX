@@ -5,6 +5,7 @@
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
 		<RootNamespace>UserEvents.Tests</RootNamespace>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -21,7 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="MakeForWinTesting\TestSupport\" />
+		<Folder Include="MakeForWinTesting\TestSupport\" />
 	</ItemGroup>
 
 </Project>

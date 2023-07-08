@@ -148,8 +148,13 @@ public static class UserEventGenerator
 
 
 
-	public static IObservable<IUserEvt> MakeForSysWin(IObservable<IPacket> msg) =>
-		Obs.Merge<IUserEvt>(
+	public static IObservable<IUserEvt> MakeForSysWin(IObservable<IPacket> msg)
+	{
+		msg.Subscribe(p =>
+		{
+			var abc = 123;
+		});
+		return Obs.Merge<IUserEvt>(
 // @formatter:off
 			msg.WhenLBUTTONDOWN	().Select(e => new MouseButtonDownUserEvt	(e.Point.ToPt(), MouseBtn.Left		     )),
 			msg.WhenLBUTTONUP	().Select(e => new MouseButtonUpUserEvt		(e.Point.ToPt(), MouseBtn.Left		     )),
@@ -177,6 +182,7 @@ public static class UserEventGenerator
 			msg.WhenACTIVATEAPP	().Where(e => !e.IsActive			).Select(_ => new InactivateAppUserEvt	(						))
 // @formatter:on
 		);
+	}
 
 
 	private static bool IsActive		(this WindowActivateFlag flag) => flag is WindowActivateFlag.WA_ACTIVE or WindowActivateFlag.WA_CLICKACTIVE;

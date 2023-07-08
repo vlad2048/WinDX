@@ -28,6 +28,22 @@ sealed class MakeForWinTests : RxTest
 		Check(
 			ActivateApp()
 		);
+
+		Send_Move(Dst.Pop0, pPop0);
+
+		Check(
+			Move(pPop0)
+		);
+
+		Send_Leave(Dst.Pop0);
+
+		Check();
+
+		Thread.Sleep(200);
+
+		Check(
+			Leave()
+		);
 	}
 
 

@@ -46,10 +46,7 @@ sealed class EventTester : IDisposable
         ).D(d);
         winWrapper = TestWinMaker.Make(whenEvt.AsObservable()).D(d);
 
-        var nodes = new[] { NodeB, NodeA, NodeR };
-        INode[] HitFun(Pt pt) => nodes.Where(e => e.R.V.Contains(pt)).OfType<INode>().ToArray();
-        //var mainWin = TestWinMaker.MakeMainWin(whenEvt.AsObservable(), HitFun);
-        var eventDispatcher = new EventDispatcher(winWrapper.Win, winWrapper.Win).D(d);
+        new EventDispatcher(winWrapper.Win, winWrapper.Win).D(d);
     }
 
 

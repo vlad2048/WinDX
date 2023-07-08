@@ -7,7 +7,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="PowRxVar.Maybe" Version="0.0.44" />
-		<PackageReference Include="PowTrees" Version="0.0.32" />
+		<PackageReference Include="PowTrees" Version="0.0.33" />
 	</ItemGroup>
 
 	<ItemGroup>
