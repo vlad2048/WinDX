@@ -23,8 +23,9 @@ sealed class PopupMan : IDisposable
 	private readonly Action invalidateAllAction;
 	private readonly SpectorWinDrawState spectorDrawState;
 	private readonly Dictionary<INode, PopupWin> map;
+	private readonly IRwTracker<IWin> rwPopupTracker;
 
-	public RxTracker<IWin> PopupTracker { get; }
+	public IRoTracker<IWin> PopupTracker => rwPopupTracker;
 
 	public PopupMan(IWin mainWin, Action invalidateAllAction, SpectorWinDrawState spectorDrawState)
 	{
@@ -32,7 +33,7 @@ sealed class PopupMan : IDisposable
 		this.invalidateAllAction = invalidateAllAction;
 		this.spectorDrawState = spectorDrawState;
 		map = new Dictionary<INode, PopupWin>().D(d);
-		PopupTracker = new RxTracker<IWin>().D(d);
+		rwPopupTracker = Tracker.Make<IWin>().D(d);
 	}
 
 	//public IWin[] GetAllWinsForWinTracker() => map.Values.Prepend(parentWin).ToArray();
@@ -79,7 +80,7 @@ sealed class PopupMan : IDisposable
 			win.SetLayout(partitionCom);
 		}
 
-		PopupTracker.Update(map.Values.Prepend(mainWin).ToArray());
+		rwPopupTracker.Update(map.Values.Prepend(mainWin).ToArray());
 
 		return partitionSet;
 	}

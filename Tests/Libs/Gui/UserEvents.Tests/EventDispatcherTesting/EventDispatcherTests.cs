@@ -27,9 +27,9 @@ namespace UserEvents.Tests.EventDispatcherTesting;
 
 sealed class EventDispatcherTests : RxTest
 {
-    private TNode R => tester.NodeR;
-    private TNode A => tester.NodeA;
-    private TNode B => tester.NodeB;
+    private NodeZ R => new(tester.NodeR, new ZOrder(0, false, 0));
+    private NodeZ A => new(tester.NodeA, new ZOrder(0, false, 1));
+    private NodeZ B => new(tester.NodeB, new ZOrder(0, false, 2));
 
 
     [Test]
@@ -144,7 +144,7 @@ sealed class EventDispatcherTests : RxTest
             Move(A, pA1)
         );
 
-        A.RSrc.V = new R(70, 30, 30, 20);
+        tester.NodeA.RSrc.V = new R(70, 30, 30, 20);
         Check(
             Leave(A),
             Enter(R, pA1),
@@ -155,7 +155,7 @@ sealed class EventDispatcherTests : RxTest
     [Test]
     public void _23_NodeMovedIn()
     {
-        A.RSrc.V = new R(70, 30, 30, 20);
+		tester.NodeA.RSrc.V = new R(70, 30, 30, 20);
         Check();
 
         User(Move(pA1));
@@ -164,7 +164,7 @@ sealed class EventDispatcherTests : RxTest
             Move(R, pA1)
         );
 
-        A.RSrc.V = rA;
+        tester.NodeA.RSrc.V = rA;
         Check(
             Leave(R),
             Enter(A, pA1),
@@ -199,8 +199,8 @@ sealed class EventDispatcherTests : RxTest
     private void Check(params NodeEvt[] evts) => tester.Check(evts);
 
     private void User(params IUserEvt[] events) => tester.User(events);
-    private void AddNodes(params TNode[] arr) => tester.AddNodes(arr);
-    private void DelNodes(params TNode[] arr) => tester.DelNodes(arr);
+    private void AddNodes(params NodeZ[] arr) => tester.AddNodes(arr);
+    private void DelNodes(params NodeZ[] arr) => tester.DelNodes(arr);
 
 
     [SetUp]
@@ -243,19 +243,19 @@ file static class Win2NodesTestsUtils
 
 
 
-    public static NodeEvt Enter(INode node, Pt pt)
+    public static NodeEvt Enter(NodeZ node, Pt pt)
     {
         mousePos = pt;
-        return new NodeEvt(node, new MouseEnterUserEvt(pt));
+        return new NodeEvt(node.Node, new MouseEnterUserEvt(pt));
     }
-    public static NodeEvt Leave(INode node) => new(node, new MouseLeaveUserEvt());
-    public static NodeEvt Move(INode node, Pt pt)
+    public static NodeEvt Leave(NodeZ node) => new(node.Node, new MouseLeaveUserEvt());
+    public static NodeEvt Move(NodeZ node, Pt pt)
     {
         mousePos = pt;
-        return new NodeEvt(node, new MouseMoveUserEvt(pt));
+        return new NodeEvt(node.Node, new MouseMoveUserEvt(pt));
     }
-    public static NodeEvt BtnDown(INode node) => new(node, new MouseButtonDownUserEvt(mousePos, MouseBtn.Left));
-    public static NodeEvt BtnUp(INode node) => new(node, new MouseButtonUpUserEvt(mousePos, MouseBtn.Left));
-    public static NodeEvt KeyDown(INode node) => new(node, new KeyDownUserEvt(VirtualKey.K));
-    public static NodeEvt KeyUp(INode node) => new(node, new KeyUpUserEvt(VirtualKey.K));
+    public static NodeEvt BtnDown(NodeZ node) => new(node.Node, new MouseButtonDownUserEvt(mousePos, MouseBtn.Left));
+    public static NodeEvt BtnUp(NodeZ node) => new(node.Node, new MouseButtonUpUserEvt(mousePos, MouseBtn.Left));
+    public static NodeEvt KeyDown(NodeZ node) => new(node.Node, new KeyDownUserEvt(VirtualKey.K));
+    public static NodeEvt KeyUp(NodeZ node) => new(node.Node, new KeyUpUserEvt(VirtualKey.K));
 }

@@ -5,20 +5,18 @@ using PowMaybe;
 using PowRxVar;
 using UserEvents.Structs;
 #pragma warning disable CS8602
-#pragma warning disable CS8631
 
 namespace UserEvents.Converters;
 
 
 public static class UserEventConverter
 {
-	public static IDisposable MakeForNodes<N>(
-		RxTracker<N> nodes,
+	public static IDisposable MakeForNodes(
+		IRoTracker<NodeZ> nodes,
 		IObservable<IUserEvt> winEvt
 	)
-		where N : INodeStateUserEventsSupport
 	{
-		N[] HitFun(Pt pt) => nodes.ItemsArr.Where(e => e.R.V.Contains(pt)).Reverse().ToArray();
+		NodeZ[] HitFun(Pt pt) => nodes.ItemsArr.Where(e => e.Node.R.V.Contains(pt)).OrderBy(e => e.ZOrder).ToArray();
 
 		var d = new Disp();
 		HandleMouseMoves(out var mayHovVar, out var mouseFun, winEvt, HitFun).D(d);
@@ -30,17 +28,16 @@ public static class UserEventConverter
 	}
 
 
-	private static IDisposable HandleMouseMoves<N>(
-		out IRwMayVar<N> mayHovVar,
+	private static IDisposable HandleMouseMoves(
+		out IRwMayVar<NodeZ> mayHovVar,
 		out Func<Pt> mouseFun,
 		IObservable<IUserEvt> winEvt,
-		Func<Pt, N[]> hitFun
+		Func<Pt, NodeZ[]> hitFun
 	)
-		where N : INodeStateUserEventsSupport
 	{
 		var d = new Disp();
 
-		var mayHovPrevVar = VarMay.Make<N>().D(d);
+		var mayHovPrevVar = VarMay.Make<NodeZ>().D(d);
 		mayHovVar = mayHovPrevVar;
 
 		var mouse = new Pt(-int.MaxValue, -int.MaxValue);
@@ -81,12 +78,11 @@ public static class UserEventConverter
 		return d;
 	}
 
-	private static IDisposable HandleMouseWheel<N>(
+	private static IDisposable HandleMouseWheel(
 		IObservable<IUserEvt> winEvt,
-		Func<Pt, N[]> hitFun,
+		Func<Pt, NodeZ[]> hitFun,
 		Func<Pt> mouseFun
 	)
-		where N : INodeStateUserEventsSupport
 	{
 		var d = new Disp();
 
@@ -103,11 +99,10 @@ public static class UserEventConverter
 		return d;
 	}
 
-	private static IDisposable HandleMouseButtons<N>(
-		IRoMayVar<N> mayHovVar,
+	private static IDisposable HandleMouseButtons(
+		IRoMayVar<NodeZ> mayHovVar,
 		IObservable<IUserEvt> winEvt
 	)
-		where N : INodeStateUserEventsSupport
 	{
 		var d = new Disp();
 
@@ -119,13 +114,12 @@ public static class UserEventConverter
 
 
 
-	private static IDisposable HandleNodeChanges<N>(
-		IRwMayVar<N> mayHovVar,
+	private static IDisposable HandleNodeChanges(
+		IRwMayVar<NodeZ> mayHovVar,
 		Func<Pt> mouseFun,
-		RxTracker<N> nodes,
-		Func<Pt, N[]> hitFun
+		IRoTracker<NodeZ> nodes,
+		Func<Pt, NodeZ[]> hitFun
 	)
-		where N : INodeStateUserEventsSupport
 	{
 		var d = new Disp();
 
@@ -157,7 +151,7 @@ public static class UserEventConverter
 
 		Obs.Merge(
 				nodes.Items.ToUnit(),
-				nodes.Items.MergeMany(e => e.R).ToUnit()
+				nodes.Items.MergeMany(e => e.Node.R).ToUnit()
 			)
 			.Subscribe(_ =>
 			{
@@ -170,18 +164,17 @@ public static class UserEventConverter
 
 
 
-	private static IDisposable HandleMouseLeave<N>(
-		IRwMayVar<N> mayHovVar,
+	private static IDisposable HandleMouseLeave(
+		IRwMayVar<NodeZ> mayHovVar,
 		IObservable<IUserEvt> winEvt
 	)
-		where N : INodeStateUserEventsSupport
 	{
 		var d = new Disp();
 
 		winEvt.Where(_ => mayHovVar.V.IsSome()).OfType<MouseLeaveUserEvt>().Subscribe(e =>
 		{
 			mayHovVar.Send(e);
-			mayHovVar.V = May.None<N>();
+			mayHovVar.V = May.None<NodeZ>();
 		}).D(d);
 
 		return d;
@@ -189,13 +182,13 @@ public static class UserEventConverter
 
 
 
-	private static void Send<N>(this IRoMayVar<N> node, IUserEvt evt) where N : INodeStateUserEventsSupport
+	private static void Send(this IRoMayVar<NodeZ> node, IUserEvt evt)
 	{
 		var v = node.V.Ensure();
 		v.Send(evt);
 	}
 
-	private static void Send<N>(this N[] nodes, IUserEvt evt) where N : INodeStateUserEventsSupport
+	private static void Send(this NodeZ[] nodes, IUserEvt evt)
 	{
 		foreach (var node in nodes)
 		{
@@ -204,11 +197,11 @@ public static class UserEventConverter
 		}
 	}
 
-	private static bool Send<N>(this N node, IUserEvt evt) where N : INodeStateUserEventsSupport
+	private static bool Send(this NodeZ node, IUserEvt evt)
 	{
-		if (node.D.IsDisposed) return false;
-		var evtTr = evt.TranslateMouse(-node.R.V.Pos);
-		node.DispatchEvt(evtTr);
+		if (node.Node.D.IsDisposed) return false;
+		var evtTr = evt.TranslateMouse(-node.Node.R.V.Pos);
+		node.Node.DispatchEvt(evtTr);
 		return evtTr.Handled;
 	}
 }

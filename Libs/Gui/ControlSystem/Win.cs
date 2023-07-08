@@ -51,7 +51,7 @@ public class Win : Ctrl, IMainWin
 	public Pt PopupOffset => Pt.Empty;
 	public IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
 	public IRoVar<R> ScreenR => sysWin.ScreenR;
-	public RxTracker<INode> Nodes { get; }
+	public IRoTracker<NodeZ> Nodes { get; }
 	//public INodeStateUserEventsSupport[] HitFun(Pt pt) => partitionSet.MainPartition.FindNodesAtMouseCoordinates(pt);
 	public void Invalidate() => whenInvalidate.OnNext(Unit.Default);
 
@@ -74,12 +74,16 @@ public class Win : Ctrl, IMainWin
 		// - MouseEnter event does not appear in WinSpector
 		SpectorDrawState = new SpectorWinDrawState().D(D);
 		var popupMan = new PopupMan(this, Invalidate, SpectorDrawState).D(D);
-		Nodes = new RxTracker<INodeStateUserEventsSupport>().D(D);
+		var rwNodes = Tracker.Make<NodeZ>().D(D);
+		Nodes = rwNodes;
 
 
-		Evt = UserEventGenerator.MakeForWin(popupMan.PopupTracker).D(D);
+		Evt = UserEventGenerator.MakeForWin(popupMan.PopupTracker, true).D(D);
 
-		popupMan.PopupTracker.Items.Transform(this.DispatchEvents).DisposeMany().MakeHot(D);
+		//popupMan.PopupTracker.Items.Transform(this.DispatchEvents).DisposeMany().MakeHot(D);
+
+		popupMan.PopupTracker.MergeManyTrackers(e => e.Nodes).SelectTracker(e => e.Item).DispatchEvents(this).D(D);
+
 
 		var canSkipLayout = new TimedFlag();
 		SpectorDrawState.WhenChanged.Subscribe(_ =>
@@ -120,7 +124,7 @@ public class Win : Ctrl, IMainWin
 					.CreatePopups(popupMan)
 					.Assign_CtrlWins_and_NodeRs(this);
 
-				Nodes.Update(partitionSet.MainPartition.AllNodeStates);
+				rwNodes.Update(partitionSet.MainPartition.AllNodeStates);
 
 				if (cnt++ == 0) WinUtils.LogPartitionSet(partitionSet);
 				G.WinMan.SetWinLayout(mixLayout);

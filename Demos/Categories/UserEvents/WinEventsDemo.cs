@@ -4,18 +4,23 @@ using ControlSystem.Structs;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Structs;
+using UserEvents.Utils;
 
 namespace Demos.Categories.UserEvents;
 
 sealed class WinEventsDemo : Win
 {
+	private static char sPref = 'A';
 	public WinEventsDemo() : base(opt => opt.R = new R(-350, 100, 200, 300))
 	{
-		var nodeRoot = new NodeState().D(D);
-		var nodeTop = new NodeState().D(D);
-		var nodePop = new NodeState().D(D);
-		var childCtrl = new ChildCtrl().D(D);
-		var nodeBottom = new NodeState().D(D);
+		var pref = sPref++;
+		var nodeRoot = new NodeState("root").D(D);
+		var nodeTop = new NodeState("top").D(D);
+		var nodePop = new NodeState("pop").D(D);
+		var childCtrl = new ChildCtrl(pref).D(D);
+		var nodeBottom = new NodeState("bottom").D(D);
+
+		nodePop.Evt.Log($"nodeOuter({pref}): ").D(D);
 
 		WhenRender.Subscribe(r =>
 		{
@@ -30,7 +35,7 @@ sealed class WinEventsDemo : Win
 				{
 					r.Gfx.FillR(Consts.BrushPop);
 
-					//using (r[childCtrl]) { }
+					using (r[childCtrl]) { }
 				}
 
 				using (r[nodeBottom].M)
@@ -41,17 +46,18 @@ sealed class WinEventsDemo : Win
 
 	private sealed class ChildCtrl : Ctrl
 	{
-		public ChildCtrl()
+		public ChildCtrl(char pref)
 		{
-			var nodeTop2 = new NodeState().D(D);
-			var nodePop2 = new NodeState().D(D);
+			var nodeTopInner = new NodeState("topInner").D(D);
+			var nodePopInner = new NodeState("popInner").D(D);
+			nodePopInner.Evt.Log($"nodeInner({pref}): ").D(D);
 
 			WhenRender.Subscribe(r =>
 			{
-				using (r[nodeTop2].DimFilFix(60).M)
-					r.Gfx.FillR(Consts.BrushTop2);
-				using (r[nodePop2].Dim(300, 50).Pop().M)
-					r.Gfx.FillR(Consts.BrushPop2);
+				using (r[nodeTopInner].DimFilFix(60).Marg(50, 0, 0, 0).M)
+					r.Gfx.FillR(Consts.BrushTopInner);
+				using (r[nodePopInner].Dim(300, 50).Pop().M)
+					r.Gfx.FillR(Consts.BrushPopInner);
 			}).D(D);
 		}
 	}
@@ -60,84 +66,10 @@ sealed class WinEventsDemo : Win
 	{
 		public static readonly BrushDef BrushRoot = new SolidBrushDef(Color.FromArgb(20, 57, 117));
 		public static readonly BrushDef BrushTop = new SolidBrushDef(Color.FromArgb(51, 102, 130));
-		public static readonly BrushDef BrushPop = new SolidBrushDef(Color.FromArgb(85, 151, 201));
-		public static readonly BrushDef BrushBottom = new SolidBrushDef(Color.FromArgb(70, 135, 54));
+		public static readonly BrushDef BrushPop = new SolidBrushDef(Color.FromArgb(194, 48, 189));
+		public static readonly BrushDef BrushBottom = new SolidBrushDef(Color.FromArgb(232, 132, 232));
 
-		public static readonly BrushDef BrushTop2 = new SolidBrushDef(Color.FromArgb(112, 117, 55));
-		public static readonly BrushDef BrushPop2 = new SolidBrushDef(Color.FromArgb(208, 219, 79));
+		public static readonly BrushDef BrushTopInner = new SolidBrushDef(Color.FromArgb(47, 156, 90));
+		public static readonly BrushDef BrushPopInner = new SolidBrushDef(Color.FromArgb(208, 219, 79));
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*using System.Drawing;
-using ControlSystem;
-using ControlSystem.Structs;
-using PowBasics.Geom;
-using PowRxVar;
-using RenderLib.Structs;
-
-namespace Demos.Categories.UserEvents;
-
-sealed class WinEventsDemo : Win
-{
-	public WinEventsDemo() : base(opt => opt.R = new R(-350, 100, 200, 300))
-	{
-		var nodeRoot = new NodeState().D(D);
-		var nodeTop = new NodeState().D(D);
-		var nodePop = new NodeState().D(D);
-		var nodeBottom = new NodeState().D(D);
-		var nodeTop2 = new NodeState().D(D);
-		var nodePop2 = new NodeState().D(D);
-
-		WhenRender.Subscribe(r =>
-		{
-			using (r[nodeRoot].StratStack(Dir.Vert).M)
-			{
-				r.Gfx.FillR(Consts.BrushRoot);
-
-				using (r[nodeTop].DimFilFix(100).M)
-					r.Gfx.FillR(Consts.BrushTop);
-
-				using (r[nodePop].StratStack(Dir.Vert).Dim(250, 150).Pop().M)
-				{
-					r.Gfx.FillR(Consts.BrushPop);
-
-					using (r[nodeTop2].DimFilFix(60).M)
-						r.Gfx.FillR(Consts.BrushTop2);
-					using (r[nodePop2].Dim(300, 50).Pop().M)
-						r.Gfx.FillR(Consts.BrushPop2);
-				}
-
-				using (r[nodeBottom].M)
-					r.Gfx.FillR(Consts.BrushBottom);
-			}
-		}).D(D);
-	}
-
-	private static class Consts
-	{
-		public static readonly BrushDef BrushRoot = new SolidBrushDef(Color.FromArgb(20, 57, 117));
-		public static readonly BrushDef BrushTop = new SolidBrushDef(Color.FromArgb(51, 102, 130));
-		public static readonly BrushDef BrushPop = new SolidBrushDef(Color.FromArgb(85, 151, 201));
-		public static readonly BrushDef BrushBottom = new SolidBrushDef(Color.FromArgb(70, 135, 54));
-
-		public static readonly BrushDef BrushTop2 = new SolidBrushDef(Color.FromArgb(112, 117, 55));
-		public static readonly BrushDef BrushPop2 = new SolidBrushDef(Color.FromArgb(208, 219, 79));
-	}
-}*/

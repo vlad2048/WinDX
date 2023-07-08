@@ -33,7 +33,7 @@ sealed class MakeForWinTester : IDisposable
 		evtMain = new Subject<IPacket>().D(d);
 		evtPop0 = new Subject<IPacket>().D(d);
 		evtPop1 = new Subject<IPacket>().D(d);
-		var popups = new RxTracker<IWin>().D(d);
+		var popups = Tracker.Make<IWin>().D(d);
 		popups.Update(new []
 		{
 			MakeWin(rMain, evtMain),

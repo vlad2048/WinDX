@@ -38,15 +38,30 @@ static class PopupSplitter
 					nodeMap,
 					partitionRMap,
 					ctrlSet,
-					SysPartition.Empty
+					SysPartition.Empty,
+					0
 				);
 			});
 
 
-		return new PartitionSet(
+		var partitionSet = new PartitionSet(
 			partitions,
 			root.GetParentMapping()
 		);
+
+		var partitionTree = partitionSet.PartitionTree;
+		var zOrderWinMap = partitionTree.Select((r, idx) => (r, idx)).ToDictionary(e => e.r.V, e => e.idx);
+		return partitionSet with
+		{
+			Partitions = partitionSet.Partitions.SelectToArray(
+				partition =>
+					partition with
+					{
+						ZOrderWin = zOrderWinMap[partition]
+					}
+			)
+		};
+
 	}
 
 

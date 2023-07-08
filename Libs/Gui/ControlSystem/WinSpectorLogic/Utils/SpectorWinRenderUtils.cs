@@ -17,6 +17,8 @@ static class SpectorWinRenderUtils
 		IGfx gfx
 	)
 	{
+		gfx.R = layout.RMap.Values.First().WithZeroPos();
+
 		bool GetR(IRoMayVar<MixNode> nod, out R nodeR)
 		{
 			nodeR = R.Empty;

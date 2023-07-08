@@ -17,6 +17,14 @@ class Program
 {
 	private const bool RunSingleDemo = false;
 
+	private static IDisposable Mk()
+	{
+		var d = new Disp();
+		new WinEventsDemo().D(d);
+		new WinEventsDemo().D(d);
+		return d;
+	}
+
 	static void Main()
 	{
 		//VarDbg.BreakpointOnDispAlloc(21);
@@ -25,7 +33,7 @@ class Program
 
 		if (RunSingleDemo)
 		{
-			using (new UserEventsDemo()) App.Run();
+			using (Mk()) App.Run();
 		}
 		else
 		{

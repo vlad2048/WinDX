@@ -4,6 +4,7 @@ using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
+using UserEvents.Structs;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
@@ -58,7 +59,8 @@ sealed record Partition(
 	IReadOnlyDictionary<NodeState, MixNode> NodeMap,
     IReadOnlyDictionary<NodeState, R> RMap,
     IReadOnlySet<Ctrl> CtrlSet,
-	SysPartition SysPartition
+	SysPartition SysPartition,
+	int ZOrderWin
 )
 {
 	public override string ToString() => $"Id:{Id}  Nodes:{NodeStates.Length}";
@@ -66,7 +68,23 @@ sealed record Partition(
     public Ctrl RootCtrl => ((CtrlNode)Root.V).Ctrl;
 
     public NodeState[] NodeStates => RMap.Keys.ToArray();
-    public INode[] AllNodeStates => RMap.Keys.OfType<INode>().Concat(SysPartition.RMap.Keys).ToArray();
+
+    public NodeZ[] AllNodeStates
+    {
+	    get
+	    {
+		    var zOrderNodeMapNormal = Root.GetZOrderNodeMapNormal(RMap);
+		    var zOrderNodeMapSys = SysPartition.RMap.GetZOrderNodeMapSys();
+		    return
+			    RMap.Keys.Select(node => new NodeZ(node, new ZOrder(ZOrderWin, false, zOrderNodeMapNormal[node]))).Concat(
+					    SysPartition.RMap.Keys.Select(node => new NodeZ(node, new ZOrder(ZOrderWin, true, zOrderNodeMapSys[node])))
+				    )
+				    .ToArray();
+	    }
+    }
+	    
+	    
+	    //=> RMap.Keys.OfType<INode>().Concat(SysPartition.RMap.Keys).ToArray();
 
     
     private static readonly Ctrl emptyCtrl = new Ctrl().DisposeOnProgramExit();
@@ -77,7 +95,8 @@ sealed record Partition(
 		new Dictionary<NodeState, MixNode>(),
         new Dictionary<NodeState, R>(),
         new HashSet<Ctrl> { emptyCtrl },
-		SysPartition.Empty
+		SysPartition.Empty,
+		0
     );
 }
 
@@ -107,4 +126,18 @@ static class PartitionExt
 		if (partition.RMap.TryGetValue(state, out var r)) return May.Some(r);
 		return May.None<R>();
 	}
+
+
+	public static IReadOnlyDictionary<NodeState, int> GetZOrderNodeMapNormal(this MixNode root, IReadOnlyDictionary<NodeState, R> rMap) =>
+		root
+			.Where(e => e.V is StFlexNode)
+			.Select(e => ((StFlexNode)e.V).State)
+			.Where(rMap.ContainsKey)
+			.Select((n, i) => (n, i))
+			.ToDictionary(t => t.n, t => t.i);
+
+	public static IReadOnlyDictionary<NodeState, int> GetZOrderNodeMapSys(this IReadOnlyDictionary<NodeState, R> rMap) =>
+		rMap.Keys
+			.Select((n, i) => (n, i))
+			.ToDictionary(t => t.n, t => t.i);
 }

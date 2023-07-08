@@ -10,6 +10,7 @@ using SysWinInterfaces;
 using SysWinLib;
 using SysWinLib.Structs;
 using UserEvents;
+using UserEvents.Structs;
 using WinAPI.User32;
 using WinAPI.Windows;
 
@@ -20,6 +21,7 @@ sealed class PopupWin : Ctrl, IWin
 	private readonly Action invalidateAllAction;
 	private readonly SysWin sysWin;
 	private readonly IRwVar<R> layoutR;
+	private readonly IRwTracker<NodeZ> rwNodes;
 	private Partition subPartition;
 	private Partition subPartitionRebased;
 
@@ -30,7 +32,7 @@ sealed class PopupWin : Ctrl, IWin
 	public Pt PopupOffset => layoutR.V.Pos;
 	public IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
 	public IRoVar<R> ScreenR => sysWin.ScreenR;
-	public RxTracker<INode> Nodes { get; }
+	public IRoTracker<NodeZ> Nodes => rwNodes;
 	public void Invalidate() => invalidateAllAction();
 
 	public void CallSysWinInvalidate() => sysWin.Invalidate();
@@ -44,7 +46,7 @@ sealed class PopupWin : Ctrl, IWin
 		SpectorWinDrawState spectorDrawState
 	)
 	{
-		Nodes = new RxTracker<INodeStateUserEventsSupport>().D(D);
+		rwNodes = Tracker.Make<NodeZ>().D(D);
 
 		this.invalidateAllAction = invalidateAllAction;
 		layoutR = Var.Make(R.Empty).D(D);
@@ -71,6 +73,8 @@ sealed class PopupWin : Ctrl, IWin
 			using var d = new Disp();
 			var gfx = renderer.GetGfx(false).D(d);
 			RenderUtils.RenderTree(subPartitionRebased, gfx);
+
+			//gfx.R = sysWin.ClientR.V;
 			SpectorWinRenderUtils.Render(spectorDrawState, subPartitionRebased, gfx);
 		}).D(D);
 	}
@@ -79,7 +83,7 @@ sealed class PopupWin : Ctrl, IWin
 	{
 		subPartition = subPartition_;
 		(subPartitionRebased, layoutR.V) = subPartition_.SplitOffset();
-		Nodes.Update(subPartition.AllNodeStates);
+		rwNodes.Update(subPartition.AllNodeStates);
 		Invalidate();
 		return (subPartition, subPartitionRebased);
 	}

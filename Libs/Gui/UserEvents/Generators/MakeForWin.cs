@@ -8,6 +8,7 @@ using UserEvents.Utils;
 using WinAPI.User32;
 using WinAPI.Utils.Exts;
 using WinAPI.Windows;
+using MouseButtonDownUserEvt = UserEvents.Structs.MouseButtonDownUserEvt;
 
 namespace UserEvents.Generators;
 
@@ -15,40 +16,139 @@ public static class UserEventGenerator
 {
 	private static readonly TimeSpan delay = TimeSpan.FromMilliseconds(50);
 
-	
-	public static (IObservable<IUserEvt>, IDisposable) MakeForWin(RxTracker<IWin> popups, bool log = false)
+	private sealed record EvtWin(IUserEvt Evt, IWin Win);
+	private sealed record MouseNfo(Pt Pos, Pt WinPos)
+	{
+		public Pt ScreenPos => Pos + WinPos;
+	}
+
+	private static int cnt;
+
+	public static (IObservable<IUserEvt>, IDisposable) MakeForWin(
+		IRoTracker<IWin> popups,
+		bool log = false
+	)
+	{
+		var d = new Disp();
+		var prefix = "[" + ((char)('A' + cnt++)) + "] ";
+		string GetWinName(IWin win)
+		{
+			if (win is IMainWin) return "Main";
+			return $"Pop[{popups.ItemsArr.IndexOf(win) - 1}]";
+		}
+
+		var sysEvtsItems = popups.Items.MergeMany(win => MakeForSysWin(win.SysEvt).Translate(() => win.PopupOffset).Select(e => new EvtWin(e, win)));
+
+		TrackMouseNfo(out var mouseNfo, sysEvtsItems).D(d);
+		MakeForWinInternal(out var evt, sysEvtsItems, popups, mouseNfo, GetWinName, log, prefix).D(d);
+		EnableMouseCapture(evt, popups, GetWinName, prefix).D(d);
+
+		return (evt, d);
+	}
+
+	private static IDisposable TrackMouseNfo(
+		out IRoVar<MouseNfo> mouseNfo,
+		IObservable<EvtWin> sysEvtsItems
+	)
+	{
+		var d = new Disp();
+		var mouseNfoRw = Var.Make(new MouseNfo(Pt.Empty, Pt.Empty)).D(d);
+		mouseNfo = mouseNfoRw.ToReadOnly();
+
+		sysEvtsItems.Where(e => e.Evt is MouseMoveUserEvt).Subscribe(e =>
+		{
+			mouseNfoRw.V = new MouseNfo(
+				((MouseMoveUserEvt)e.Evt).Pos,
+				e.Win.ScreenPt.V
+			);
+		}).D(d);
+		
+
+		return d;
+	}
+
+
+	private static IDisposable EnableMouseCapture(
+		IObservable<IUserEvt> evt,
+		IRoTracker<IWin> popups,
+		Func<IWin, string> getWinName,
+		string prefix
+	)
+	{
+		var d = new Disp();
+		var serD = new SerialDisp<Disp>().D(d);
+
+		evt.OfType<MouseButtonDownUserEvt>()
+			.Subscribe(_ =>
+			{
+				var hwnd = popups.ItemsArr.First().Handle;
+				var prevHwnd = User32Methods.SetCapture(hwnd);
+
+				serD.Value = null;
+				serD.Value = new Disp();
+
+				evt.OfType<MouseButtonUpUserEvt>().Subscribe(_ =>
+				{
+					var res = User32Methods.ReleaseCapture();
+					L($"{prefix} - ReleaseCapture   (res:{res})");
+				}).D(serD.Value);
+
+
+				var prevWin = popups.ItemsArr.FirstOrDefault(e => e.Handle == prevHwnd);
+				var prevWinName = (prevHwnd == nint.Zero) switch
+				{
+					true => "(none)",
+					false => prevWin switch
+					{
+						null => "(other)",
+						not null => getWinName(prevWin)
+					}
+				};
+
+				L($"{prefix} - MouseCapture   (prev:{prevWinName})");
+
+			}).D(d);
+
+		return d;
+	}
+
+
+
+	private static IDisposable MakeForWinInternal(
+		out IObservable<IUserEvt> evt,
+		IObservable<EvtWin> sysEvtsItems,
+		IRoTracker<IWin> popups,
+		IRoVar<MouseNfo> mouseNfo,
+		Func<IWin, string> getWinName,
+		bool log,
+		string prefix
+	)
 	{
 		var d = new Disp();
 
-		var sysEvtsItems = popups.Items.MergeMany(win => MakeForSysWin(win.SysEvt).Translate(() => win.PopupOffset).Select(e => (win, e)));
-		var sysEvts = sysEvtsItems.Select(e => e.e);
-
-
 		if (log)
 		{
-			var pops = popups.Items.AsObservableList().D(d);
-
-			string GetWinName(IWin win)
-			{
-				if (win is IMainWin) return "Main";
-				return $"Pop[{pops.Items.IndexOf(win) - 1}]";
-			}
-
 			sysEvtsItems
 				//.Where(e => e.e is MouseEnterUserEvt or MouseLeaveUserEvt)
-				.Select(e => $"{GetWinName(e.Item1)} {e.e}")
+				.Select(e => $"{prefix} {getWinName(e.Win)} {e.Evt}")
 				.Log().D(d);
 		}
 
-
-
+		var sysEvts = sysEvtsItems.Select(e => e.Evt);
 		var whenEvt = new Subject<IUserEvt>().D(d);
-
-
-
 		void Send(IUserEvt evt) => whenEvt.OnNext(evt);
+		bool IsMouseOver()
+		{
+			var mp = GetMousePos();
+			/*L($"------------ Y = {mp.Y}");
+			if (mp.Y == 100 + 100)
+			{
+				var abc = 123;
+			}*/
+			return popups.ItemsArr.Any(e => e.ScreenR.V.Contains(mp));
+		}
 
-		
+
 		// State
 		// =====
 		var isActivateApp = Var.Make(false).D(d);
@@ -60,27 +160,11 @@ public static class UserEventGenerator
 		// State changes
 		// =============
 		var isLastActivateMouse = false;
-		var mousePos = Pt.Empty;
-		//var mousePosWinPos = Pt.Empty;
 		sysEvts.OfType<ActivateUserEvt>().Subscribe(e => isLastActivateMouse = e.WithMouseClick).D(d);
-		//Obs.Merge(sysEvts.WhenMouseMove(), sysEvts.WhenMouseEnter()).Subscribe(e => mousePos = e).D(d);
-		//sysEvts.WhenMouseMove().Subscribe(e => mousePos = e).D(d);
-		sysEvtsItems.Where(t => t.e is MouseMoveUserEvt).Subscribe(t =>
-		{
-			mousePos = ((MouseMoveUserEvt)t.e).Pos;
-			//mousePosWinPos = t.Item1.ScreenPt.V;
-		}).D(d);
-		/*bool IsMouseOverWin()
-		{
-			User32Methods.GetCursorPos(out var pt);
-			var mp = pt.ToPt();
-			//var mp = mousePosWinPos + mousePos;
-			return wins.Items.Any(e => e.ScreenR.V.Contains(mp));
-		}*/
 
 		isActivateApp.Skip(1).Subscribe(e => Send(e ? new ActivateAppUserEvt() : new InactivateAppUserEvt())).D(d);
 		isActivate.Skip(1).Subscribe(e => Send(e ? new ActivateUserEvt(isLastActivateMouse) : new InactivateUserEvt())).D(d);
-		isMouseOver.Skip(1).Subscribe(e => Send(e ? new MouseEnterUserEvt(mousePos) : new MouseLeaveUserEvt())).D(d);
+		isMouseOver.Skip(1).Subscribe(e => Send(e ? new MouseEnterUserEvt(mouseNfo.V.Pos) : new MouseLeaveUserEvt())).D(d);
 		hasFocus.Skip(1).Subscribe(e => Send(e ? new GotFocusUserEvt() : new LostFocusUserEvt())).D(d);
 
 
@@ -96,8 +180,8 @@ public static class UserEventGenerator
 		sysEvts.RunActionAfterIfNot<IUserEvt, LostFocusUserEvt, GotFocusUserEvt>(() => hasFocus.V = false, delay).D(d);
 
 		sysEvts.WhenMouseMove().Subscribe(_ => isMouseOver.V = true).D(d);
-		//sysEvts.WhenMouseLeave().Where(_ => !IsMouseOverWin()).Subscribe(_ => isMouseOver.V = false).D(d);
-		sysEvts.RunActionAfterIfNot<IUserEvt, MouseLeaveUserEvt, MouseMoveUserEvt>(() => isMouseOver.V = false, delay).D(d);
+		sysEvts.WhenMouseLeave().Where(_ => !IsMouseOver()).Subscribe(_ => isMouseOver.V = false).D(d);
+		//sysEvts.RunActionAfterIfNot<IUserEvt, MouseLeaveUserEvt, MouseMoveUserEvt>(() => isMouseOver.V = false, delay).D(d);
 
 
 		// Events (IUserEvtMouse + IUserEvtKeyboard)
@@ -114,26 +198,27 @@ public static class UserEventGenerator
 			.Subscribe(Send).D(d);
 
 
-		var evt = whenEvt.AsObservable();
+		evt = whenEvt.AsObservable();
 
 
 		if (log)
 		{
 			evt
-				//.Where(e => e is MouseEnterUserEvt or MouseLeaveUserEvt)
-				//.Select(e => $"{e}  (IsMouseOverWin: {IsMouseOverWin()})")
-				.Log(Pad).D(d);
+				.Log($"{Pad}{prefix}").D(d);
 		}
 
 
-		return (
-			evt,
-			d
-		);
+		return d;
 	}
 	
 
 	private static readonly string Pad = new(' ', 40);
+
+	private static Pt GetMousePos()
+	{
+		User32Methods.GetCursorPos(out var pt);
+		return pt.ToPt();
+	}
 
 
 

@@ -9,25 +9,25 @@ class WinWrapper : IDisposable
 	private readonly Disp d;
 	public void Dispose() => d.Dispose();
 
-	private readonly RxTracker<INode> nodes;
-	private readonly List<INode> list = new();
+	private readonly IRwTracker<NodeZ> nodes;
+	private readonly List<NodeZ> list = new();
 
 	public IMainWinUserEventsSupport Win { get; }
 
-	public WinWrapper(IMainWinUserEventsSupport win, RxTracker<INode> nodes, Disp d)
+	public WinWrapper(IMainWinUserEventsSupport win, IRwTracker<NodeZ> nodes, Disp d)
 	{
 		this.d = d;
 		Win = win;
 		this.nodes = nodes;
 	}
 
-	public void AddNodes(TNode[] arr)
+	public void AddNodes(NodeZ[] arr)
 	{
 		list.AddRange(arr);
 		nodes.Update(list.ToArray());
 	}
 
-	public void DelNodes(TNode[] arr)
+	public void DelNodes(NodeZ[] arr)
 	{
 		foreach (var elt in arr)
 			list.Remove(elt);
@@ -44,7 +44,7 @@ static class TestWinMaker
 		var d = new Disp();
 		var winMock = new Mock<IMainWinUserEventsSupport>();
 
-		var nodes = new RxTracker<INode>().D(d);
+		var nodes = Tracker.Make<NodeZ>().D(d);
 
 		winMock
 			.Setup(e => e.Nodes)

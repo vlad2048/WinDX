@@ -12,7 +12,7 @@ public interface IWinUserEventsSupport
 	Pt PopupOffset { get; }
 	IRoVar<Pt> ScreenPt { get; }
 	IRoVar<R> ScreenR { get; }
-	RxTracker<INode> Nodes { get; }
+	IRoTracker<NodeZ> Nodes { get; }
 	//INodeStateUserEventsSupport[] HitFun(Pt pt);
 	void Invalidate();
 }

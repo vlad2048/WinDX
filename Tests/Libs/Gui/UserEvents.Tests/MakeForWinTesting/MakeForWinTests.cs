@@ -37,9 +37,8 @@ sealed class MakeForWinTests : RxTest
 
 		Send_Leave(Dst.Pop0);
 
-		Check();
-
-		Thread.Sleep(200);
+		//Check();
+		//Thread.Sleep(200);
 
 		Check(
 			Leave()

@@ -45,7 +45,8 @@ sealed class EventTester : IDisposable
         ).D(d);
         winWrapper = TestWinMaker.Make(whenEvt.AsObservable()).D(d);
 
-        winWrapper.Win.DispatchEvents(winWrapper.Win).D(d);
+        winWrapper.Win.Nodes
+	        .DispatchEvents(winWrapper.Win).D(d);
     }
 
 
@@ -60,9 +61,9 @@ sealed class EventTester : IDisposable
 
     public void Check(NodeEvt[] evts) => checker.Check(evts.SelectToArray(e => e with { Evt = e.Evt.TranslateMouse(-e.N.R.V.Pos) }));
 
-    public void AddNodes(TNode[] arr) => winWrapper.AddNodes(arr);
+    public void AddNodes(NodeZ[] arr) => winWrapper.AddNodes(arr);
 
-    public void DelNodes(TNode[] arr) => winWrapper.DelNodes(arr);
+    public void DelNodes(NodeZ[] arr) => winWrapper.DelNodes(arr);
 
 
     //private void UpdateNodes() => eventDispatcher.Update(win.Nodes.OfType<INode>().ToArray());
