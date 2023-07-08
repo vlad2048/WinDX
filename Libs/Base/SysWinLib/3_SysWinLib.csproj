@@ -12,7 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Logging\1_Logging.csproj" />
+		<ProjectReference Include="..\LoggingConfig\1_LoggingConfig.csproj" />
 		<ProjectReference Include="..\SysWinInterfaces\2_SysWinInterfaces.csproj" />
 	</ItemGroup>
 

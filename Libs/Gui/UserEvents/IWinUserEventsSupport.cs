@@ -17,10 +17,19 @@ public interface IWinUserEventsSupport
 	void SysInvalidate();
 }
 
+
+public enum RedrawReason
+{
+	Resize,
+	Ctrl,
+	SpectorOverlay,
+	SpectorRequestFullRedraw,
+	UserCode,
+}
+
 public interface IInvalidator
 {
-	void InvalidateLayout();
-	void InvalidateRender();
+	void Invalidate(RedrawReason reason);
 }
 
 public interface IMainWinUserEventsSupport : IWinUserEventsSupport

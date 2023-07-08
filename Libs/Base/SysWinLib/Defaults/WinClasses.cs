@@ -14,7 +14,6 @@ public static class WinClasses
 			Styles =
 				WindowClassStyles.CS_HREDRAW |
 				WindowClassStyles.CS_VREDRAW |
-				WindowClassStyles.CS_DBLCLKS |
 				WindowClassStyles.CS_OWNDC |
 				0
 			,

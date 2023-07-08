@@ -1,9 +1,11 @@
 ﻿using System.Reactive.Linq;
 using ControlSystem.Logic.Scrolling_.Structs;
 using ControlSystem.Structs;
+using ControlSystem.Utils;
 using PowBasics.Geom;
 using PowRxVar;
 using UserEvents.Structs;
+using UserEvents.Utils;
 using C = ControlSystem.Logic.Scrolling_.ScrollBarConsts;
 
 namespace ControlSystem.Logic.Scrolling_;
@@ -22,8 +24,10 @@ public sealed class ScrollBarCtrl : Ctrl
 
 		var thumbPos = 0;
 
-		ScrollBarCtrlUtils.HookBtn(out var btnDecState, state, ScrollBtnDecInc.Dec, nodeBtnDec).D(D);
+		ScrollBarCtrlUtils.HookBtn(out var btnDecState, state, ScrollBtnDecInc.Dec, nodeBtnDec, true).D(D);
 		ScrollBarCtrlUtils.HookBtn(out var btnIncState, state, ScrollBtnDecInc.Inc, nodeBtnInc).D(D);
+
+		//nodeBtnInc.Evt.Log("Inc: ").D(D);
 
 		if (dir == Dir.Vert)
 		{
@@ -93,15 +97,23 @@ file static class ScrollBarCtrlUtils
 		out IRoVar<ScrollBtnState> btnState,
 		ScrollDimState state,
 		ScrollBtnDecInc decInc,
-		NodeState node
+		NodeState node,
+		bool disable = false
 	)
 	{
 		var d = new Disp();
 		btnState = node.Evt.IsMouseOver().D(d).SelectVar(e => e ? ScrollBtnState.Hover : ScrollBtnState.Normal);
 
-		node.Evt.WhenRepeatedClick(MouseBtn.Left)
+		//node.Evt.WhenMouseDown().Subscribe(p => L($"MouseDown {p}")).D(d);
+		if (disable) return d;
+
+		node.Evt.WhenRepeatedClick(node).D(d)
+			.ObserveOnUIThread()
+			.Do(p => L($"RepeatedClick {p}"))
 			.Select(_ => new UnitScrollCmd(decInc))
+			.Do(_ => L("T_0"))
 			.Where(state.CanRunScrollCmd)
+			.Do(_ => L("T_1"))
 			.Subscribe(state.RunScrollCmd).D(d);
 
 		return d;

@@ -1,12 +1,63 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using DynamicData;
 using PowRxVar;
 using UserEvents;
+using WinAPI.Windows;
 
 namespace ControlSystem.Logic.Invalidate_;
 
-class Invalidator : IInvalidator, IDisposable
+
+
+sealed class Invalidator : IInvalidator, IDisposable
+{
+	private readonly Disp d = new();
+	public void Dispose() => d.Dispose();
+
+	private readonly IRwTracker<RedrawReason> reasonTracker;
+
+	// IInvalidator
+	// ============
+	public void Invalidate(RedrawReason reason) => reasonTracker.Src.Add(reason);
+
+	public Invalidator(IRoTracker<IWin> wins)
+	{
+		reasonTracker = Tracker.Make<RedrawReason>().D(d);
+
+		reasonTracker.ItemsList.CountChanged.Where(e => e > 0).Subscribe(_ =>
+		{
+			foreach (var win in wins.ItemsArr)
+				win.SysInvalidate();
+		}).D(d);
+	}
+
+	public bool IsLayoutRequired(out RedrawReason[] reasons)
+	{
+		reasons = reasonTracker.ItemsArr;
+		reasonTracker.Src.Clear();
+		return reasons.Any(e => e.IsLayoutRequired());
+	}
+}
+
+
+
+file static class InvalidatorExt
+{
+	public static bool IsLayoutRequired(this RedrawReason e) => e switch
+	{
+		RedrawReason.Resize => true,
+		RedrawReason.Ctrl => true,
+		RedrawReason.SpectorOverlay => false,
+		RedrawReason.SpectorRequestFullRedraw => true,
+		RedrawReason.UserCode => true,
+	};
+}
+
+
+
+/*
+sealed class Invalidator : IInvalidator, IDisposable
 {
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
@@ -40,3 +91,4 @@ class Invalidator : IInvalidator, IDisposable
 		WhenInvalidateLayout.Subscribe(_ => layoutRequired = true).D(d);
 	}
 }
+*/

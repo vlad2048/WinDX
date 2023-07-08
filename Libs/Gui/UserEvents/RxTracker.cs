@@ -9,12 +9,13 @@ public interface IRoTracker<T>
 {
 	Disp D { get; }
 	IObservable<IChangeSet<T>> Items { get; }
+	IObservableList<T> ItemsList { get; }
 	T[] ItemsArr { get; }
 }
 
 public interface IRwTracker<T> : IRoTracker<T>, IDisposable
 {
-	void Update(T[] items);
+	ISourceList<T> Src { get; }
 }
 
 
@@ -23,14 +24,16 @@ sealed class RoTracker<T> : IRoTracker<T>, IDisposable
 	public Disp D { get; } = new();
 	public void Dispose() => D.Dispose();
 
-	private readonly IObservableList<T> itemsList;
+	// IRoTracker
+	// ==========
 	public IObservable<IChangeSet<T>> Items { get; }
-	public T[] ItemsArr => itemsList.Items.ToArray();
+	public IObservableList<T> ItemsList { get; }
+	public T[] ItemsArr => ItemsList.Items.ToArray();
 
 	public RoTracker(IObservable<IChangeSet<T>> items)
 	{
 		Items = items;
-		itemsList = items.AsObservableList().D(D);
+		ItemsList = items.AsObservableList().D(D);
 	}
 }
 
@@ -40,20 +43,22 @@ sealed class RwTracker<T> : IRwTracker<T>
 	public Disp D { get; } = new();
 	public void Dispose() => D.Dispose();
 
-	private readonly ISourceList<T> itemsSrc;
-	private readonly IObservableList<T> itemsList;
-
+	// IRoTracker
+	// ==========
 	public IObservable<IChangeSet<T>> Items { get; }
-	public T[] ItemsArr => itemsList.Items.ToArray();
+	public IObservableList<T> ItemsList { get; }
+	public T[] ItemsArr => ItemsList.Items.ToArray();
+
+	// IRwTracker
+	// ==========
+	public ISourceList<T> Src { get; }
 
 	public RwTracker()
 	{
-		itemsSrc = new SourceList<T>().D(D);
-		itemsList = itemsSrc.AsObservableList().D(D);
-		Items = itemsSrc.Connect();
+		Src = new SourceList<T>().D(D);
+		ItemsList = Src.AsObservableList().D(D);
+		Items = Src.Connect();
 	}
-
-	public void Update(T[] items) => itemsSrc.EditDiff(items);
 }
 
 
@@ -62,6 +67,9 @@ public sealed record ItemWithSelector<T, U>(T Selector, U Item);
 
 public static class Tracker
 {
+	public static void Update<T>(this IRwTracker<T> tracker, T[] items) => tracker.Src.EditDiff(items);
+
+
 	public static (IRwTracker<T>, IDisposable) Make<T>() => new RwTracker<T>().WithDisp();
 
 

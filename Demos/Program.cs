@@ -15,7 +15,7 @@ namespace Demos;
 
 class Program
 {
-	private const bool RunSingleDemo = true;
+	private const bool RunSingleDemo = false;
 
 	private static IDisposable Mk()
 	{

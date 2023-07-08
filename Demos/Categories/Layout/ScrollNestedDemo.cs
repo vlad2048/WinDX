@@ -51,12 +51,12 @@ sealed class ScrollNestedDemo : Win
 					{
 						var nodeLine = nodesLines[i];
 						var marg = new Marg(i > 0 ? 1 : 0, 0, 0, 0);
-						using (r[nodeLine].DimFixFit(180).Marg(marg).M)
+						using (r[nodeLine].DimFixFit(400).Marg(marg).M)
 						{
 							//if (i != 0)
 							{
 								r.Gfx.FillR(Consts.LineBrush);
-								r.DrawText($"[{i}] 01234567890123456789 Line {i}", Consts.Font, Consts.TextColor);
+								r.DrawText($"[{i}] 01234567890123456789 01234567890123456789 01234567890123456789 01234567890123456789 Line {i}", Consts.Font, Consts.TextColor);
 							}
 							/*else
 							{

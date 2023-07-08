@@ -4,6 +4,8 @@ using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
 using UserEvents.Structs;
+using UserEvents.Utils;
+
 #pragma warning disable CS8602
 
 namespace UserEvents.Converters;
@@ -29,6 +31,8 @@ public static class UserEventConverter
 			HitFun,
 			rwNodeLock
 		).D(d);
+
+		//mayHovVar.Log("Hover: ").D(d);
 
 		HandleMouseWheel(
 			winEvt,

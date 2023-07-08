@@ -5,6 +5,7 @@ using LayoutSystem.Flex.LayStrats;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Structs;
+using UserEvents;
 using UserEvents.Structs;
 using WinAPI.User32;
 
@@ -82,7 +83,7 @@ sealed class DetachCtrlDemo : Win
 		state.Subscribe(s =>
 		{
 			L($"State <- {s}");
-			Invalidator.InvalidateLayout();
+			Invalidator.Invalidate(RedrawReason.UserCode);
 		}).D(D);
 
 

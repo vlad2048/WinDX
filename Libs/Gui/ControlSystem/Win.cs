@@ -72,7 +72,7 @@ public class Win : Ctrl, IMainWin
 		rwNodes = Tracker.Make<NodeZ>().D(D);
 		rwCtrls = Tracker.Make<ICtrl>().D(D);
 		rwWins = Tracker.Make<IWin>().D(D);
-		fullInvalidator = new Invalidator().D(D);
+		fullInvalidator = new Invalidator(Wins).D(D);
 
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
@@ -84,6 +84,7 @@ public class Win : Ctrl, IMainWin
 		Evt = UserEventGenerator.MakeForWin(Wins, false).D(D);
 
 		Wins.MergeManyTrackers(e => e.Nodes).SelectTracker(e => e.Item).DispatchEvents(out var nodeLock, this).D(D);
+		nodeLock.PipeTo(SpectorDrawState.LockedNode);
 
 
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
@@ -94,28 +95,25 @@ public class Win : Ctrl, IMainWin
 
 		// Invalidate Triggers
 		// ===================
-		ClientR.Trigger(fullInvalidator.SetLayoutRequired).D(D);
-		nodeLock.PipeTo(SpectorDrawState.LockedNode);
-		SpectorDrawState.WhenChanged.Trigger(Invalidator.InvalidateRender).D(D);
+		ClientR.Trigger(() => Invalidator.Invalidate(RedrawReason.Resize)).D(D);
+		SpectorDrawState.WhenChanged.Trigger(() => Invalidator.Invalidate(RedrawReason.SpectorOverlay)).D(D);
 
 		Wins.MergeManyTrackers(e => e.Ctrls)
 			.SelectTracker(e => e.Item).Items
 			.MergeMany(e => e.WhenChanged)
-			.Trigger(Invalidator.InvalidateLayout).D(D);
-		
-		fullInvalidator.WhenChanged
-			.Subscribe(_ =>
-			{
-				foreach (var win in Wins.ItemsArr)
-					win.SysInvalidate();
-			}).D(D);
+			.Trigger(() => Invalidator.Invalidate(RedrawReason.Ctrl)).D(D);
+
+		/*Wins.MergeManyTrackers(e => e.Nodes)
+			.SelectTracker(e => e.Item).Items
+			.MergeMany(e => e.Node.WhenInvalidateRequired)
+			.Trigger(Invalidator.InvalidateLayout).D(D);*/
 
 
 		// Layout / Render
 		// ===============
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
-			var isLayoutRequired = fullInvalidator.IsLayoutRequired();
+			var isLayoutRequired = fullInvalidator.IsLayoutRequired(out var reasons);
 			//L($"Paint (layout:{isLayoutRequired})");
 			if (isLayoutRequired)
 			{
@@ -167,6 +165,8 @@ file static class WinUtils
 		PopupMan popupMan
 	)
 	{
+
+
 		(
 			from partition in partitionSet.Partitions
 			from ctrl in partition.CtrlSet
@@ -183,7 +183,10 @@ file static class WinUtils
 			from nodeState in partition.NodeStates
 			select (nodeState, r: partition.RMap[nodeState])
 		)
-			.ForEach(t => t.nodeState.RSrc.V = t.r);
+			.ForEach(t =>
+			{
+				t.nodeState.RSrc.V = t.r;
+			});
 
 
 		(
@@ -203,7 +206,10 @@ file static class WinUtils
 			from t in partition.SysPartition.RMap
 			select t
 		)
-			.ForEach(t => t.Key.RSrc.V = t.Value);
+			.ForEach(t =>
+			{
+				t.Key.RSrc.V = t.Value;
+			});
 
 		return partitionSet;
 	}

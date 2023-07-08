@@ -62,7 +62,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SysWinDemo", "Play\SysWinDe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Demos", "Demos\Demos.csproj", "{DC9D5C0A-BCA3-4CEB-B0BE-CF290365C973}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1_Logging", "Libs\Base\Logging\1_Logging.csproj", "{B909147B-C169-454C-9000-036FB802BD81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1_LoggingConfig", "Libs\Base\LoggingConfig\1_LoggingConfig.csproj", "{B909147B-C169-454C-9000-036FB802BD81}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "3_WinFormsTooling", "Libs\Gui\WinFormsTooling\3_WinFormsTooling.csproj", "{44DFFF8E-0DC3-4A82-8A5D-5EB18F7B72BB}"
 EndProject
