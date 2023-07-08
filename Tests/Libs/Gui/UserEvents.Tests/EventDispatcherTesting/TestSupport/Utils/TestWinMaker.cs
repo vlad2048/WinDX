@@ -10,15 +10,16 @@ namespace UserEvents.Tests.EventDispatcherTesting.TestSupport.Utils;
 
 class WinWrapper : IDisposable
 {
-	private readonly Disp d = new();
+	private readonly Disp d;
 	public void Dispose() => d.Dispose();
 
 	private readonly ISourceList<INode> nodesSrc;
 
-	public IWin Win { get; }
+	public IMainWinUserEventsSupport Win { get; }
 
-	public WinWrapper(IWin win, ISourceList<INode> nodesSrc)
+	public WinWrapper(IMainWinUserEventsSupport win, ISourceList<INode> nodesSrc, Disp d)
 	{
+		this.d = d;
 		Win = win;
 		this.nodesSrc = nodesSrc;
 	}
@@ -33,8 +34,9 @@ class WinWrapper : IDisposable
 
 static class TestWinMaker
 {
-	public static IMainWinUserEventsSupport MakeMainWin(
-		IObservable<IUserEvt> evt
+	/*public static IMainWinUserEventsSupport MakeMainWin(
+		IObservable<IUserEvt> evt,
+		Func<Pt, INode[]> hitFun
 	)
 	{
 		var winMock = new Mock<IMainWinUserEventsSupport>();
@@ -42,24 +44,41 @@ static class TestWinMaker
 			.Setup(e => e.Evt)
 			.Returns(evt);
 		winMock
+			.Setup(e => e.HitFun(It.IsAny<Pt>()))
+			.Returns(hitFun);
+		winMock
 			.Setup(e => e.Invalidate());
 		return winMock.Object;
-	}
+	}*/
 
 	public static WinWrapper Make(
+		IObservable<IUserEvt> evt
 	)
 	{
 		var d = new Disp();
-		var winMock = new Mock<IWin>();
+		var winMock = new Mock<IMainWinUserEventsSupport>();
 
 		var nodesSrc = new SourceList<INode>().D(d);
 		var nodes = nodesSrc.Connect();
+		var nodesList = nodes.AsObservableList().D(d);
 
 		winMock
 			.Setup(e => e.Nodes)
 			.Returns(nodes);
 
-		return new WinWrapper(winMock.Object, nodesSrc);
+		winMock
+			.Setup(e => e.Evt)
+			.Returns(evt);
+
+		INode[] HitFun(Pt pt) => nodesList.Items.Where(e => e.R.V.Contains(pt)).Reverse().ToArray();
+		winMock
+			.Setup(e => e.HitFun(It.IsAny<Pt>()))
+			.Returns(HitFun);
+		winMock
+			.Setup(e => e.Invalidate());
+
+
+		return new WinWrapper(winMock.Object, nodesSrc, d);
 	}
 }
 

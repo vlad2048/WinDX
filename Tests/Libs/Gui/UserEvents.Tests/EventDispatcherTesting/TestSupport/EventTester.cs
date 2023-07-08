@@ -1,6 +1,7 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using PowBasics.CollectionsExt;
+using PowBasics.Geom;
 using PowRxVar;
 using TestBase;
 using UserEvents.Structs;
@@ -43,9 +44,12 @@ sealed class EventTester : IDisposable
             true,
             e => e with { Evt = e.Evt.TranslateMouse(e.N.R.V.Pos) }
         ).D(d);
-        winWrapper = TestWinMaker.Make().D(d);
-        var mainWin = TestWinMaker.MakeMainWin(whenEvt.AsObservable());
-        var eventDispatcher = new EventDispatcher(winWrapper.Win, mainWin).D(d);
+        winWrapper = TestWinMaker.Make(whenEvt.AsObservable()).D(d);
+
+        var nodes = new[] { NodeB, NodeA, NodeR };
+        INode[] HitFun(Pt pt) => nodes.Where(e => e.R.V.Contains(pt)).OfType<INode>().ToArray();
+        //var mainWin = TestWinMaker.MakeMainWin(whenEvt.AsObservable(), HitFun);
+        var eventDispatcher = new EventDispatcher(winWrapper.Win, winWrapper.Win).D(d);
     }
 
 
