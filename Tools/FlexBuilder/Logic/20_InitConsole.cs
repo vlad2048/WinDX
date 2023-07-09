@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Disposables;
-using FlexBuilder.Structs;
 using PowBasics.Geom;
 using PowRxVar;
 using WinAPI.Utils;

@@ -9,10 +9,10 @@ namespace ControlSystem.Logic.Popup_;
 
 static class PopupSplitter
 {
-	public static PartitionSet Split(MixNode root, IReadOnlyDictionary<NodeState, R> rMap)
+	public static PartitionSet Split(MixLayout mixLayout)
 	{
-		var backMap = root.ToDictionary(e => e.V);
-		var partitions = root
+		var backMap = mixLayout.MixRoot.ToDictionary(e => e.V);
+		var partitions = mixLayout.MixRoot
 			.PartitionPopNodes()
 			.SelectToArray((partition, partitionIdx) =>
 			{
@@ -28,7 +28,7 @@ static class PopupSplitter
 				var nodeMap = partitionExtended
 					.Where(e => e.V is StFlexNode { State: var state } && enabledStates.Contains(state))
 					.ToDictionary(e => ((StFlexNode)e.V).State);
-				var partitionRMap = rMap
+				var partitionRMap = mixLayout.RMap
 					.Where(t => enabledStates.Contains(t.Key))
 					.ToDictionary(e => e.Key, e => e.Value);
 				var ctrlSet = partitionExtended.Select(e => e.V).OfType<CtrlNode>().ToHashSet(e => e.Ctrl);
@@ -46,7 +46,8 @@ static class PopupSplitter
 
 		var partitionSet = new PartitionSet(
 			partitions,
-			root.GetParentMapping()
+			mixLayout.MixRoot.GetParentMapping(),
+			mixLayout
 		);
 
 		var partitionTree = partitionSet.PartitionTree;

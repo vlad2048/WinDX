@@ -14,8 +14,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="DynamicData" Version="7.14.2" />
-		<PackageReference Include="PowBasics" Version="0.0.23" />
-		<PackageReference Include="PowRxVar.Maybe" Version="0.0.44" />
+		<PackageReference Include="PowBasics" Version="0.0.24" />
+		<PackageReference Include="PowRxVar.Maybe" Version="0.0.45" />
 	</ItemGroup>
 
 	<ItemGroup>

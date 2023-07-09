@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Disposables;
-using ControlSystem.Structs;
 using DynamicData;
 using PowRxVar;
+using UserEvents;
 
 namespace ControlSystem.Singletons.WinMan_;
 
@@ -10,29 +10,21 @@ sealed class WinMan : IDisposable
 	private readonly Disp d = new();
 	public void Dispose() => d.Dispose();
 
-	private readonly ISourceList<Win> wins;
-	private readonly ISourceCache<MixLayout, Win> win2layout;
+	private readonly IRwTracker<Win> rwMainWins;
 
-	public IObservable<IChangeSet<Win>> Wins { get; }
-	public IObservable<IChangeSet<MixLayout, Win>> Win2Layout { get; }
+	public IRoTracker<Win> MainWins => rwMainWins;
 
 	public WinMan()
 	{
-		wins = new SourceList<Win>().D(d);
-		Wins = wins.Connect();
-
-		win2layout = new SourceCache<MixLayout, Win>(e => e.Win).D(d);
-		Win2Layout = win2layout.Connect();
+		rwMainWins = Tracker.Make<Win>().D(d);
 	}
 
 	public void AddWin(Win win)
 	{
-		wins.Add(win);
+		rwMainWins.Src.Add(win);
 		Disposable.Create(() =>
 		{
-			wins.Remove(win);
+			rwMainWins.Src.Remove(win);
 		}).D(win.D);
 	}
-
-	public void SetWinLayout(MixLayout layout) => win2layout.AddOrUpdate(layout);
 }

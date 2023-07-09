@@ -211,7 +211,7 @@ sealed class PopSplitterTests : RxTest
 		const bool F = false;
 
 		CheckLayoutPartitions(
-			PopupSplitter.Split(tree, rMap),
+			PopupSplitter.Split(MixLayout.Empty with { MixRoot = tree, RMap = rMap }),
 
 			Cb(c1,
 				Nb(n1, T),
@@ -348,7 +348,6 @@ sealed class PopSplitterTests : RxTest
 
 
 
-
 	private Disp d;
 	private MixNode tree;
 	private IReadOnlyDictionary<NodeState, R> rMap;
@@ -376,7 +375,7 @@ sealed class PopSplitterTests : RxTest
 	public new void Setup()
 	{
 		d = new Disp();
-		(n1, n2, n3, n4, n5, p1, p2, p3) = NodeStateMaker.Make8(d);
+		(n1, n2, n3, n4, n5, p1, p2, p3) = CtrlMaker.Make8(d);
 		(c1, c2, c3, c4) = CtrlMaker.Make4(d);
 
 		tree =
@@ -495,7 +494,7 @@ sealed class PopSplitterTests : RxTest
 	public static void _00_Basic()
 	{
 		using var d = new Disp();
-		var (n1, n2, n3, n4, n5, p1, p2, p3) = NodeStateMaker.Make8(d);
+		var (n1, n2, n3, n4, n5, p1, p2, p3) = CtrlMaker.Make8(d);
 		var (c1, c2, c3, c4) = CtrlMaker.Make4(d);
 
 		string Fmt(IMixNode n) => n switch
@@ -611,5 +610,18 @@ file static class CtrlMaker
 		var c2 = new Ctrl().D(d);
 		var c3 = new Ctrl().D(d);
 		return (c0, c1, c2, c3);
+	}
+
+	public static (NodeState, NodeState, NodeState, NodeState, NodeState, NodeState, NodeState, NodeState) Make8(IRoDispBase d)
+	{
+		var n0 = new NodeState().D(d);
+		var n1 = new NodeState().D(d);
+		var n2 = new NodeState().D(d);
+		var n3 = new NodeState().D(d);
+		var n4 = new NodeState().D(d);
+		var n5 = new NodeState().D(d);
+		var n6 = new NodeState().D(d);
+		var n7 = new NodeState().D(d);
+		return (n0, n1, n2, n3, n4, n5, n6, n7);
 	}
 }

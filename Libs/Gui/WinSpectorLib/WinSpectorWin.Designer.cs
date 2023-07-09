@@ -46,6 +46,7 @@ partial class WinSpectorWin
 		demosList = new BrightIdeasSoftware.ObjectListView();
 		eventsGroupBox = new GroupBox();
 		eventDisplayer = new Controls.EventDisplayer();
+		showSysCtrlsCheckBox = new CheckBox();
 		((System.ComponentModel.ISupportInitialize)layoutTree).BeginInit();
 		layoutTreeContextMenu.SuspendLayout();
 		toolStrip1.SuspendLayout();
@@ -68,13 +69,13 @@ partial class WinSpectorWin
 		// 
 		// layoutTree
 		// 
+		layoutTree.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 		layoutTree.CellEditUseWholeCell = false;
 		layoutTree.ContextMenuStrip = layoutTreeContextMenu;
-		layoutTree.Dock = DockStyle.Fill;
 		layoutTree.Location = new Point(3, 19);
 		layoutTree.Name = "layoutTree";
 		layoutTree.ShowGroups = false;
-		layoutTree.Size = new Size(596, 375);
+		layoutTree.Size = new Size(596, 347);
 		layoutTree.TabIndex = 4;
 		layoutTree.View = View.Details;
 		layoutTree.VirtualMode = true;
@@ -167,6 +168,7 @@ partial class WinSpectorWin
 		// layoutGroupBox
 		// 
 		layoutGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+		layoutGroupBox.Controls.Add(showSysCtrlsCheckBox);
 		layoutGroupBox.Controls.Add(layoutTree);
 		layoutGroupBox.Location = new Point(186, 28);
 		layoutGroupBox.Name = "layoutGroupBox";
@@ -216,6 +218,17 @@ partial class WinSpectorWin
 		eventDisplayer.Size = new Size(297, 375);
 		eventDisplayer.TabIndex = 0;
 		// 
+		// showSysCtrlsCheckBox
+		// 
+		showSysCtrlsCheckBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+		showSysCtrlsCheckBox.AutoSize = true;
+		showSysCtrlsCheckBox.Location = new Point(461, 372);
+		showSysCtrlsCheckBox.Name = "showSysCtrlsCheckBox";
+		showSysCtrlsCheckBox.Size = new Size(141, 19);
+		showSysCtrlsCheckBox.TabIndex = 5;
+		showSysCtrlsCheckBox.Text = "Show system controls";
+		showSysCtrlsCheckBox.UseVisualStyleBackColor = true;
+		// 
 		// WinSpectorWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
@@ -236,6 +249,7 @@ partial class WinSpectorWin
 		toolStrip1.PerformLayout();
 		windowsGroupBox.ResumeLayout(false);
 		layoutGroupBox.ResumeLayout(false);
+		layoutGroupBox.PerformLayout();
 		demosGroupBox.ResumeLayout(false);
 		((System.ComponentModel.ISupportInitialize)demosList).EndInit();
 		eventsGroupBox.ResumeLayout(false);
@@ -250,17 +264,18 @@ partial class WinSpectorWin
 	private ToolStrip toolStrip1;
 	public ToolStripButton openFlexBuilderToolBtn;
 	public GroupBox windowsGroupBox;
-	private GroupBox layoutGroupBox;
+	public GroupBox layoutGroupBox;
 	public StatusStrip statusStrip;
 	private Button unselectWindowBtn;
 	public GroupBox demosGroupBox;
 	public BrightIdeasSoftware.ObjectListView demosList;
 	public Button redrawWindowBtn;
-	private GroupBox eventsGroupBox;
+	public GroupBox eventsGroupBox;
 	public ToolStripMenuItem trackEventsMenuItem;
 	public ToolStripMenuItem stopTrackingMenuItem;
 	public ToolStripMenuItem stopAllTrackingMenuItem;
 	private ToolStripSeparator toolStripSeparator1;
 	public ContextMenuStrip layoutTreeContextMenu;
 	public Controls.EventDisplayer eventDisplayer;
+	public CheckBox showSysCtrlsCheckBox;
 }

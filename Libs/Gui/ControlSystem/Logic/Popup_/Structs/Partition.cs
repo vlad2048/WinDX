@@ -13,6 +13,29 @@ namespace ControlSystem.Logic.Popup_.Structs;
 /// Represents the portion of the partition added by the system (used for ScrollBars)
 /// </summary>
 sealed record SysPartition(
+	IReadOnlyDictionary<NodeState, MixNode[]> Forest,
+	IReadOnlyDictionary<NodeState, Ctrl[]> CtrlTriggers,
+	IReadOnlyDictionary<NodeState, R> RMap
+)
+{
+	public static readonly SysPartition Empty = new(
+		new Dictionary<NodeState, MixNode[]>(),
+		new Dictionary<NodeState, Ctrl[]>(),
+		new Dictionary<NodeState, R>()
+	);
+}
+
+
+static class SysPartitionExt
+{
+	public static IReadOnlyDictionary<NodeState, NodeState[]> GetStateLinks(this SysPartition sysPartition) =>
+		sysPartition.Forest.MapValues(e => e.SelectMany(f => f.GetAllNodeStatesInTree()).ToArray());
+
+	public static ICtrl[] GetCtrls(this SysPartition sysPartition) =>
+		sysPartition.CtrlTriggers.Values.SelectMany(e => e).OfType<ICtrl>().ToArray();
+}
+
+/*sealed record SysPartition(
 	IReadOnlyDictionary<NodeState, Ctrl[]> CtrlTriggers,
 	IReadOnlyDictionary<NodeState, R> RMap,
 	IReadOnlyDictionary<NodeState, NodeState[]> StateLinks
@@ -26,7 +49,7 @@ sealed record SysPartition(
 		new Dictionary<NodeState, R>(),
 		new Dictionary<NodeState, NodeState[]>()
 	);
-}
+}*/
 
 
 /// <summary>
@@ -94,7 +117,7 @@ sealed record Partition(
 		    }
 	    )
 	    .Concat(
-		    SysPartition.Ctrls
+		    SysPartition.GetCtrls()
 	    )
 	    .ToArray();
 

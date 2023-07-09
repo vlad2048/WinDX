@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using DynamicData;
+using PowBasics.CollectionsExt;
 using PowRxVar;
 using UserEvents;
 using WinAPI.Windows;
@@ -32,11 +33,16 @@ sealed class Invalidator : IInvalidator, IDisposable
 		}).D(d);
 	}
 
-	public bool IsLayoutRequired(out RedrawReason[] reasons)
+	public bool IsLayoutRequired()
 	{
-		reasons = reasonTracker.ItemsArr;
+		var reasons = reasonTracker.ItemsArr;
+		var isLayoutRequired = reasons.Any(e => e.IsLayoutRequired());
 		reasonTracker.Src.Clear();
-		return reasons.Any(e => e.IsLayoutRequired());
+
+		if (Cfg.V.Log.Redraws)
+			L($"Redraw (layout:{isLayoutRequired}) <- {reasons.JoinText("; ")}");
+
+		return isLayoutRequired;
 	}
 }
 

@@ -24,15 +24,23 @@ static class SpectorWinRenderUtils
 		bool GetRMix(IRoMayVar<MixNode> nod, out R nodeR)
 		{
 			nodeR = R.Empty;
-			if (nod.V.IsNone(out var node) || node.V is not StFlexNode { State: var nodeState }) return false;
-			return layout.RMap.TryGetValue(nodeState, out nodeR);
+			if (nod.V.IsNone(out var node) || node.V is not StFlexNode { State: var ns }) return false;
+			if (layout.RMap.TryGetValue(ns, out nodeR))
+				return true;
+			if (layout.SysPartition.RMap.TryGetValue(ns, out nodeR))
+				return true;
+			return false;
 		}
 
 		bool GetR(IRoMayVar<INode> nod, out R nodeR)
 		{
 			nodeR = R.Empty;
-			if (nod.V.IsNone(out var nodeState)) return false;
-			return layout.RMap.TryGetValue((NodeState)nodeState, out nodeR);
+			if (nod.V.IsNone(out var ns)) return false;
+			if (layout.RMap.TryGetValue((NodeState)ns, out nodeR))
+				return true;
+			if (layout.SysPartition.RMap.TryGetValue((NodeState)ns, out nodeR))
+				return true;
+			return false;
 		}
 
 		var isSel = GetRMix(state.SelNode, out var selR);

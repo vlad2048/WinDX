@@ -1,4 +1,5 @@
 ﻿using BrightIdeasSoftware;
+using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
@@ -6,6 +7,10 @@ using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
 using PowWinForms.Utils;
+using System.Collections.Concurrent;
+using System.Reactive.Linq;
+using ControlSystem.Utils;
+using WinFormsTooling;
 using WinSpectorLib.Controls;
 using WinSpectorLib.Utils;
 
@@ -13,24 +18,40 @@ namespace WinSpectorLib.Logic;
 
 static partial class Setup
 {
-	public static IDisposable ViewLayout(WinSpectorWin ui, IRoMayVar<MixLayout> selLayout, IRwVar<bool> showEvents)
+	public static IDisposable ViewLayout(
+		WinSpectorWin ui,
+		IRoMayVar<MixLayout> selLayout,
+		IRwVar<bool> showEvents,
+		SpectorPrefs prefs
+	)
 	{
 		var d = new Disp();
+
 		var ctrl = ui.layoutTree;
 		PrepareTree(ctrl, selLayout, ui.eventDisplayer);
-		ctrl.SetRoot(selLayout.Map2(e => e.MixRoot.AddNfoToTree())).D(d);
 
-		var selNodeNfo = VarMay.Make<TNod<MixNodeWithNfo>>().D(d);
-		var hovNodeNfo = VarMay.Make<TNod<MixNodeWithNfo>>().D(d);
-		ctrl.PipeSelectedNodeInto(selNodeNfo).D(d);
-		ctrl.PipeHoveredNodeInto(hovNodeNfo).D(d);
-		var selNode = selNodeNfo.SelectVarMay(e => e.Map(f => f.Node));
-		var hovNode = hovNodeNfo.SelectVarMay(e => e.Map(f => f.Node));
+		var rootMayVar = selLayout.SelectVarMay(e => e.MixRoot);
+		ctrl.SetRoot(rootMayVar).D(d);
+
+		/*var rootMayVar2 = Obs.Merge(
+			selPartitionSet.ToUnit(),
+			showSysCtrls.ToUnit()
+		)
+			.Select(_ => selP)
+
+		ctrl.SetRoot(selPartitionSet.Map2(e => e.MixLayout.MixRoot.AddNfoToTree())).D(d);*/
+
+		var selNode = VarMay.Make<TNod<IMixNode>>().D(d);
+		var hovNode = VarMay.Make<TNod<IMixNode>>().D(d);
+		ctrl.PipeSelectedNodeInto(selNode).D(d);
+		ctrl.PipeHoveredNodeInto(hovNode).D(d);
+		//var selNode = selNodeNfo.SelectVarMay(e => e.Map(f => f.Node));
+		//var hovNode = hovNodeNfo.SelectVarMay(e => e.Map(f => f.Node));
 
 		Obs.Merge(selNode, hovNode).Subscribe(_ =>
 		{
-			if (selLayout.V.IsNone(out var lay)) return;
-			var win = lay.Win;
+			if (selLayout.V.IsNone()) return;
+			var win = WinMan.MainWins.ItemsArr.First(); // HACK
 			win.SpectorDrawState.SelNode.V = selNode.V;
 			win.SpectorDrawState.HovNode.V = hovNode.V;
 		}).D(d);
@@ -45,10 +66,15 @@ static partial class Setup
 	// ***************
 	// * Nfo Wrapper *
 	// ***************
-	private sealed record MixNodeWithNfo(
+	/*private sealed record MixNodeWithNfo(
 		IMixNode Node,
 		int? PopIndex
 	);
+	private static TNod<MixNodeWithNfo> AddNfoToTree(this MixNode root)
+	{
+		var map = root.GetPopMapping();
+		return root.Map(e => new MixNodeWithNfo(e, map[e]));
+	}
 	private static IReadOnlyDictionary<IMixNode, int?> GetPopMapping(this MixNode root)
 	{
 		var map = new Dictionary<IMixNode, int?>();
@@ -64,12 +90,7 @@ static partial class Setup
 		Rec(root, null);
 		return map;
 	}
-	private static bool IsPop(this MixNode node) => node.V is StFlexNode { Flex.Flags.Pop: true };
-	private static TNod<MixNodeWithNfo> AddNfoToTree(this MixNode root)
-	{
-		var map = root.GetPopMapping();
-		return root.Map(e => new MixNodeWithNfo(e, map[e]));
-	}
+	private static bool IsPop(this MixNode node) => node.V is StFlexNode { Flex.Flags.Pop: true };*/
 
 
 
@@ -87,20 +108,20 @@ static partial class Setup
 		public const string Tracked = "Tracked";
 	}
 
-	private static void PrepareTree(TreeListView ctrl, IRoMayVar<MixLayout> layout, EventDisplayer eventDisplayer)
+	private static void PrepareTree(TreeListView ctrl, IRoMayVar<MixLayout> selLayout, EventDisplayer eventDisplayer)
 	{
 		var warningIcon = Resource.LayoutTree_Warning;
 		var errorIcon = Resource.LayoutTree_Error;
 
-		ctrl.SetupForNodeType<MixNodeWithNfo>();
+		ctrl.SetupForNodeType<IMixNode>();
 
-		Image? GetImage(TNod<MixNodeWithNfo> nod) => nod.V.PopIndex.HasValue switch
+		/*Image? GetImage(TNod<IMixNode> nod) => nod.V.PopIndex.HasValue switch
 		{
 			true => Consts.GetPopIcon(nod.V.PopIndex.Value),
 			false => null
 		};
 
-		ctrl.AddTextColumnWithImage<MixNodeWithNfo>(ColumnName.Node, null, nod => nod.V.Node switch
+		ctrl.AddTextColumnWithImage<IMixNode>(ColumnName.Node, null, nod => nod.V.Node switch
 		{
 			CtrlNode {Ctrl: var c} => (
 				c.GetType().Name,
@@ -114,9 +135,16 @@ static partial class Setup
 				"_",
 				null
 			)
+		});*/
+
+		ctrl.AddTextColumn<IMixNode>(ColumnName.Node, null, nod => nod.V switch
+		{
+			CtrlNode { Ctrl: var c } => c.GetType().Name,
+			StFlexNode { Flex: var flex } => $"{flex}",
+			_ => "_"
 		});
 
-		ctrl.AddTextColumn<MixNodeWithNfo>(ColumnName.Flags, 100, nod => nod.V.Node switch
+		ctrl.AddTextColumn<IMixNode>(ColumnName.Flags, 100, nod => nod.V switch
 		{
 			CtrlNode => "_",
 			StFlexNode { Flex.Flags: var flags } => $"{flags}",
@@ -124,10 +152,10 @@ static partial class Setup
 		});
 
 
-		ctrl.AddTextColumnWithColorAndTooltip<MixNodeWithNfo>(ColumnName.Width, 80, nod =>
+		ctrl.AddTextColumnWithColorAndTooltip<IMixNode>(ColumnName.Width, 80, nod =>
 		{
-			if (nod.V.Node is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
-			var warn = layout.GetDimWarningForColumn(nodState, WarningDir.Horz);
+			if (nod.V is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
+			var warn = selLayout.GetDimWarningForColumn(nodState, WarningDir.Horz);
 			return warn switch
 			{
 				null => (
@@ -147,10 +175,10 @@ static partial class Setup
 			};
 		});
 
-		ctrl.AddTextColumnWithColorAndTooltip<MixNodeWithNfo>(ColumnName.Height, 80, nod =>
+		ctrl.AddTextColumnWithColorAndTooltip<IMixNode>(ColumnName.Height, 80, nod =>
 		{
-			if (nod.V.Node is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
-			var warn = layout.GetDimWarningForColumn(nodState, WarningDir.Vert);
+			if (nod.V is not StFlexNode { Flex: var flex, State: var nodState }) return ("_", null, null);
+			var warn = selLayout.GetDimWarningForColumn(nodState, WarningDir.Vert);
 			return warn switch
 			{
 				null => (
@@ -170,22 +198,22 @@ static partial class Setup
 			};
 		});
 
-		ctrl.AddTextColumn<MixNodeWithNfo>(ColumnName.R, 100, nod =>
+		ctrl.AddTextColumn<IMixNode>(ColumnName.R, 100, nod =>
 		{
-			if (nod.V.Node is not StFlexNode { State: var nodState }) return "_";
-			if (layout.V.IsNone(out var lay)) return "_";
-			var r = lay.RMap[nodState];
+			if (nod.V is not StFlexNode { State: var nodState }) return "_";
+			if (selLayout.V.IsNone(out var selLayoutVal)) return "_";
+			var r = selLayoutVal.RMap[nodState];
 			return $"{r}";
 		});
 
-		ctrl.AddImageColumnWithTooltip<MixNodeWithNfo>(ColumnName.Warnings, 65, nod =>
+		ctrl.AddImageColumnWithTooltip<IMixNode>(ColumnName.Warnings, 65, nod =>
 		{
-			if (layout.V.IsNone(out var lay)) return (null, null);
+			if (selLayout.V.IsNone(out var selLayoutVal)) return (null, null);
 
-			switch (nod.V.Node)
+			switch (nod.V)
 			{
 				case StFlexNode { State: var nodState }:
-					var warn = lay.WarningMap.GetDimWarningForColumn(nodState, WarningDir.Horz | WarningDir.Vert);
+					var warn = selLayoutVal.WarningMap.GetDimWarningForColumn(nodState, WarningDir.Horz | WarningDir.Vert);
 					if (warn == null) return (null, null);
 					return (
 						warningIcon,
@@ -198,7 +226,7 @@ static partial class Setup
 
 
 				case CtrlNode { Ctrl: var ctr }:
-					return lay.UnbalancedCtrls.TryGetValue(ctr, out var errNode) switch
+					return selLayoutVal.UnbalancedCtrls.TryGetValue(ctr, out var errNode) switch
 					{
 						true => (
 							errorIcon,
@@ -217,9 +245,9 @@ static partial class Setup
 
 		});
 
-		ctrl.AddTextColumn<MixNodeWithNfo>(ColumnName.Tracked, 100, nod =>
+		ctrl.AddTextColumn<IMixNode>(ColumnName.Tracked, 100, nod =>
 		{
-			if (nod.V.Node is not StFlexNode st) return string.Empty;
+			if (nod.V is not StFlexNode st) return string.Empty;
 			return eventDisplayer.GetTrackedNodeName(st);
 		});
 	}
@@ -231,10 +259,10 @@ static partial class Setup
 		return warn;
 	}
 
-	private static FlexWarning? GetDimWarningForColumn(this IRoMayVar<MixLayout> layout, NodeState nodState, WarningDir colDir) =>
-		layout.V.IsSome(out var lay) switch
+	private static FlexWarning? GetDimWarningForColumn(this IRoMayVar<MixLayout> selLayout, NodeState nodState, WarningDir colDir) =>
+		selLayout.V.IsSome(out var selLayoutVal) switch
 		{
-			true => lay.WarningMap.GetDimWarningForColumn(nodState, colDir),
+			true => selLayoutVal.WarningMap.GetDimWarningForColumn(nodState, colDir),
 			false => null
 		};
 

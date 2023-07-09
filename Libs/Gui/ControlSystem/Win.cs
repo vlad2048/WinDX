@@ -1,7 +1,4 @@
 ﻿using System.Drawing;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using ControlSystem.Logic.Invalidate_;
 using ControlSystem.Logic.Popup_;
 using ControlSystem.Logic.Popup_.Structs;
@@ -37,14 +34,15 @@ namespace ControlSystem;
 public class Win : Ctrl, IMainWin
 {
 	private readonly SysWin sysWin;
-	private PartitionSet partitionSet = PartitionSet.Empty;
 	private readonly Invalidator fullInvalidator;
 	private readonly IRwTracker<NodeZ> rwNodes;
 	private readonly IRwTracker<ICtrl> rwCtrls;
 	private readonly IRwTracker<IWin> rwWins;
 
+	// WinSpector
+	// ==========
+	internal IRoVar<PartitionSet> PartitionSetVar { get; }
 	internal SpectorWinDrawState SpectorDrawState { get; }
-	internal IRoVar<R> ClientR => sysWin.ClientR;
 
 	// IWinUserEventsSupport
 	// =====================
@@ -63,6 +61,7 @@ public class Win : Ctrl, IMainWin
 	public IRoTracker<IWin> Wins => rwWins;
 	public IInvalidator Invalidator => fullInvalidator;
 
+
 	public override string ToString() => GetType().Name;
 	private int cnt;
 
@@ -73,6 +72,8 @@ public class Win : Ctrl, IMainWin
 		rwCtrls = Tracker.Make<ICtrl>().D(D);
 		rwWins = Tracker.Make<IWin>().D(D);
 		fullInvalidator = new Invalidator(Wins).D(D);
+		var partitionSet = Var.Make(PartitionSet.Empty).D(D);
+		PartitionSetVar = partitionSet.ToReadOnly();
 
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
@@ -81,7 +82,7 @@ public class Win : Ctrl, IMainWin
 		var popupMan = new PopupMan(this, rwWins, SpectorDrawState).D(D);
 
 
-		Evt = UserEventGenerator.MakeForWin(Wins, false).D(D);
+		Evt = UserEventGenerator.MakeForWin(Wins).D(D);
 
 		Wins.MergeManyTrackers(e => e.Nodes).SelectTracker(e => e.Item).DispatchEvents(out var nodeLock, this).D(D);
 		nodeLock.PipeTo(SpectorDrawState.LockedNode);
@@ -90,12 +91,13 @@ public class Win : Ctrl, IMainWin
 		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
 		var scrollMan = new ScrollMan(renderer).D(D);
 
-		G.WinMan.AddWin(this);
+		var isAdded = false;
+		void AddIFN() { if (isAdded) return; isAdded = true; WinMan.AddWin(this); }
 
 
 		// Invalidate Triggers
 		// ===================
-		ClientR.Trigger(() => Invalidator.Invalidate(RedrawReason.Resize)).D(D);
+		sysWin.ClientR.Trigger(() => Invalidator.Invalidate(RedrawReason.Resize)).D(D);
 		SpectorDrawState.WhenChanged.Trigger(() => Invalidator.Invalidate(RedrawReason.SpectorOverlay)).D(D);
 
 		Wins.MergeManyTrackers(e => e.Ctrls)
@@ -103,39 +105,35 @@ public class Win : Ctrl, IMainWin
 			.MergeMany(e => e.WhenChanged)
 			.Trigger(() => Invalidator.Invalidate(RedrawReason.Ctrl)).D(D);
 
-		/*Wins.MergeManyTrackers(e => e.Nodes)
-			.SelectTracker(e => e.Item).Items
-			.MergeMany(e => e.Node.WhenInvalidateRequired)
-			.Trigger(Invalidator.InvalidateLayout).D(D);*/
-
 
 		// Layout / Render
 		// ===============
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
-			var isLayoutRequired = fullInvalidator.IsLayoutRequired(out var reasons);
+			var isLayoutRequired = fullInvalidator.IsLayoutRequired();
 			//L($"Paint (layout:{isLayoutRequired})");
 			if (isLayoutRequired)
 			{
-				partitionSet = this
+				partitionSet.V = this
 					.BuildCtrlTree(renderer)
-					.SolveTree(this, out var mixLayout)
+					.SolveTree(this, sysWin.ClientR.V.Size, out var mixLayout)
 					.SplitPopups()
 					.AddScrollBars(scrollMan)
 					.ApplyScrollOffsets(mixLayout)
 					.CreatePopups(popupMan)
 					.Assign_CtrlWins_and_NodeRs(this, popupMan);
-				(rwNodes, rwCtrls).UpdateFromPartition(partitionSet.MainPartition);
 
-				if (cnt++ == 0) WinUtils.LogPartitionSet(partitionSet);
-				G.WinMan.SetWinLayout(mixLayout);
+				(rwNodes, rwCtrls).UpdateFromPartition(partitionSet.V.MainPartition);
+
+				AddIFN();
+				if (cnt++ == 0) WinUtils.LogPartitionSet(partitionSet.V);
 			}
 
 
 			using var d = new Disp();
 			var gfx = renderer.GetGfx(false).D(d);
-			RenderUtils.RenderTree(partitionSet.MainPartition, gfx);
-			SpectorWinRenderUtils.Render(SpectorDrawState, partitionSet.MainPartition, gfx);
+			RenderUtils.RenderTree(partitionSet.V.MainPartition, gfx);
+			SpectorWinRenderUtils.Render(SpectorDrawState, partitionSet.V.MainPartition, gfx);
 		}).D(D);
 	}
 }
@@ -147,15 +145,16 @@ file static class WinUtils
 	public static MixLayout SolveTree(
 		this ReconstructedTree<IMixNode> tree,
 		Win win,
+		Sz clientSz,
 		out MixLayout mixLayout
 	)
-		=> mixLayout = tree.ResolveCtrlTree(FreeSzMaker.FromSz(win.ClientR.V.Size), win);
+		=> mixLayout = tree.ResolveCtrlTree(FreeSzMaker.FromSz(clientSz), win);
 
 	public static PartitionSet AddScrollBars(this PartitionSet partitionSet, ScrollMan scrollMan)
 		=> scrollMan.AddScrollBars(partitionSet);
 	
 	public static PartitionSet SplitPopups(this MixLayout layout)
-		=> PopupSplitter.Split(layout.MixRoot, layout.RMap);
+		=> PopupSplitter.Split(layout);
 
 	
 

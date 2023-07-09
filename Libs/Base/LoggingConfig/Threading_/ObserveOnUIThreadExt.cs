@@ -1,8 +1,7 @@
 ﻿using System.Reactive.Concurrency;
 using System.Reactive.Linq;
-using System.Windows.Forms;
 
-namespace ControlSystem.Utils;
+namespace LoggingConfig.Threading_;
 
 public static class ObserveOnUIThreadExt
 {
@@ -12,8 +11,7 @@ public static class ObserveOnUIThreadExt
 	public static IObservable<T> ObserveOnUIThread<T>(this IObservable<T> obs)
 	{
 		InitIFN();
-		//return obs.ObserveOn(Scheduler);
-		return obs.ObserveOn(SynchronizationContext.Current!);
+		return obs.ObserveOn(SynchronizationContext.Current ?? throw new ArgumentException());
 	}
 
 	private static void InitIFN()

@@ -72,7 +72,9 @@ static class ScrollUtils
 
 		var statesWithOfs = states.WhereToArray(e => e.ScrollState.ScrollOfs != Pt.Empty);
 
-		var extraStateLinks = partitionSet.Partitions.Select(e => e.SysPartition.StateLinks).Merge();
+		//var extraStateLinks = partitionSet.Partitions.Select(e => e.SysPartition.StateLinks).Merge();
+
+		var extraStateLinks = partitionSet.Partitions.Select(e => e.SysPartition.GetStateLinks()).Merge();
 
 		foreach (var state in statesWithOfs)
 		{
@@ -110,19 +112,6 @@ static class ScrollUtils
 				kv => kv.Value - ofsMap[kv.Key]
 			)
 		};
-
-
-	private static IReadOnlyDictionary<K, V[]> Merge<K, V>(this IEnumerable<IReadOnlyDictionary<K, V[]>> source) where K : notnull
-	{
-		var res = new Dictionary<K, List<V>>();
-		foreach (var dict in source)
-		{
-			foreach (var (key, vals) in dict)
-				foreach (var val in vals)
-					res.AddToDictionaryList(key, val);
-		}
-		return res.MapValues(e => e.ToArray());
-	}
 
 
 

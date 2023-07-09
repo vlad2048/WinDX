@@ -1,5 +1,9 @@
 ﻿using ControlSystem.Structs;
+using LayoutSystem.Flex;
+using LayoutSystem.Flex.Structs;
+using LayoutSystem.Utils;
 using PowBasics.CollectionsExt;
+using PowRxVar;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
@@ -14,9 +18,13 @@ namespace ControlSystem.Logic.Popup_.Structs;
 /// <param name="ParentMapping">
 /// Mapping from the Partitions Ids (NodeState) to the Partitions Ids (NodeState) (or null to reference the main window)
 /// </param>
+/// <param name="MixLayout">
+/// Identical for all partitions, the full MixLayout
+/// </param>
 sealed record PartitionSet(
     Partition[] Partitions,
-    IReadOnlyDictionary<NodeState, NodeState?> ParentMapping
+    IReadOnlyDictionary<NodeState, NodeState?> ParentMapping,
+    MixLayout MixLayout
 )
 {
     public Partition MainPartition => Partitions[0];
@@ -52,8 +60,21 @@ sealed record PartitionSet(
 	    }
     }
 
+
+    private static readonly StFlexNode emptyStFlexNode = new StFlexNode(
+	    new NodeState().DisposeOnProgramExit(),
+	    new FlexNode(
+		    new DimVec(null, null),
+		    FlexFlags.None,
+		    Strats.Fill,
+		    Mg.Zero
+	    )
+    );
+
+
     public static readonly PartitionSet Empty = new(
         new[] { Partition.Empty },
-        new Dictionary<NodeState, NodeState?>()
+        new Dictionary<NodeState, NodeState?>(),
+		MixLayout.Empty
     );
 }

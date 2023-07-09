@@ -165,14 +165,14 @@ sealed class ScrollMan : IDisposable
 
 sealed class SysPartitionMut
 {
+	public Dictionary<NodeState, List<MixNode>> Forest { get; } = new();
 	public Dictionary<NodeState, List<Ctrl>> CtrlTriggers { get; } = new();
 	public Dictionary<NodeState, R> RMap { get; } = new();
-	public Dictionary<NodeState, List<NodeState>> StateLinks { get; } = new();
 
 	public SysPartition ToSysPartition() => new(
+		Forest.ToDictionary(e => e.Key, e => e.Value.ToArray()),
 		CtrlTriggers.ToDictionary(e => e.Key, e => e.Value.ToArray()),
-		RMap,
-		StateLinks.ToDictionary(e => e.Key, e => e.Value.ToArray())
+		RMap
 	);
 }
 
@@ -191,19 +191,17 @@ file static class ScrollManLocalUtils
 		if (!condition) return;
 
 		var (ctrl, ctrlR) = makeFun();
-		var ctrlRMap = RenderCtrl(ctrl, ctrlR, renderer);
+		var (tree, ctrlRMap) = RenderCtrl(ctrl, ctrlR, renderer);
 
+		sys.Forest.AddToDictionaryList(state, tree);
 		sys.CtrlTriggers.AddToDictionaryList(state, ctrl);
 		foreach (var (key, val) in ctrlRMap)
-		{
 			sys.RMap[key] = val;
-			sys.StateLinks.AddToDictionaryList(state, key);
-		}
 	}
 
 
 
-	private static IReadOnlyDictionary<NodeState, R> RenderCtrl(Ctrl ctrl, R nodeR, IRenderWinCtx renderer)
+	private static (MixNode, IReadOnlyDictionary<NodeState, R>) RenderCtrl(Ctrl ctrl, R nodeR, IRenderWinCtx renderer)
 	{
 		var tree = ctrl
 			.BuildCtrlTree(renderer);
@@ -213,22 +211,12 @@ file static class ScrollManLocalUtils
 			.Translate(nodeR.Pos)
 			.RMap;
 
-		return rMap;
+		return (tree.Root, rMap);
 	}
 }
 
 
 
-
-static class ScrollManDictionaryExt
-{
-	public static void AddToDictionaryList<K, V>(this IDictionary<K, List<V>> dict, K key, V val) where K : notnull
-	{
-		if (!dict.TryGetValue(key, out var list))
-			list = dict[key] = new List<V>();
-		list.Add(val);
-	}
-}
 
 
 file static class ScrollManDictionaryExtLocal

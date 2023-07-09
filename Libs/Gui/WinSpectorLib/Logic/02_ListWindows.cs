@@ -1,43 +1,63 @@
-﻿using ControlSystem;
+﻿using System.Reactive.Linq;
 using PowMaybe;
 using PowRxVar;
 using PowWinForms.ListBoxSourceListViewing;
-using System.Reactive.Linq;
+using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
-using DynamicData;
-using PowBasics.CollectionsExt;
+using PowTrees.Algorithms;
 using UserEvents;
 using WinFormsTooling.Utils.Exts;
+using ControlSystem.Utils;
 
 namespace WinSpectorLib.Logic;
 
 static partial class Setup
 {
-	public static IDisposable ListWindowsAndGetSelectedLayout(WinSpectorWin ui, out IRoMayVar<MixLayout> selLayout)
+	public static IDisposable ListWindowsAndGetVirtualTree(WinSpectorWin ui, out IRoMayVar<MixLayout> selLayout, IRoVar<bool> showSysCtrls)
 	{
 		var d = new Disp();
-		ListBoxSourceListViewer.View(out var selWin, G.WinMan.Wins, ui.winList).D(d);
-		selLayout = GetSelWinLayout(selWin).D(d);
+		ListBoxSourceListViewer.View(out var selWin, WinMan.MainWins.Items, ui.winList).D(d);
+
+		var parts = selWin.SwitchMayVar(e => e.PartitionSetVar);
+
+		selLayout = VarMay.Make(
+			Obs.Merge(
+				parts.ToUnit(),
+				showSysCtrls.ToUnit()
+			)
+				.Select(_ => parts.V.IsSome(out var partsSet) switch
+				{
+					true => May.Some(BuildVirtualTree(partsSet, showSysCtrls)),
+					false => May.None<MixLayout>()
+				})
+		).D(d);
+
 		ui.redrawWindowBtn.EnableWhenSome(selWin).D(d);
 		ui.redrawWindowBtn.Events().Click.Subscribe(_ => selWin.V.Ensure().Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw)).D(d);
 		return d;
 	}
 
-	private static (IRoMayVar<MixLayout>, IDisposable) GetSelWinLayout(IRoMayVar<Win> selWin)
+
+	private static MixLayout BuildVirtualTree(PartitionSet parts, IRoVar<bool> showSysCtrls)
 	{
-		var d = new Disp();
-		static Func<MixLayout, bool> MatchesSelWin(Maybe<Win> mayWin) => layout => mayWin.IsSome(out var win) && layout.Win == win;
-		var layoutEvt = G.WinMan.Win2Layout.Filter(selWin.Select(MatchesSelWin));
-		var layout = VarMayNoCheck.Make<MixLayout>().D(d);
+		var lay = parts.MixLayout;
+		var root = lay.MixRoot.Clone();
+		if (!showSysCtrls.V) return lay;
 
-		layoutEvt.Subscribe(cs =>
+		var rootMap = root.Make_NodeState_2_MixNode_Map();
+		var extras = parts.Partitions.Select(e => e.SysPartition.Forest).Merge();
+		foreach (var (nodeState, nodes) in extras)
 		{
-			var csAdds = cs.WhereToArray(e => e.Reason is ChangeReason.Add or ChangeReason.Update);
-			var csDels = cs.WhereToArray(e => e.Reason is ChangeReason.Remove);
-			csDels.ForEach(_ => layout.V = May.None<MixLayout>());
-			csAdds.ForEach(c => layout.V = May.Some(c.Current));
-		}).D(d);
+			var nodeDad = rootMap[nodeState];
+			nodeDad.AddChildren(nodes);
+		}
 
-		return (layout, d);
+		return lay with
+		{
+			MixRoot = root,
+			NodeMap = root.Make_NodeState_2_MixNode_Map(),
+			RMap = parts.Partitions.SelectMany(e => new[] { e.RMap, e.SysPartition.RMap }).Merge(),
+			Ctrl2NodMap = root.Make_Ctrl_2_MixNode_Map()
+		};
 	}
 }

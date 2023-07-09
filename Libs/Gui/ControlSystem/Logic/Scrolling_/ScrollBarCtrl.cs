@@ -2,6 +2,7 @@
 using ControlSystem.Logic.Scrolling_.Structs;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
+using LoggingConfig.Threading_;
 using PowBasics.Geom;
 using PowRxVar;
 using UserEvents.Structs;

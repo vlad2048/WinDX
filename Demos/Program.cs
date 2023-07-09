@@ -2,7 +2,6 @@
 using Demos.Categories.Layout;
 using Demos.Categories.Ownership;
 using Demos.Categories.UserEvents;
-using Demos.Structs;
 using PowRxVar;
 using PowWinForms;
 using SysWinLib;
@@ -15,13 +14,13 @@ namespace Demos;
 
 class Program
 {
-	private const bool RunSingleDemo = false;
+	private const bool RunSingleDemo = true;
 
 	private static IDisposable Mk()
 	{
 		var d = new Disp();
 		//new UserEventsDemo().D(d);
-		new WinEventsDemo().D(d);
+		new ScrollNestedDemo().D(d);
 		//new WinEventsDemo().D(d);
 		return d;
 	}
@@ -40,7 +39,7 @@ class Program
 		{
 			using var d = new Disp();
 			// ReSharper disable once UnusedVariable
-			var userPrefs = new UserPrefs().Track();
+			var userPrefs = new DemoPrefs().Track();
 			//Setup.InitConsole(userPrefs).D(d);
 			var serD = new SerialDisp<Disp>().D(d);
 

@@ -16,7 +16,7 @@ sealed partial class MainWin : Form
 	public MainWin(Maybe<StartupFile> startupFile)
 	{
 		InitializeComponent();
-		if (LicenseManager.UsageMode == LicenseUsageMode.Designtime) return;
+		if (WinFormsUtils.IsDesignMode) return;
 
 		this.InitRX(d => {
 			var ui = this;

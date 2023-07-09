@@ -3,6 +3,8 @@ global using DWRITE = Vortice.DirectWrite;
 using System.Drawing;
 using System.Numerics;
 using System.Windows.Forms;
+using LoggingConfig.Config_;
+using LoggingConfig.Config_.Utils;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib;
@@ -19,9 +21,25 @@ namespace SysWinDemo;
 
 static class Program
 {
+	record Cfg(int Val, string Str)
+	{
+		public static Cfg Default => new(123, "Vlad");
+	}
+
 	private static void Main()
 	{
-		var win = new SysWin(opt =>
+		using var d = new Disp();
+		var file = @"C:\tmp\play-cfg\cfg.json";
+		var cfg = ConfigWatcher.Watch(file, Cfg.Default).D(d);
+
+		cfg.Subscribe(c => Console.WriteLine($"Cfg <- {c}")).D(d);
+
+		Console.WriteLine("Press a key to exit ...");
+		Console.ReadKey();
+
+
+
+		/*var win = new SysWin(opt =>
 		{
 			opt.CreateWindowParams = new CreateWindowParams
 			{
@@ -112,7 +130,7 @@ static class Program
 		
 
 		win.Init();
-		App.Run();
+		App.Run();*/
 	}
 
 	private const int FontSizePoints = 9;

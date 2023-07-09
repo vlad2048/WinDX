@@ -1,13 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<RootNamespace>TreePusherLib</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowRxVar.Maybe" Version="0.0.44" />
-		<PackageReference Include="PowTrees" Version="0.0.33" />
+		<PackageReference Include="PowRxVar.Maybe" Version="0.0.45" />
+		<PackageReference Include="PowTrees" Version="0.0.34" />
 	</ItemGroup>
 
 	<ItemGroup>

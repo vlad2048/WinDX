@@ -1,6 +1,7 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using ControlSystem;
+using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using DynamicData;
 using PowMaybe;
@@ -40,7 +41,6 @@ sealed partial class EventDisplayer : UserControl
 
 	private readonly IRwVar<bool> isEmpty;
 	private IRwVar<bool> showEvents = null!;
-	private IRoMayVar<MixLayout> selLayout = null!;
 
 	public EventDisplayer()
 	{
@@ -50,15 +50,14 @@ sealed partial class EventDisplayer : UserControl
 		trks = trksSrc.AsObservableList().D(this);
 		var isPaused = Var.Make(false).D(this);
 		isEmpty = Var.Make(false).D(this);
+		if (WinFormsUtils.IsDesignMode) return;
 
 		this.InitRX(d => {
 			var trksObs = trksSrc.Connect();
 
-			var winEvt = selLayout.SelectMaySwitch(e => e.Win.Evt);
-
 			IObservable<Unit> WhenKey(Keys key) => Obs.Merge(
 				ParentForm.Events().KeyDown.Where(e => e.KeyCode == key).ToUnit(),
-				winEvt.WhenKeyDown((VirtualKey)key)
+				WinMan.MainWins.Items.MergeMany(win => win.Evt.WhenKeyDown((VirtualKey)key))
 			);
 
 			WhenKey(Keys.H).Subscribe(_ => showEvents.V = !showEvents.V).D(d);
@@ -96,11 +95,7 @@ sealed partial class EventDisplayer : UserControl
 		});
 	}
 
-	public void SetShowEvents(IRwVar<bool> showEvents_, IRoMayVar<MixLayout> selLayout_)
-	{
-		showEvents = showEvents_;
-		selLayout = selLayout_;
-	}
+	public void SetShowEvents(IRwVar<bool> showEvents_) => showEvents = showEvents_;
 
 	public void Clear()
 	{
@@ -167,7 +162,7 @@ sealed partial class EventDisplayer : UserControl
 	{
 		var baseName = node switch
 		{
-			StFlexNode { State: var state } => "N",
+			StFlexNode => "N",
 			CtrlNode => "Win",
 			_ => throw new ArgumentException()
 		};

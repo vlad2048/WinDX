@@ -23,10 +23,10 @@ static partial class Setup
 		// (use MouseDown maybe)
 		ui.openFlexBuilderToolBtn.Events().MouseDown.Subscribe(_ =>
 		{
-			var layout = selLayout.V.Ensure();
+			var selLayoutVal = selLayout.V.Ensure();
 			var layoutDef = new LayoutDef(
-				layout.WinSize,
-				layout.MixRoot
+				selLayoutVal.WinSize,
+				selLayoutVal.MixRoot
 					.OfTypeTree<IMixNode, StFlexNode>()
 					.Map(e => e.Flex)
 			);
