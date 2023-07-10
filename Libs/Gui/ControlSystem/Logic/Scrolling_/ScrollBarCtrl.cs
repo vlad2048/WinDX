@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Linq;
+using ControlSystem.Logic.Scrolling_.State;
 using ControlSystem.Logic.Scrolling_.Structs;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
@@ -25,20 +26,19 @@ public sealed class ScrollBarCtrl : Ctrl
 
 		var thumbPos = 0;
 
-		ScrollBarCtrlUtils.HookBtn(out var btnDecState, state, ScrollBtnDecInc.Dec, nodeBtnDec, true).D(D);
+		ScrollBarCtrlUtils.HookBtn(out var btnDecState, state, ScrollBtnDecInc.Dec, nodeBtnDec).D(D);
 		ScrollBarCtrlUtils.HookBtn(out var btnIncState, state, ScrollBtnDecInc.Inc, nodeBtnInc).D(D);
 
-		//nodeBtnInc.Evt.Log("Inc: ").D(D);
+		//nodeBtnInc.Evt.WhenMouseMove().Log().D(D);
 
 		if (dir == Dir.Vert)
 		{
 			nodeEvt.OfType<MouseWheelUserEvt>()
-				.Select(e => (e, new WheelScrollCmd(Math.Sign(e.Direction) == -1 ? ScrollBtnDecInc.Dec : ScrollBtnDecInc.Inc)))
+				.Select(e => (e, new WheelScrollCmd(Dir.Vert, Math.Sign(e.Direction) == -1 ? ScrollBtnDecInc.Dec : ScrollBtnDecInc.Inc)))
 				.Where(t => state.CanRunScrollCmd(t.Item2))
 				.Subscribe(t =>
 				{
 					t.e.Handled = true;
-					//L($"Cmd <- Wheel({t.e.Direction})");
 					state.RunScrollCmd(t.Item2);
 				}).D(D);
 		}
@@ -53,35 +53,35 @@ public sealed class ScrollBarCtrl : Ctrl
 		{
 			using (r[nodeRoot].DimFilFix(dir, 17).M)
 			{
-				var (ptInnerA, ptInnerB) = ScrollBarCtrlUtils.GetInnerLine(r.Gfx.R, dir);
-				var (ptOuterA, ptOuterB) = ScrollBarCtrlUtils.GetOuterLine(r.Gfx.R, dir);
-				r.Gfx.DrawLine(ptInnerA, ptInnerB, C.EdgeInnerColor);
-				r.Gfx.DrawLine(ptOuterA, ptOuterB, C.EdgeOuterColor);
+				var (ptInnerA, ptInnerB) = ScrollBarCtrlUtils.GetInnerLine(r.R, dir);
+				var (ptOuterA, ptOuterB) = ScrollBarCtrlUtils.GetOuterLine(r.R, dir);
+				r.DrawLine(ptInnerA, ptInnerB, C.EdgeInnerColor);
+				r.DrawLine(ptOuterA, ptOuterB, C.EdgeOuterColor);
 
 				using (r[nodeStack].DimFil().StratStack(dir).Marg(dir, 0, 1).M)
 				{
-					r.Gfx.FillR(C.BackColor);
+					r.FillR(C.BackColor);
 
 					using (r[nodeBtnDec].Dim(dir, 17, 15).M)
 					{
 						var (bmp, col) = C.GetBtnBmpCol(dir, ScrollBtnDecInc.Dec, btnDecState.V);
-						r.Gfx.FillR(col);
-						r.Gfx.DrawBmp(bmp);
+						r.FillR(col);
+						r.DrawBmp(bmp);
 					}
 
 
 					using (r[nodeThumb].DimFil().M)
 					{
 						var thumbBrush = C.GetThumbBackColor(ScrollBtnState.Normal);
-						r.Gfx.FillR(thumbBrush);
+						r.FillR(thumbBrush);
 					}
 
 
 					using (r[nodeBtnInc].Dim(dir, 17, 15).M)
 					{
 						var (bmp, col) = C.GetBtnBmpCol(dir, ScrollBtnDecInc.Inc, btnIncState.V);
-						r.Gfx.FillR(col);
-						r.Gfx.DrawBmp(bmp);
+						r.FillR(col);
+						r.DrawBmp(bmp);
 					}
 
 				}
@@ -98,24 +98,27 @@ file static class ScrollBarCtrlUtils
 		out IRoVar<ScrollBtnState> btnState,
 		ScrollDimState state,
 		ScrollBtnDecInc decInc,
-		NodeState node,
-		bool disable = false
+		NodeState node
 	)
 	{
 		var d = new Disp();
 		btnState = node.Evt.IsMouseOver().D(d).SelectVar(e => e ? ScrollBtnState.Hover : ScrollBtnState.Normal);
 
-		//node.Evt.WhenMouseDown().Subscribe(p => L($"MouseDown {p}")).D(d);
-		if (disable) return d;
-
 		node.Evt.WhenRepeatedClick(node).D(d)
+			.Delay(TimeSpan.FromMilliseconds(10))
 			.ObserveOnUIThread()
-			.Do(p => L($"RepeatedClick {p}"))
-			.Select(_ => new UnitScrollCmd(decInc))
-			.Do(_ => L("T_0"))
+			.Select(_ => new UnitScrollCmd(state.Dir, decInc))
 			.Where(state.CanRunScrollCmd)
-			.Do(_ => L("T_1"))
 			.Subscribe(state.RunScrollCmd).D(d);
+
+		/*node.Evt.WhenMouseDown()
+			//.Select(_ => Obs.Interval(TimeSpan.FromMilliseconds(1000))).Switch()
+			//.Delay(TimeSpan.FromMilliseconds(1000))
+			.ObserveOnUIThread()
+			.Select(_ => new UnitScrollCmd(state.Dir, decInc))
+			.Where(state.CanRunScrollCmd)
+			.Subscribe(state.RunScrollCmd).D(d);*/
+
 
 		return d;
 	}

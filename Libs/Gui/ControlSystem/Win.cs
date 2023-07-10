@@ -63,7 +63,6 @@ public class Win : Ctrl, IMainWin
 
 
 	public override string ToString() => GetType().Name;
-	private int cnt;
 
 
 	public Win(Action<WinOpt>? optFun = null)
@@ -71,14 +70,14 @@ public class Win : Ctrl, IMainWin
 		rwNodes = Tracker.Make<NodeZ>().D(D);
 		rwCtrls = Tracker.Make<ICtrl>().D(D);
 		rwWins = Tracker.Make<IWin>().D(D);
-		fullInvalidator = new Invalidator(Wins).D(D);
+		fullInvalidator = new Invalidator(this).D(D);
 		var partitionSet = Var.Make(PartitionSet.Empty).D(D);
 		PartitionSetVar = partitionSet.ToReadOnly();
 
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
-		SpectorDrawState = new SpectorWinDrawState().D(D);
+		SpectorDrawState = new SpectorWinDrawState(Wins).D(D);
 		var popupMan = new PopupMan(this, rwWins, SpectorDrawState).D(D);
 
 
@@ -105,13 +104,20 @@ public class Win : Ctrl, IMainWin
 			.MergeMany(e => e.WhenChanged)
 			.Trigger(() => Invalidator.Invalidate(RedrawReason.Ctrl)).D(D);
 
+		Wins.MergeManyTrackers(e => e.Nodes)
+			.SelectTracker(e => e.Item).Items
+			.MergeMany(e => e.Node.WhenInvalidateRequired)
+			.Trigger(() => Invalidator.Invalidate(RedrawReason.Node)).D(D);
+
+
+		//Evt.WhenKeyDown(VirtualKey.D).Trigger(() => ControlSystem.Logic.Popup_.PopupWin.Dbg = true).D(D);
+
 
 		// Layout / Render
 		// ===============
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			var isLayoutRequired = fullInvalidator.IsLayoutRequired();
-			//L($"Paint (layout:{isLayoutRequired})");
 			if (isLayoutRequired)
 			{
 				partitionSet.V = this
@@ -126,14 +132,22 @@ public class Win : Ctrl, IMainWin
 				(rwNodes, rwCtrls).UpdateFromPartition(partitionSet.V.MainPartition);
 
 				AddIFN();
-				if (cnt++ == 0) WinUtils.LogPartitionSet(partitionSet.V);
+				//WinUtils.LogPartitionSet(partitionSet.V);
 			}
 
 
 			using var d = new Disp();
 			var gfx = renderer.GetGfx(false).D(d);
-			RenderUtils.RenderTree(partitionSet.V.MainPartition, gfx);
+			RenderUtils.RenderTree(
+				partitionSet.V.MainPartition,
+				gfx,
+				SpectorDrawState.ShouldLogRender(this),
+				GetType().Name
+			);
 			SpectorWinRenderUtils.Render(SpectorDrawState, partitionSet.V.MainPartition, gfx);
+
+			foreach (var popupWin in Wins.ItemsArr.Skip(1))
+				popupWin.SysInvalidate();
 		}).D(D);
 	}
 }

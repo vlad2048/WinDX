@@ -37,7 +37,11 @@ public static class UserEventGenerator
 			return $"Pop[{popups.ItemsArr.IndexOf(win) - 1}]";
 		}
 
-		var sysEvtsItems = popups.Items.MergeMany(win => MakeForSysWin(win.SysEvt).Translate(() => win.PopupOffset).Select(e => new EvtWin(e, win)));
+		var sysEvtsItems = popups.Items.MergeMany(win =>
+			MakeForSysWin(win.SysEvt)
+				.Translate(() => win.PopupOffset)
+				.Select(e => new EvtWin(e, win))
+		);
 
 		TrackMouseNfo(out var mouseNfo, sysEvtsItems).D(d);
 		MakeForWinInternal(out var evt, sysEvtsItems, popups, mouseNfo, GetWinName, log, prefix).D(d);

@@ -40,8 +40,7 @@ sealed class EventTester : IDisposable
                 NodeB.Evt.Select(e => new NodeEvt(NodeB, e))
             ),
             "user",
-            true,
-            e => e with { Evt = e.Evt.TranslateMouse(e.N.R.V.Pos) }
+            true
         ).D(d);
         winWrapper = TestWinMaker.Make(whenEvt.AsObservable()).D(d);
 
@@ -59,7 +58,7 @@ sealed class EventTester : IDisposable
         }
     }
 
-    public void Check(NodeEvt[] evts) => checker.Check(evts.SelectToArray(e => e with { Evt = e.Evt.TranslateMouse(-e.N.R.V.Pos) }));
+    public void Check(NodeEvt[] evts) => checker.Check(evts);
 
     public void AddNodes(NodeZ[] arr) => winWrapper.AddNodes(arr);
 

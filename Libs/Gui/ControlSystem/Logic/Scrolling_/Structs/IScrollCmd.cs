@@ -1,13 +1,25 @@
-﻿namespace ControlSystem.Logic.Scrolling_.Structs;
+﻿using PowBasics.Geom;
+
+namespace ControlSystem.Logic.Scrolling_.Structs;
 
 interface IScrollCmd
 {
+	Dir Dir { get; }
 	ScrollBtnDecInc DecInc { get; }
 }
 
-sealed record UnitScrollCmd(ScrollBtnDecInc DecInc) : IScrollCmd;
-sealed record WheelScrollCmd(ScrollBtnDecInc DecInc) : IScrollCmd;
-sealed record PageScrollCmd(ScrollBtnDecInc DecInc) : IScrollCmd;
+sealed record UnitScrollCmd(Dir Dir, ScrollBtnDecInc DecInc) : IScrollCmd
+{
+	public override string ToString() => $"ScrollUnit {DecInc.Fmt(Dir)}";
+}
+sealed record WheelScrollCmd(Dir Dir, ScrollBtnDecInc DecInc) : IScrollCmd
+{
+	public override string ToString() => $"ScrollWheel {DecInc.Fmt(Dir)}";
+}
+sealed record PageScrollCmd(Dir Dir, ScrollBtnDecInc DecInc) : IScrollCmd
+{
+	public override string ToString() => $"ScrollPage {DecInc.Fmt(Dir)}";
+}
 
 
 static class ScrollCmdExt

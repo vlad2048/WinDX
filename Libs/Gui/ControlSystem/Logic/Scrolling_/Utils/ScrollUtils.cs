@@ -1,4 +1,6 @@
-﻿using ControlSystem.Logic.Popup_.Structs;
+﻿using ControlSystem.Logic.Popup_;
+using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Logic.Scrolling_.State;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using LayoutSystem.Flex.Structs;
@@ -14,7 +16,6 @@ sealed record ScrollNfo(
 	BoolVec Visible,
 	Sz ViewSz,
 	Sz ContSz,
-	Sz TrakSz,
 	R ViewR
 )
 {
@@ -22,7 +23,6 @@ sealed record ScrollNfo(
 		state.ScrollState,
 		BoolVec.False,
 		BoolVec.False,
-		Sz.Empty,
 		Sz.Empty,
 		Sz.Empty,
 		R.Empty
@@ -37,7 +37,6 @@ static class ScrollUtils
 			return ScrollNfo.MkEmpty(state);
 
 		var node = partition.NodeMap[state];
-		var nodeR = partition.RMap[state];
 		var stNode = (StFlexNode)node.V;
 		var scrollEnabled = stNode.Flex.Flags.Scroll;
 		var scrollVisible = partition.AreScrollBarsVisible(state);
@@ -48,18 +47,19 @@ static class ScrollUtils
 			.Select(e => partition.RMap[((StFlexNode)e.V).State] + ((StFlexNode)e.V).Flex.Marg)
 			.Union()
 			.Size;
-		var trakSz = GeomMaker.SzDirFun(dir => scrollVisible.Dir(dir) switch
-		{
-			false => 0,
-			truer => Math.Max(0, GetScrollBarR(nodeR, dir, scrollVisible == BoolVec.True).Dir(dir) - 2 * 17)
-		});
+		//var nodeR = partition.RMap[state];
+		//var trakSz = GeomMaker.SzDirFun(dir => scrollVisible.Dir(dir) switch
+		//{
+		//	false => 0,
+		//	truer => Math.Max(0, GetScrollBarR(nodeR, dir, scrollVisible == BoolVec.True).Dir(dir) - 2 * 17)
+		//});
 		return new ScrollNfo(
 			stNode.State.ScrollState,
 			scrollEnabled,
 			scrollVisible,
 			viewSz,
 			contSz,
-			trakSz,
+			//trakSz,
 			new R(partition.GetNodeR(state).Ensure().Pos, viewSz)
 		);
 	}
@@ -71,8 +71,6 @@ static class ScrollUtils
 		var ofsMap = states.ToDictionary(e => e, _ => Pt.Empty);
 
 		var statesWithOfs = states.WhereToArray(e => e.ScrollState.ScrollOfs != Pt.Empty);
-
-		//var extraStateLinks = partitionSet.Partitions.Select(e => e.SysPartition.StateLinks).Merge();
 
 		var extraStateLinks = partitionSet.Partitions.Select(e => e.SysPartition.GetStateLinks()).Merge();
 

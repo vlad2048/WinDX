@@ -15,7 +15,7 @@ public sealed class ScrollBarCornerCtrl : Ctrl
 		{
 			using (r[nodeRoot].Dim(FlexFlags.ScrollBarCrossDims.Width, FlexFlags.ScrollBarCrossDims.Height).M)
 			{
-				r.Gfx.FillR(C.BackColor);
+				r.FillR(C.BackColor);
 			}
 		}).D(D);
 	}

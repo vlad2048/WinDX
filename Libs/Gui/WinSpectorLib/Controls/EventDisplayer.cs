@@ -1,7 +1,5 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using ControlSystem;
-using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using DynamicData;
 using PowMaybe;
@@ -9,7 +7,6 @@ using PowRxVar;
 using PowWinForms;
 using UserEvents.Structs;
 using UserEvents.Utils;
-using WinAPI.User32;
 
 namespace WinSpectorLib.Controls;
 
@@ -17,8 +14,9 @@ sealed partial class EventDisplayer : UserControl
 {
 	private const int MAX_ITEMS = 20;
 
-	private interface ITrk {
-		string Name { get;  }
+	private interface ITrk
+	{
+		string Name { get; }
 		IObservable<IUserEvt> Evt { get; }
 		bool IsState(NodeState state);
 		bool IsCtrl(Ctrl ctrl);
@@ -42,41 +40,26 @@ sealed partial class EventDisplayer : UserControl
 	private readonly IRwVar<bool> isEmpty;
 	private IRwVar<bool> showEvents = null!;
 
+
+	public IRwVar<bool> IsPaused { get; }
+
+
 	public EventDisplayer()
 	{
 		InitializeComponent();
 
 		trksSrc = new SourceList<ITrk>().D(this);
 		trks = trksSrc.AsObservableList().D(this);
-		var isPaused = Var.Make(false).D(this);
+		IsPaused = Var.Make(false).D(this);
 		isEmpty = Var.Make(false).D(this);
 		if (WinFormsUtils.IsDesignMode) return;
 
 		this.InitRX(d => {
 			var trksObs = trksSrc.Connect();
 
-			IObservable<Unit> WhenKey(Keys key) => Obs.Merge(
-				ParentForm.Events().KeyDown.Where(e => e.KeyCode == key).ToUnit(),
-				WinMan.MainWins.Items.MergeMany(win => win.Evt.WhenKeyDown((VirtualKey)key))
-			);
-
-			WhenKey(Keys.H).Subscribe(_ => showEvents.V = !showEvents.V).D(d);
-			WhenKey(Keys.C).Subscribe(_ => Clear()).D(d);
-			WhenKey(Keys.P).Subscribe(_ => isPaused.V = !isPaused.V).D(d);
-
-			isPaused.Subscribe(paused => pauseBtn.Text = paused ? "Resume (P)" : "Pause (P)").D(d);
-			pauseBtn.Events().Click.Subscribe(_ => isPaused.V = !isPaused.V).D(d);
-
-			isEmpty.Subscribe(e => clearBtn.Enabled = pauseBtn.Enabled = !e).D(d);
-			clearBtn.Events().Click.Subscribe(_ => Clear()).D(d);
-
-			hideBtn.Events().Click.Subscribe(_ => showEvents.V = false).D(d);
-
-			//var objLock = new object();
-
 			var evt = trksObs
-				.MergeMany(trk => PrettyPrintAggregator.Transform(trk.Evt/*.Synchronize(objLock)*/).Select(e => (trk, e)))
-				.Where(_ => !isPaused.V);
+				.MergeMany(trk => PrettyPrintAggregator.Transform(trk.Evt).Select(e => (trk, e)))
+				.Where(_ => !IsPaused.V);
 
 			evt.Subscribe(e => {
 				var str = $"[{e.trk.Name}] - {e.e}";
@@ -105,18 +88,16 @@ sealed partial class EventDisplayer : UserControl
 
 	public bool IsAnyNodeTracked() => trks.Count > 0;
 
-	public bool IsNodeTracked(IMixNode node) => node switch
-	{
-		StFlexNode {State: var state} => trks.Items.Any(e => e.IsState(state)),
-		CtrlNode {Ctrl: var ctrl} => trks.Items.Any(e => e.IsCtrl(ctrl)),
+	public bool IsNodeTracked(IMixNode node) => node switch {
+		StFlexNode { State: var state } => trks.Items.Any(e => e.IsState(state)),
+		CtrlNode { Ctrl: var ctrl } => trks.Items.Any(e => e.IsCtrl(ctrl)),
 		_ => false
 	};
 
 	public string GetTrackedNodeName(IMixNode node)
 	{
 		var trk = GetTrk(node);
-		return trk switch
-		{
+		return trk switch {
 			null => string.Empty,
 			not null => trk.Name
 		};
@@ -127,8 +108,7 @@ sealed partial class EventDisplayer : UserControl
 	{
 		if (IsNodeTracked(node)) return;
 		var name = GetNewName(node);
-		ITrk trk = node switch
-		{
+		ITrk trk = node switch {
 			StFlexNode { State: var state } => new NodeStateTrk(name, state),
 			CtrlNode { Ctrl.Win.V: var mayWin } => new WinTrk(name, mayWin.Ensure()),
 			_ => throw new ArgumentException()
@@ -150,9 +130,8 @@ sealed partial class EventDisplayer : UserControl
 		trksSrc.Clear();
 	}
 
-		
-	private ITrk? GetTrk(IMixNode node) => node switch
-	{
+
+	private ITrk? GetTrk(IMixNode node) => node switch {
 		StFlexNode { State: var state } => trks.Items.FirstOrDefault(e => e.IsState(state)),
 		CtrlNode { Ctrl: var ctrl } => trks.Items.FirstOrDefault(e => e.IsCtrl(ctrl)),
 		_ => null
@@ -160,8 +139,7 @@ sealed partial class EventDisplayer : UserControl
 
 	private string GetNewName(IMixNode node)
 	{
-		var baseName = node switch
-		{
+		var baseName = node switch {
 			StFlexNode => "N",
 			CtrlNode => "Win",
 			_ => throw new ArgumentException()

@@ -1,8 +1,5 @@
-Abstract away PopupWindows from Win.Evt
-=======================================
-	- Win.Evt should pretend there's no popup windows
-	- No MouseLeave/Enter events when the mouse goes over a popup window
-	- Pipe PopupWindow events to Win.Evt
+- fix scroll update issue
 
-Think about how to handle Ctrls changing between the 2 rendering passes
-=======================================================================
+- make coordinates relative to MainWin and not to the Nodes
+- think about how to handle Ctrls changing between the 2 rendering passes
+

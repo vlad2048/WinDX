@@ -1,16 +1,10 @@
 ﻿using BrightIdeasSoftware;
-using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowMaybe;
 using PowRxVar;
-using PowTrees.Algorithms;
 using PowWinForms.Utils;
-using System.Collections.Concurrent;
-using System.Reactive.Linq;
-using ControlSystem.Utils;
-using WinFormsTooling;
 using WinSpectorLib.Controls;
 using WinSpectorLib.Utils;
 
@@ -22,7 +16,7 @@ static partial class Setup
 		WinSpectorWin ui,
 		IRoMayVar<MixLayout> selLayout,
 		IRwVar<bool> showEvents,
-		SpectorPrefs prefs
+		IRwMayVar<NodeState> trackedState
 	)
 	{
 		var d = new Disp();
@@ -33,30 +27,20 @@ static partial class Setup
 		var rootMayVar = selLayout.SelectVarMay(e => e.MixRoot);
 		ctrl.SetRoot(rootMayVar).D(d);
 
-		/*var rootMayVar2 = Obs.Merge(
-			selPartitionSet.ToUnit(),
-			showSysCtrls.ToUnit()
-		)
-			.Select(_ => selP)
-
-		ctrl.SetRoot(selPartitionSet.Map2(e => e.MixLayout.MixRoot.AddNfoToTree())).D(d);*/
-
-		var selNode = VarMay.Make<TNod<IMixNode>>().D(d);
-		var hovNode = VarMay.Make<TNod<IMixNode>>().D(d);
+		var selNode = VarMay.Make<MixNode>().D(d);
+		var hovNode = VarMay.Make<MixNode>().D(d);
 		ctrl.PipeSelectedNodeInto(selNode).D(d);
 		ctrl.PipeHoveredNodeInto(hovNode).D(d);
-		//var selNode = selNodeNfo.SelectVarMay(e => e.Map(f => f.Node));
-		//var hovNode = hovNodeNfo.SelectVarMay(e => e.Map(f => f.Node));
 
 		Obs.Merge(selNode, hovNode).Subscribe(_ =>
 		{
-			if (selLayout.V.IsNone()) return;
-			var win = WinMan.MainWins.ItemsArr.First(); // HACK
+			if (selLayout.V.IsNone(out var selLayoutVal)) return;
+			var win = selLayoutVal.Win;
 			win.SpectorDrawState.SelNode.V = selNode.V;
 			win.SpectorDrawState.HovNode.V = hovNode.V;
 		}).D(d);
 
-		SetupContextMenu(ui, selNode, showEvents).D(d);
+		SetupContextMenu(ui, selNode, showEvents, trackedState).D(d);
 
 		return d;
 	}
@@ -274,40 +258,39 @@ static partial class Setup
 	private static IDisposable SetupContextMenu(
 		WinSpectorWin ui,
 		IRoMayVar<MixNode> selNode,
-		IRwVar<bool> showEvents
+		IRwVar<bool> showEvents,
+		IRwMayVar<NodeState> trackedState
 	)
 	{
 		var d = new Disp();
 
 		ui.layoutTreeContextMenu.Events().Opening.Subscribe(e =>
 		{
-			if (!selNode.CanTrackNode(out var node))
-			{
-				e.Cancel = true;
-				return;
-			}
+			var isTracked = selNode.CanTrackNode(out var node) && ui.eventDisplayer.IsNodeTracked(node!);
 
-			var isTracked = ui.eventDisplayer.IsNodeTracked(node!);
-
-			ui.trackEventsMenuItem.Enabled = !isTracked;
+			ui.trackEventsMenuItem.Enabled = !isTracked && selNode.CanTrackNode();
 			ui.stopTrackingMenuItem.Enabled = isTracked;
 			ui.stopAllTrackingMenuItem.Enabled = ui.eventDisplayer.IsAnyNodeTracked();
+			ui.printStateMenuItem.Enabled = selNode.IsFlexNode();
 
+			var isAny = ui.trackEventsMenuItem.Enabled || ui.stopTrackingMenuItem.Enabled || ui.stopAllTrackingMenuItem.Enabled || ui.printStateMenuItem.Enabled;
+			if (!isAny)
+				e.Cancel = true;
 		}).D(d);
 
 
 		ui.trackEventsMenuItem.Events().Click.Subscribe(_ =>
 		{
-			if (!selNode.CanTrackNode(out var node))
-				return;
+			if (!selNode.CanTrackNode(out var node)) return;
+
 			ui.eventDisplayer.TrackNode(node!);
 			showEvents.V = true;
 		}).D(d);
 
 		ui.stopTrackingMenuItem.Events().Click.Subscribe(_ =>
 		{
-			if (!selNode.CanTrackNode(out var node))
-				return;
+			if (!selNode.CanTrackNode(out var node)) return;
+
 			ui.eventDisplayer.StopTrackingNode(node!);
 		}).D(d);
 
@@ -316,10 +299,20 @@ static partial class Setup
 			ui.eventDisplayer.StopAllTracking();
 		}).D(d);
 
+		ui.printStateMenuItem.Events().Click.Subscribe(_ =>
+		{
+			if (!selNode.IsFlexNode()) return;
+
+			var state = ((StFlexNode)selNode.V.Ensure().V).State;
+			trackedState.V = May.Some(state);
+		}).D(d);
+
 		return d;
 	}
 
 
+	private static bool IsCtrlNode(this IRoMayVar<MixNode> node) => node.V.IsSome(out var nod) && nod.V is CtrlNode;
+	private static bool IsFlexNode(this IRoMayVar<MixNode> node) => node.V.IsSome(out var nod) && nod.V is StFlexNode;
 
 	private static bool CanTrackNode(this IRoMayVar<MixNode> node, out IMixNode? n)
 	{

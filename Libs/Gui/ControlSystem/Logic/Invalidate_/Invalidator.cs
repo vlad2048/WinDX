@@ -22,14 +22,13 @@ sealed class Invalidator : IInvalidator, IDisposable
 	// ============
 	public void Invalidate(RedrawReason reason) => reasonTracker.Src.Add(reason);
 
-	public Invalidator(IRoTracker<IWin> wins)
+	public Invalidator(IWin mainWin)
 	{
 		reasonTracker = Tracker.Make<RedrawReason>().D(d);
 
 		reasonTracker.ItemsList.CountChanged.Where(e => e > 0).Subscribe(_ =>
 		{
-			foreach (var win in wins.ItemsArr)
-				win.SysInvalidate();
+			mainWin.SysInvalidate();
 		}).D(d);
 	}
 
@@ -54,6 +53,7 @@ file static class InvalidatorExt
 	{
 		RedrawReason.Resize => true,
 		RedrawReason.Ctrl => true,
+		RedrawReason.Node => true,
 		RedrawReason.SpectorOverlay => false,
 		RedrawReason.SpectorRequestFullRedraw => true,
 		RedrawReason.UserCode => true,

@@ -20,18 +20,18 @@ sealed class PopNodeDemo : Win
 		{
 			using (r[nodeRoot].StratStack(Dir.Vert).M)
 			{
-				r.Gfx.FillR(r.Gfx.R, Consts.BrushRoot);
+				r.FillR(r.R, Consts.BrushRoot);
 				using (r[nodeFill1].Dim(120, 75).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill1);
+					r.FillR(r.R, Consts.BrushFill1);
 				}
 				using (r[nodePop].Dim(250, 50).Pop().M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushPop);
+					r.FillR(r.R, Consts.BrushPop);
 				}
 				using (r[nodeFill2].Dim(80, 100).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushFill2);
+					r.FillR(r.R, Consts.BrushFill2);
 				}
 			}
 		}).D(D);

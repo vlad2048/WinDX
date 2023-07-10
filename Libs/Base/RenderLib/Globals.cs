@@ -7,3 +7,5 @@ global using WIC = Vortice.WIC;
 global using ANIM = Vortice.UIAnimation;
 global using DCOMP = Vortice.DirectComposition;
 global using DWRITE = Vortice.DirectWrite;
+
+global using static LoggingConfig.Logging_.LogUtils;

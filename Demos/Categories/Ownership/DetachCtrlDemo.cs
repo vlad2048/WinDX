@@ -92,7 +92,7 @@ sealed class DetachCtrlDemo : Win
 		{
 			using (r[nRoot].StratStack(Dir.Horz).M)
 			{
-				r.Gfx.FillR(C.BrushWinBack);
+				r.FillR(C.BrushWinBack);
 				if (state.V == State.Attached)
 					using (r[ctrlDetach]) { }
 				using (r[ctrlNormal]) { }
@@ -112,7 +112,7 @@ sealed class DetachCtrlDemo : Win
 			{
 				using (r[nRoot].StratStack(Dir.Horz).M)
 				{
-					r.Gfx.FillR(C.BrushWinDetachBack);
+					r.FillR(C.BrushWinDetachBack);
 					using (r[ctrl]) { }
 				}
 			}).D(D);
@@ -133,7 +133,7 @@ sealed class DetachCtrlDemo : Win
 			{
 				using (r[nRoot].Dim(300, 250).StratStack(Dir.Horz).Marg(5).M)
 				{
-					r.Gfx.FillR(C.BrushDetachCtrlRoot);
+					r.FillR(C.BrushDetachCtrlRoot);
 					using (r[c1]) { }
 					using (r[c2]) { }
 				}
@@ -149,7 +149,7 @@ sealed class DetachCtrlDemo : Win
 			{
 				using (r[nRoot].Marg(20, 40).M)
 				{
-					r.Gfx.FillR(C.BrushDetachCtrlChild);
+					r.FillR(C.BrushDetachCtrlChild);
 				}
 			}).D(D);
 		}
@@ -167,7 +167,7 @@ sealed class DetachCtrlDemo : Win
 			{
 				using (r[nRoot].Dim(200, 250).StratStack(Dir.Vert, Align.Middle).Marg(5).M)
 				{
-					r.Gfx.FillR(C.BrushNormalCtrlRoot);
+					r.FillR(C.BrushNormalCtrlRoot);
 					using (r[c1]) { }
 					using (r[c2]) { }
 				}
@@ -183,7 +183,7 @@ sealed class DetachCtrlDemo : Win
 			{
 				using (r[nRoot].Dim(80, 30).Marg(0, 20).M)
 				{
-					r.Gfx.FillR(C.BrushNormalCtrlChild);
+					r.FillR(C.BrushNormalCtrlChild);
 				}
 			}).D(D);
 		}

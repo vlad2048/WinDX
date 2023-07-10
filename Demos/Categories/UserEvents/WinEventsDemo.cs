@@ -26,20 +26,20 @@ sealed class WinEventsDemo : Win
 		{
 			using (r[nodeRoot].StratStack(Dir.Vert).M)
 			{
-				r.Gfx.FillR(Consts.BrushRoot);
+				r.FillR(Consts.BrushRoot);
 
 				using (r[nodeTop].DimFilFix(100).M)
-					r.Gfx.FillR(Consts.BrushTop);
+					r.FillR(Consts.BrushTop);
 
 				using (r[nodePop].StratStack(Dir.Vert).Dim(250, 150).Pop().M)
 				{
-					r.Gfx.FillR(Consts.BrushPop);
+					r.FillR(Consts.BrushPop);
 
 					using (r[childCtrl]) { }
 				}
 
 				using (r[nodeBottom].M)
-					r.Gfx.FillR(Consts.BrushBottom);
+					r.FillR(Consts.BrushBottom);
 			}
 		}).D(D);
 	}
@@ -55,9 +55,9 @@ sealed class WinEventsDemo : Win
 			WhenRender.Subscribe(r =>
 			{
 				using (r[nodeTopInner].DimFilFix(60).Marg(50, 0, 0, 0).M)
-					r.Gfx.FillR(Consts.BrushTopInner);
+					r.FillR(Consts.BrushTopInner);
 				using (r[nodePopInner].Dim(300, 50).Pop().M)
-					r.Gfx.FillR(Consts.BrushPopInner);
+					r.FillR(Consts.BrushPopInner);
 			}).D(D);
 		}
 	}

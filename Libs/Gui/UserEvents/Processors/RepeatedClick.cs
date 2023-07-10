@@ -1,4 +1,5 @@
 ﻿using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using PowBasics.Geom;
 using PowRxVar;
@@ -12,7 +13,8 @@ public static class Processor_RepeatedClick
 	public static (IObservable<Unit>, IDisposable) WhenRepeatedClick(
 		this IObservable<IUserEvt> evt,
 		INode node,
-		MouseBtn btn = MouseBtn.Left
+		MouseBtn btn = MouseBtn.Left,
+		IScheduler? scheduler = null
 	)
 	{
 		var d = new Disp();
@@ -28,7 +30,7 @@ public static class Processor_RepeatedClick
 				.Select(v => v switch
 					{
 						true =>
-							Obs.Timer(InputConstants.RepeatClickDelay, InputConstants.RepeatClickSpeed)
+							Obs.Timer(InputConstants.RepeatClickDelay, InputConstants.RepeatClickSpeed, scheduler ?? DefaultScheduler.Instance)
 								.ToUnit()
 								.Prepend(Unit.Default)
 								.Where(_ => node.ContainsMouse(mp)),
@@ -43,5 +45,5 @@ public static class Processor_RepeatedClick
 		);
 	}
 
-	private static bool ContainsMouse(this INode node, Pt mp) => node.R.V.WithZeroPos().Contains(mp);
+	private static bool ContainsMouse(this INode node, Pt mp) => node.R.V.Contains(mp);
 }

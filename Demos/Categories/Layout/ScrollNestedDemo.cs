@@ -37,16 +37,16 @@ sealed class ScrollNestedDemo : Win
 		{
 			using (r[nodeRoot].StratStack(Dir.Vert).M)
 			{
-				r.Gfx.FillR(Consts.BackBrush);
+				r.FillR(Consts.BackBrush);
 
 				using (r[nodeTop].DimFilFix(50).M)
 				{
-					r.Gfx.FillR(Consts.InterBrush);
+					r.FillR(Consts.InterBrush);
 				}
 
 				using (r[nodeScroll].StratStack(Dir.Vert).ScrollXY().Pop().Dim(140, 100).Marg(20).M)
 				{
-					r.Gfx.FillR(Consts.ScrollBrush);
+					r.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines.Length; i++)
 					{
 						var nodeLine = nodesLines[i];
@@ -55,7 +55,7 @@ sealed class ScrollNestedDemo : Win
 						{
 							//if (i != 0)
 							{
-								r.Gfx.FillR(Consts.LineBrush);
+								r.FillR(Consts.LineBrush);
 								r.DrawText($"[{i}] 01234567890123456789 01234567890123456789 01234567890123456789 01234567890123456789 Line {i}", Consts.Font, Consts.TextColor);
 							}
 							/*else
@@ -63,14 +63,14 @@ sealed class ScrollNestedDemo : Win
 
 								using (r[nodeScroll2].Dim(350, 150).StratStack(Dir.Vert).ScrollXY().Pop().Marg(10).M)
 								{
-									r.Gfx.FillR(Consts.ScrollBrush2);
+									r.FillR(Consts.ScrollBrush2);
 									for (var i2 = 0; i2 < nodesLines2.Length; i2++)
 									{
 										var nodeLine2 = nodesLines2[i2];
 										var marg2 = new Marg(i2 > 0 ? 1 : 0, 0, 0, 0);
 										using (r[nodeLine2].DimFixFit(400).Marg(marg2).M)
 										{
-											r.Gfx.FillR(Consts.LineBrush2);
+											r.FillR(Consts.LineBrush2);
 											r.DrawText($"[{i2}] Sub123Sub456Sub789Sub123Sub456Sub789Sub123Sub456Sub789 Line {i2}", Consts.Font, Consts.TextColor);
 										}
 									}
@@ -82,19 +82,19 @@ sealed class ScrollNestedDemo : Win
 
 				/*using (r[nodeMiddle].DimFilFix(150).M)
 				{
-					r.Gfx.FillR(Consts.InterBrush);
+					r.FillR(Consts.InterBrush);
 				}
 
 				using (r[nodeScroll3].StratStack(Dir.Vert).ScrollXY().Dim(140, 100).Marg(20).M)
 				{
-					r.Gfx.FillR(Consts.ScrollBrush);
+					r.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines3.Length; i++)
 					{
 						var nodeLine = nodesLines3[i];
 						var marg = new Marg(i > 0 ? 1 : 0, 0, 0, 0);
 						using (r[nodeLine].DimFixFit(180).Marg(marg).M)
 						{
-							r.Gfx.FillR(Consts.LineBrush);
+							r.FillR(Consts.LineBrush);
 							r.DrawText($"[{i}] ThirdThirdThird Line {i}", Consts.Font, Consts.TextColor);
 						}
 					}
@@ -102,7 +102,7 @@ sealed class ScrollNestedDemo : Win
 
 				using (r[nodeBottom].M)
 				{
-					r.Gfx.FillR(Consts.InterBrush);
+					r.FillR(Consts.InterBrush);
 				}
 
 			}

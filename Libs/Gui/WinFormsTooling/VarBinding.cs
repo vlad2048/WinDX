@@ -1,4 +1,5 @@
-﻿using PowRxVar;
+﻿/*
+using PowRxVar;
 
 namespace WinFormsTooling;
 
@@ -14,3 +15,4 @@ public static class VarBinding
 		return d;
 	}
 }
+*/

@@ -19,15 +19,15 @@ sealed class TextDemo : Win
 		{
 			using (r[nodeRoot].StratStack(Dir.Vert).M)
 			{
-				r.Gfx.FillR(Consts.BrushRoot);
+				r.FillR(Consts.BrushRoot);
 				using (r[nodeText1].DimFit().M)
 				{
-					r.Gfx.FillR(Consts.BrushText1);
+					r.FillR(Consts.BrushText1);
 					r.DrawText("First item", Consts.Font, Consts.TextColor);
 				}
 				using (r[nodeText2].DimFit().M)
 				{
-					r.Gfx.FillR(Consts.BrushText2);
+					r.FillR(Consts.BrushText2);
 					r.DrawText("Second item", Consts.Font, Consts.TextColor);
 				}
 			}

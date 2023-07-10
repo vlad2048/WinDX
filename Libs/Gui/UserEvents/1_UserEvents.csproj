@@ -6,15 +6,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Folder Include="Generators\" />
-		<Folder Include="Converters\" />
-		<Folder Include="Processors\" />
-		<Folder Include="Utils\" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="DynamicData" Version="7.14.2" />
-		<PackageReference Include="PowBasics" Version="0.0.24" />
+		<PackageReference Include="PowBasics" Version="0.0.27" />
 		<PackageReference Include="PowRxVar.Maybe" Version="0.0.45" />
 	</ItemGroup>
 

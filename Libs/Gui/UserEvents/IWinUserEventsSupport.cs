@@ -22,6 +22,7 @@ public enum RedrawReason
 {
 	Resize,
 	Ctrl,
+	Node,
 	SpectorOverlay,
 	SpectorRequestFullRedraw,
 	UserCode,

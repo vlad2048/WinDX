@@ -29,7 +29,7 @@ public static class UserEventConverter
 			out var mouseFun,
 			winEvt,
 			HitFun,
-			rwNodeLock
+			nodeLock
 		).D(d);
 
 		//mayHovVar.Log("Hover: ").D(d);
@@ -56,7 +56,7 @@ public static class UserEventConverter
 		HandleMouseLeave(
 			mayHovVar,
 			winEvt,
-			rwNodeLock
+			nodeLock
 		).D(d);
 
 		return d;
@@ -253,30 +253,11 @@ public static class UserEventConverter
 	private static bool Send(this INode node, IUserEvt evt)
 	{
 		if (node.D.IsDisposed) return false;
-		var evtTr = evt.TranslateMouse(-node.R.V.Pos);
-		node.DispatchEvt(evtTr);
-		return evtTr.Handled;
+		node.DispatchEvt(evt);
+		return evt.Handled;
 	}
 
 	private static bool Send(this NodeZ node, IUserEvt evt) => node.Node.Send(evt);
-
-	private static bool SendIfNoLock(this NodeZ node, IUserEvt evt, IRoMayVar<INode> nodeLock)
-	{
-		if (node.Node.D.IsDisposed) return false;
-		if (nodeLock.V.IsSome()) return false;
-		var evtTr = evt.TranslateMouse(-node.Node.R.V.Pos);
-		node.Node.DispatchEvt(evtTr);
-		return evtTr.Handled;
-	}
-
-	private static bool SendIfLockMatches(this NodeZ node, IUserEvt evt, IRoMayVar<INode> nodeLock)
-	{
-		if (node.Node.D.IsDisposed) return false;
-		if (node.IsLocked(nodeLock)) return false;
-		var evtTr = evt.TranslateMouse(-node.Node.R.V.Pos);
-		node.Node.DispatchEvt(evtTr);
-		return evtTr.Handled;
-	}
 
 
 	private static bool IsLocked(this NodeZ node, IRoMayVar<INode> nodeLock) => nodeLock.V.IsSome(out var nodeLockState) switch

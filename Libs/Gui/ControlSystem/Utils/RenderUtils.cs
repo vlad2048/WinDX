@@ -15,13 +15,15 @@ static class RenderUtils
 {
 	public static void RenderTree(
 		Partition partition,
-		IGfx gfx
+		IGfx gfx,
+		bool log,
+		string title
 	)
 	{
 		using var d = new Disp();
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
 		var pusher = new TreePusher<IMixNode>(treeEvtSig);
-		var renderArgs = new RenderArgs(gfx, pusher).D(d);
+		var renderArgs = new RenderArgs(gfx, pusher, log, title).D(d);
 
 
 		treeEvtObs.ToTree(

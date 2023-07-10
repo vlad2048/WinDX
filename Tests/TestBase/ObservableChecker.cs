@@ -22,6 +22,13 @@ public class ObservableChecker<T> : IDisposable
 		this.evtDisplayFun = evtDisplayFun ?? (_ => _);
 	}
 
+	public T[] Clear()
+	{
+		var res = list.ToArray();
+		list.Clear();
+		return res;
+	}
+
 	public void Check(params T[] expArr)
 	{
 		var actArr = list.ToArray();

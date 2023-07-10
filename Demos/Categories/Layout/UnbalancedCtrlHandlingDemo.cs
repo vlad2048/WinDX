@@ -19,10 +19,10 @@ sealed class UnbalancedCtrlHandlingDemo : Win
 		{
 			using (r[nodeRoot].Dim(400, 350).M)
 			{
-				r.Gfx.FillR(r.Gfx.R, Consts.WinBrush1);
+				r.FillR(r.R, Consts.WinBrush1);
 				using (r[nodeFit].DimFit().Marg(30).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.WinBrush2);
+					r.FillR(r.R, Consts.WinBrush2);
 					using (r[c1])
 					{
 					}
@@ -44,10 +44,10 @@ sealed class UnbalancedCtrlHandlingDemo : Win
 			{
 				using (r[nodeRoot].Dim(180, 250).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.C1Brush1);
+					r.FillR(r.R, Consts.C1Brush1);
 					using (r[nodeFil].DimFit().Marg(20).M)
 					{
-						r.Gfx.FillR(r.Gfx.R, Consts.C1Brush2);
+						r.FillR(r.R, Consts.C1Brush2);
 						using (r[c2])
 						{
 						}
@@ -69,10 +69,10 @@ sealed class UnbalancedCtrlHandlingDemo : Win
 			{
 				using (r[nodeRoot].Dim(110, 170).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.C2Brush1);
+					r.FillR(r.R, Consts.C2Brush1);
 					var _ = r[nodeFil].DimFit().Marg(10).M;
 					{
-						r.Gfx.FillR(r.Gfx.R, Consts.C2Brush2);
+						r.FillR(r.R, Consts.C2Brush2);
 						using (r[c3])
 						{
 						}
@@ -93,10 +93,10 @@ sealed class UnbalancedCtrlHandlingDemo : Win
 			{
 				using (r[nodeRoot].Dim(60, 80).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.C3Brush1);
+					r.FillR(r.R, Consts.C3Brush1);
 					using (r[nodeFil].Marg(5).M)
 					{
-						r.Gfx.FillR(r.Gfx.R, Consts.C3Brush2);
+						r.FillR(r.R, Consts.C3Brush2);
 					}
 				}
 			}).D(D);

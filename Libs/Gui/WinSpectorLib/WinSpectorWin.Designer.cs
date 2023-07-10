@@ -35,56 +35,69 @@ partial class WinSpectorWin
 		stopTrackingMenuItem = new ToolStripMenuItem();
 		toolStripSeparator1 = new ToolStripSeparator();
 		stopAllTrackingMenuItem = new ToolStripMenuItem();
-		toolStrip1 = new ToolStrip();
-		openFlexBuilderToolBtn = new ToolStripButton();
+		toolStripSeparator2 = new ToolStripSeparator();
+		printStateMenuItem = new ToolStripMenuItem();
 		statusStrip = new StatusStrip();
 		windowsGroupBox = new GroupBox();
-		redrawWindowBtn = new Button();
-		unselectWindowBtn = new Button();
 		layoutGroupBox = new GroupBox();
 		demosGroupBox = new GroupBox();
 		demosList = new BrightIdeasSoftware.ObjectListView();
 		eventsGroupBox = new GroupBox();
 		eventDisplayer = new Controls.EventDisplayer();
-		showSysCtrlsCheckBox = new CheckBox();
+		menuStrip1 = new MenuStrip();
+		windowsToolStripMenuItem = new ToolStripMenuItem();
+		windowRedrawItem = new ToolStripMenuItem();
+		windowUnselectItem = new ToolStripMenuItem();
+		layoutToolStripMenuItem = new ToolStripMenuItem();
+		layoutShowSysCtrlsItem = new ToolStripMenuItem();
+		layoutOpenInFlexBuilderItem = new ToolStripMenuItem();
+		toolStripSeparator3 = new ToolStripSeparator();
+		stopPrintingTrackedNodeStateMenuItem = new ToolStripMenuItem();
+		eventsToolStripMenuItem = new ToolStripMenuItem();
+		eventsShowItem = new ToolStripMenuItem();
+		eventsEnabledItem = new ToolStripMenuItem();
+		eventsClearItem = new ToolStripMenuItem();
+		windowLogRedrawItem = new ToolStripMenuItem();
+		windowLogNextRedrawItem = new ToolStripMenuItem();
+		windowLogNext2RedrawsItem = new ToolStripMenuItem();
 		((System.ComponentModel.ISupportInitialize)layoutTree).BeginInit();
 		layoutTreeContextMenu.SuspendLayout();
-		toolStrip1.SuspendLayout();
 		windowsGroupBox.SuspendLayout();
 		layoutGroupBox.SuspendLayout();
 		demosGroupBox.SuspendLayout();
 		((System.ComponentModel.ISupportInitialize)demosList).BeginInit();
 		eventsGroupBox.SuspendLayout();
+		menuStrip1.SuspendLayout();
 		SuspendLayout();
 		// 
 		// winList
 		// 
-		winList.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+		winList.Dock = DockStyle.Fill;
 		winList.FormattingEnabled = true;
 		winList.ItemHeight = 15;
-		winList.Location = new Point(6, 22);
+		winList.Location = new Point(3, 19);
 		winList.Name = "winList";
-		winList.Size = new Size(156, 94);
+		winList.Size = new Size(162, 161);
 		winList.TabIndex = 0;
 		// 
 		// layoutTree
 		// 
-		layoutTree.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 		layoutTree.CellEditUseWholeCell = false;
 		layoutTree.ContextMenuStrip = layoutTreeContextMenu;
+		layoutTree.Dock = DockStyle.Fill;
 		layoutTree.Location = new Point(3, 19);
 		layoutTree.Name = "layoutTree";
 		layoutTree.ShowGroups = false;
-		layoutTree.Size = new Size(596, 347);
+		layoutTree.Size = new Size(562, 534);
 		layoutTree.TabIndex = 4;
 		layoutTree.View = View.Details;
 		layoutTree.VirtualMode = true;
 		// 
 		// layoutTreeContextMenu
 		// 
-		layoutTreeContextMenu.Items.AddRange(new ToolStripItem[] { trackEventsMenuItem, stopTrackingMenuItem, toolStripSeparator1, stopAllTrackingMenuItem });
+		layoutTreeContextMenu.Items.AddRange(new ToolStripItem[] { trackEventsMenuItem, stopTrackingMenuItem, toolStripSeparator1, stopAllTrackingMenuItem, toolStripSeparator2, printStateMenuItem });
 		layoutTreeContextMenu.Name = "layoutTreeContextMenu";
-		layoutTreeContextMenu.Size = new Size(160, 76);
+		layoutTreeContextMenu.Size = new Size(160, 104);
 		// 
 		// trackEventsMenuItem
 		// 
@@ -109,70 +122,42 @@ partial class WinSpectorWin
 		stopAllTrackingMenuItem.Size = new Size(159, 22);
 		stopAllTrackingMenuItem.Text = "Stop all tracking";
 		// 
-		// toolStrip1
+		// toolStripSeparator2
 		// 
-		toolStrip1.Items.AddRange(new ToolStripItem[] { openFlexBuilderToolBtn });
-		toolStrip1.Location = new Point(0, 0);
-		toolStrip1.Name = "toolStrip1";
-		toolStrip1.Size = new Size(792, 25);
-		toolStrip1.TabIndex = 5;
-		toolStrip1.Text = "toolStrip1";
+		toolStripSeparator2.Name = "toolStripSeparator2";
+		toolStripSeparator2.Size = new Size(156, 6);
 		// 
-		// openFlexBuilderToolBtn
+		// printStateMenuItem
 		// 
-		openFlexBuilderToolBtn.DisplayStyle = ToolStripItemDisplayStyle.Image;
-		openFlexBuilderToolBtn.Image = Resource.ToolBtn_OpenFlexBuilder;
-		openFlexBuilderToolBtn.ImageTransparentColor = Color.Magenta;
-		openFlexBuilderToolBtn.Name = "openFlexBuilderToolBtn";
-		openFlexBuilderToolBtn.Size = new Size(23, 22);
-		openFlexBuilderToolBtn.Text = "Open in FlexBuilder";
+		printStateMenuItem.Name = "printStateMenuItem";
+		printStateMenuItem.Size = new Size(159, 22);
+		printStateMenuItem.Text = "Print State";
 		// 
 		// statusStrip
 		// 
-		statusStrip.Location = new Point(0, 428);
+		statusStrip.Location = new Point(0, 592);
 		statusStrip.Name = "statusStrip";
-		statusStrip.Size = new Size(792, 22);
+		statusStrip.Size = new Size(1075, 22);
 		statusStrip.TabIndex = 6;
 		statusStrip.Text = "statusStrip";
 		// 
 		// windowsGroupBox
 		// 
-		windowsGroupBox.Controls.Add(redrawWindowBtn);
-		windowsGroupBox.Controls.Add(unselectWindowBtn);
 		windowsGroupBox.Controls.Add(winList);
-		windowsGroupBox.Location = new Point(12, 28);
+		windowsGroupBox.Location = new Point(12, 27);
 		windowsGroupBox.Name = "windowsGroupBox";
-		windowsGroupBox.Size = new Size(168, 150);
+		windowsGroupBox.Size = new Size(168, 183);
 		windowsGroupBox.TabIndex = 7;
 		windowsGroupBox.TabStop = false;
 		windowsGroupBox.Text = "Windows";
 		// 
-		// redrawWindowBtn
-		// 
-		redrawWindowBtn.Location = new Point(6, 121);
-		redrawWindowBtn.Name = "redrawWindowBtn";
-		redrawWindowBtn.Size = new Size(75, 23);
-		redrawWindowBtn.TabIndex = 2;
-		redrawWindowBtn.Text = "Redraw";
-		redrawWindowBtn.UseVisualStyleBackColor = true;
-		// 
-		// unselectWindowBtn
-		// 
-		unselectWindowBtn.Location = new Point(87, 121);
-		unselectWindowBtn.Name = "unselectWindowBtn";
-		unselectWindowBtn.Size = new Size(75, 23);
-		unselectWindowBtn.TabIndex = 1;
-		unselectWindowBtn.Text = "Unselect";
-		unselectWindowBtn.UseVisualStyleBackColor = true;
-		// 
 		// layoutGroupBox
 		// 
 		layoutGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-		layoutGroupBox.Controls.Add(showSysCtrlsCheckBox);
 		layoutGroupBox.Controls.Add(layoutTree);
-		layoutGroupBox.Location = new Point(186, 28);
+		layoutGroupBox.Location = new Point(186, 27);
 		layoutGroupBox.Name = "layoutGroupBox";
-		layoutGroupBox.Size = new Size(602, 397);
+		layoutGroupBox.Size = new Size(568, 556);
 		layoutGroupBox.TabIndex = 8;
 		layoutGroupBox.TabStop = false;
 		layoutGroupBox.Text = "Layout";
@@ -181,9 +166,9 @@ partial class WinSpectorWin
 		// 
 		demosGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 		demosGroupBox.Controls.Add(demosList);
-		demosGroupBox.Location = new Point(12, 184);
+		demosGroupBox.Location = new Point(12, 216);
 		demosGroupBox.Name = "demosGroupBox";
-		demosGroupBox.Size = new Size(168, 238);
+		demosGroupBox.Size = new Size(168, 367);
 		demosGroupBox.TabIndex = 9;
 		demosGroupBox.TabStop = false;
 		demosGroupBox.Text = "Demos";
@@ -195,7 +180,7 @@ partial class WinSpectorWin
 		demosList.FullRowSelect = true;
 		demosList.Location = new Point(3, 19);
 		demosList.Name = "demosList";
-		demosList.Size = new Size(162, 216);
+		demosList.Size = new Size(162, 345);
 		demosList.TabIndex = 0;
 		demosList.View = View.Details;
 		// 
@@ -203,9 +188,9 @@ partial class WinSpectorWin
 		// 
 		eventsGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
 		eventsGroupBox.Controls.Add(eventDisplayer);
-		eventsGroupBox.Location = new Point(794, 28);
+		eventsGroupBox.Location = new Point(760, 27);
 		eventsGroupBox.Name = "eventsGroupBox";
-		eventsGroupBox.Size = new Size(303, 397);
+		eventsGroupBox.Size = new Size(303, 556);
 		eventsGroupBox.TabIndex = 10;
 		eventsGroupBox.TabStop = false;
 		eventsGroupBox.Text = "Events";
@@ -215,44 +200,136 @@ partial class WinSpectorWin
 		eventDisplayer.Dock = DockStyle.Fill;
 		eventDisplayer.Location = new Point(3, 19);
 		eventDisplayer.Name = "eventDisplayer";
-		eventDisplayer.Size = new Size(297, 375);
+		eventDisplayer.Size = new Size(297, 534);
 		eventDisplayer.TabIndex = 0;
 		// 
-		// showSysCtrlsCheckBox
+		// menuStrip1
 		// 
-		showSysCtrlsCheckBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-		showSysCtrlsCheckBox.AutoSize = true;
-		showSysCtrlsCheckBox.Location = new Point(461, 372);
-		showSysCtrlsCheckBox.Name = "showSysCtrlsCheckBox";
-		showSysCtrlsCheckBox.Size = new Size(141, 19);
-		showSysCtrlsCheckBox.TabIndex = 5;
-		showSysCtrlsCheckBox.Text = "Show system controls";
-		showSysCtrlsCheckBox.UseVisualStyleBackColor = true;
+		menuStrip1.Items.AddRange(new ToolStripItem[] { windowsToolStripMenuItem, layoutToolStripMenuItem, eventsToolStripMenuItem });
+		menuStrip1.Location = new Point(0, 0);
+		menuStrip1.Name = "menuStrip1";
+		menuStrip1.Size = new Size(1075, 24);
+		menuStrip1.TabIndex = 11;
+		menuStrip1.Text = "menuStrip1";
+		// 
+		// windowsToolStripMenuItem
+		// 
+		windowsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { windowRedrawItem, windowUnselectItem, windowLogRedrawItem, windowLogNextRedrawItem, windowLogNext2RedrawsItem });
+		windowsToolStripMenuItem.Name = "windowsToolStripMenuItem";
+		windowsToolStripMenuItem.Size = new Size(68, 20);
+		windowsToolStripMenuItem.Text = "&Windows";
+		// 
+		// windowRedrawItem
+		// 
+		windowRedrawItem.Name = "windowRedrawItem";
+		windowRedrawItem.Size = new Size(180, 22);
+		windowRedrawItem.Text = "&Redraw";
+		// 
+		// windowUnselectItem
+		// 
+		windowUnselectItem.Name = "windowUnselectItem";
+		windowUnselectItem.Size = new Size(180, 22);
+		windowUnselectItem.Text = "&Unselect";
+		// 
+		// layoutToolStripMenuItem
+		// 
+		layoutToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { layoutShowSysCtrlsItem, layoutOpenInFlexBuilderItem, toolStripSeparator3, stopPrintingTrackedNodeStateMenuItem });
+		layoutToolStripMenuItem.Name = "layoutToolStripMenuItem";
+		layoutToolStripMenuItem.Size = new Size(55, 20);
+		layoutToolStripMenuItem.Text = "&Layout";
+		// 
+		// layoutShowSysCtrlsItem
+		// 
+		layoutShowSysCtrlsItem.CheckOnClick = true;
+		layoutShowSysCtrlsItem.Name = "layoutShowSysCtrlsItem";
+		layoutShowSysCtrlsItem.Size = new Size(202, 22);
+		layoutShowSysCtrlsItem.Text = "Show &system controls";
+		// 
+		// layoutOpenInFlexBuilderItem
+		// 
+		layoutOpenInFlexBuilderItem.Name = "layoutOpenInFlexBuilderItem";
+		layoutOpenInFlexBuilderItem.Size = new Size(202, 22);
+		layoutOpenInFlexBuilderItem.Text = "Open in &FlexBuilder";
+		// 
+		// toolStripSeparator3
+		// 
+		toolStripSeparator3.Name = "toolStripSeparator3";
+		toolStripSeparator3.Size = new Size(199, 6);
+		// 
+		// stopPrintingTrackedNodeStateMenuItem
+		// 
+		stopPrintingTrackedNodeStateMenuItem.Name = "stopPrintingTrackedNodeStateMenuItem";
+		stopPrintingTrackedNodeStateMenuItem.Size = new Size(202, 22);
+		stopPrintingTrackedNodeStateMenuItem.Text = "Stop tracking node state";
+		// 
+		// eventsToolStripMenuItem
+		// 
+		eventsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { eventsShowItem, eventsEnabledItem, eventsClearItem });
+		eventsToolStripMenuItem.Name = "eventsToolStripMenuItem";
+		eventsToolStripMenuItem.Size = new Size(53, 20);
+		eventsToolStripMenuItem.Text = "&Events";
+		// 
+		// eventsShowItem
+		// 
+		eventsShowItem.CheckOnClick = true;
+		eventsShowItem.Name = "eventsShowItem";
+		eventsShowItem.Size = new Size(133, 22);
+		eventsShowItem.Text = "Show (S)";
+		// 
+		// eventsEnabledItem
+		// 
+		eventsEnabledItem.Name = "eventsEnabledItem";
+		eventsEnabledItem.Size = new Size(133, 22);
+		eventsEnabledItem.Text = "Enabled (E)";
+		// 
+		// eventsClearItem
+		// 
+		eventsClearItem.Name = "eventsClearItem";
+		eventsClearItem.Size = new Size(133, 22);
+		eventsClearItem.Text = "Clear (C)";
+		// 
+		// windowLogRedrawItem
+		// 
+		windowLogRedrawItem.Name = "windowLogRedrawItem";
+		windowLogRedrawItem.Size = new Size(180, 22);
+		windowLogRedrawItem.Text = "Log Redraw";
+		// 
+		// windowLogNextRedrawItem
+		// 
+		windowLogNextRedrawItem.Name = "windowLogNextRedrawItem";
+		windowLogNextRedrawItem.Size = new Size(180, 22);
+		windowLogNextRedrawItem.Text = "Log Next Redraw";
+		// 
+		// windowLogNext2RedrawsItem
+		// 
+		windowLogNext2RedrawsItem.Name = "windowLogNext2RedrawsItem";
+		windowLogNext2RedrawsItem.Size = new Size(180, 22);
+		windowLogNext2RedrawsItem.Text = "Log Next 2 Redraws";
 		// 
 		// WinSpectorWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
-		ClientSize = new Size(792, 450);
+		ClientSize = new Size(1075, 614);
 		Controls.Add(eventsGroupBox);
 		Controls.Add(demosGroupBox);
 		Controls.Add(layoutGroupBox);
 		Controls.Add(windowsGroupBox);
 		Controls.Add(statusStrip);
-		Controls.Add(toolStrip1);
+		Controls.Add(menuStrip1);
 		KeyPreview = true;
+		MainMenuStrip = menuStrip1;
 		Name = "WinSpectorWin";
 		Text = "WinSpector";
 		((System.ComponentModel.ISupportInitialize)layoutTree).EndInit();
 		layoutTreeContextMenu.ResumeLayout(false);
-		toolStrip1.ResumeLayout(false);
-		toolStrip1.PerformLayout();
 		windowsGroupBox.ResumeLayout(false);
 		layoutGroupBox.ResumeLayout(false);
-		layoutGroupBox.PerformLayout();
 		demosGroupBox.ResumeLayout(false);
 		((System.ComponentModel.ISupportInitialize)demosList).EndInit();
 		eventsGroupBox.ResumeLayout(false);
+		menuStrip1.ResumeLayout(false);
+		menuStrip1.PerformLayout();
 		ResumeLayout(false);
 		PerformLayout();
 	}
@@ -261,21 +338,34 @@ partial class WinSpectorWin
 
 	public ListBox winList;
 	public BrightIdeasSoftware.TreeListView layoutTree;
-	private ToolStrip toolStrip1;
-	public ToolStripButton openFlexBuilderToolBtn;
 	public GroupBox windowsGroupBox;
 	public GroupBox layoutGroupBox;
 	public StatusStrip statusStrip;
-	private Button unselectWindowBtn;
 	public GroupBox demosGroupBox;
 	public BrightIdeasSoftware.ObjectListView demosList;
-	public Button redrawWindowBtn;
 	public GroupBox eventsGroupBox;
 	public ToolStripMenuItem trackEventsMenuItem;
 	public ToolStripMenuItem stopTrackingMenuItem;
 	public ToolStripMenuItem stopAllTrackingMenuItem;
 	private ToolStripSeparator toolStripSeparator1;
 	public ContextMenuStrip layoutTreeContextMenu;
+	private MenuStrip menuStrip1;
+	private ToolStripMenuItem windowsToolStripMenuItem;
+	public ToolStripMenuItem windowRedrawItem;
+	public ToolStripMenuItem windowUnselectItem;
+	private ToolStripMenuItem layoutToolStripMenuItem;
+	public ToolStripMenuItem layoutShowSysCtrlsItem;
+	private ToolStripMenuItem eventsToolStripMenuItem;
+	public ToolStripMenuItem eventsShowItem;
+	public ToolStripMenuItem eventsEnabledItem;
+	public ToolStripMenuItem eventsClearItem;
 	public Controls.EventDisplayer eventDisplayer;
-	public CheckBox showSysCtrlsCheckBox;
+	public ToolStripMenuItem layoutOpenInFlexBuilderItem;
+	private ToolStripSeparator toolStripSeparator2;
+	public ToolStripMenuItem printStateMenuItem;
+	private ToolStripSeparator toolStripSeparator3;
+	public ToolStripMenuItem stopPrintingTrackedNodeStateMenuItem;
+	public ToolStripMenuItem windowLogRedrawItem;
+	public ToolStripMenuItem windowLogNextRedrawItem;
+	public ToolStripMenuItem windowLogNext2RedrawsItem;
 }

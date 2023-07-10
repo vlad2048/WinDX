@@ -11,11 +11,10 @@ global using ICtrl = UserEvents.ICtrlUserEventsSupport;
 global using static LoggingConfig.Logging_.LogUtils;
 global using static LayoutSystem.FmtConstants;
 global using static ControlSystem.G;
+global using static LoggingConfig.Singletons;
 
 using System.Runtime.CompilerServices;
 using ControlSystem.Singletons.WinMan_;
-using LoggingConfig.Config_;
-using LoggingConfig.File_;
 using PowRxVar;
 
 [assembly: InternalsVisibleTo("4_WinSpectorLib")]
@@ -26,7 +25,6 @@ namespace ControlSystem;
 static class G
 {
 	public static WinMan WinMan { get; private set; } = null!;
-	public static IRoVar<TCfg> Cfg { get; private set; } = null!;
 
 	private static void Init()
 	{
@@ -34,7 +32,6 @@ static class G
 		var d = serD.Value = new Disp();
 
 		WinMan = new WinMan().D(d);
-		Cfg = ConfigWatcher.Watch(FileUtils.GetFilenameRelativeToExe("_Config", "cfg.json"), TCfg.Default).D(d);
 	}
 
 	public static void ReinitForTests() => Init();

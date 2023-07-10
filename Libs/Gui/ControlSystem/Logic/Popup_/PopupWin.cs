@@ -6,6 +6,7 @@ using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib;
+using RenderLib.Renderers.GDIPlus;
 using SysWinInterfaces;
 using SysWinLib;
 using SysWinLib.Structs;
@@ -37,6 +38,7 @@ sealed class PopupWin : Ctrl, IWin
 	public void SysInvalidate() => sysWin.Invalidate();
 
 	public ISysWinUserEventsSupport SysWin => sysWin;
+
 
 	public PopupWin(
 		Partition subPartition,
@@ -71,9 +73,12 @@ sealed class PopupWin : Ctrl, IWin
 		{
 			using var d = new Disp();
 			var gfx = renderer.GetGfx(false).D(d);
-			RenderUtils.RenderTree(subPartitionRebased, gfx);
-
-			//gfx.R = sysWin.ClientR.V;
+			RenderUtils.RenderTree(
+				subPartitionRebased,
+				gfx,
+				spectorDrawState.ShouldLogRender(this),
+				GetType().Name
+			);
 			SpectorWinRenderUtils.Render(spectorDrawState, subPartitionRebased, gfx);
 		}).D(D);
 	}

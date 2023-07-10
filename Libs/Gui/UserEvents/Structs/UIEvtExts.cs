@@ -50,6 +50,7 @@ public static class IUIEvtExts
 				evt.WhenMouseEnter().Select(_ => true),
 				evt.WhenMouseLeave().Select(_ => false)
 			)
+				.Where(_ => !Cfg.V.Tweaks.DisableHover)
 		);
 
 

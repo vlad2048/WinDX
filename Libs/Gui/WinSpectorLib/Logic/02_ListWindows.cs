@@ -32,8 +32,36 @@ static partial class Setup
 				})
 		).D(d);
 
-		ui.redrawWindowBtn.EnableWhenSome(selWin).D(d);
-		ui.redrawWindowBtn.Events().Click.Subscribe(_ => selWin.V.Ensure().Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw)).D(d);
+		ui.windowRedrawItem.EnableWhenSome(selWin).D(d);
+		ui.windowLogRedrawItem.EnableWhenSome(selWin).D(d);
+		ui.windowLogNextRedrawItem.EnableWhenSome(selWin).D(d);
+		ui.windowLogNext2RedrawsItem.EnableWhenSome(selWin).D(d);
+
+		ui.windowRedrawItem.Events().Click.Subscribe(_ =>
+		{
+			var win = selWin.V.Ensure();
+			win.Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw);
+		}).D(d);
+
+		ui.windowLogRedrawItem.Events().Click.Subscribe(_ =>
+		{
+			var win = selWin.V.Ensure();
+			win.SpectorDrawState.SetRenderCountToLog(1);
+			win.Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw);
+		}).D(d);
+
+		ui.windowLogNextRedrawItem.Events().Click.Subscribe(_ =>
+		{
+			var win = selWin.V.Ensure();
+			win.SpectorDrawState.SetRenderCountToLog(1);
+		}).D(d);
+
+		ui.windowLogNext2RedrawsItem.Events().Click.Subscribe(_ =>
+		{
+			var win = selWin.V.Ensure();
+			win.SpectorDrawState.SetRenderCountToLog(2);
+		}).D(d);
+
 		return d;
 	}
 

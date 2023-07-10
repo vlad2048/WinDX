@@ -23,14 +23,14 @@ sealed class UserEventsDemo : Win
 		{
 			using (r[nodeRoot].StratStack(Dir.Horz).M)
 			{
-				r.Gfx.FillR(Consts.BrushRoot);
+				r.FillR(Consts.BrushRoot);
 				using (r[nodeFill1].Marg(10).M)
 				{
-					r.Gfx.FillR(Consts.BrushFill1);
+					r.FillR(Consts.BrushFill1);
 				}
 				using (r[nodeFill2].Marg(10).M)
 				{
-					r.Gfx.FillR(Consts.BrushFill2);
+					r.FillR(Consts.BrushFill2);
 				}
 			}
 		}).D(D);

@@ -22,20 +22,20 @@ sealed class ScrollDemo : Win
 		{
 			using (r[nodeRoot].StratStack(Dir.Vert).M)
 			{
-				r.Gfx.FillR(Consts.BackBrush);
+				r.FillR(Consts.BackBrush);
 
 				using (r[nodeTop].DimFilFix(50).M) { }
 
 				using (r[nodeScroll].StratStack(Dir.Vert).ScrollXY().Marg(20).M)
 				{
-					r.Gfx.FillR(Consts.ScrollBrush);
+					r.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines.Length; i++)
 					{
 						var nodeLine = nodesLines[i];
 
 						using (r[nodeLine].DimFixFit(180).Marg(i > 0 ? 1 : 0, 0, 0, 0).M)
 						{
-							r.Gfx.FillR(Consts.LineBrush);
+							r.FillR(Consts.LineBrush);
 							r.DrawText($"01234567890123456789 Line {i}", Consts.Font, Consts.TextColor);
 						}
 					}

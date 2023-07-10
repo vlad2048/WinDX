@@ -26,31 +26,31 @@ sealed class PopNodeComplexDemo : Win
 		{
 			using (r[n0].StratStack(Dir.Horz).M)
 			{
-				r.Gfx.FillR(r.Gfx.R, Consts.BrushN0);
+				r.FillR(r.R, Consts.BrushN0);
 				using (r[n1].DimFixFil(70).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushN1);
+					r.FillR(r.R, Consts.BrushN1);
 				}
 				using (r[n2].StratStack(Dir.Vert).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushN2);
+					r.FillR(r.R, Consts.BrushN2);
 					using (r[c1]) { }
 
 					using (r[p1].Dim(250, 150).Pop().M)
 					{
-						r.Gfx.FillR(r.Gfx.R, Consts.BrushP1);
+						r.FillR(r.R, Consts.BrushP1);
 						using (r[n4].StratStack(Dir.Horz).M)
 						{
-							r.Gfx.FillR(r.Gfx.R, Consts.BrushN4);
+							r.FillR(r.R, Consts.BrushN4);
 							using (r[n5].DimFixFil(50).M)
 							{
-								r.Gfx.FillR(r.Gfx.R, Consts.BrushN5);
+								r.FillR(r.R, Consts.BrushN5);
 								using (r[p2].Dim(45, 230).Pop().M)
 								{
-									r.Gfx.FillR(r.Gfx.R, Consts.BrushP2);
+									r.FillR(r.R, Consts.BrushP2);
 									using (r[n6].DimFil().M)
 									{
-										r.Gfx.FillR(r.Gfx.R, Consts.BrushN6);
+										r.FillR(r.R, Consts.BrushN6);
 									}
 								}
 							}
@@ -72,7 +72,7 @@ sealed class PopNodeComplexDemo : Win
 			{
 				using (r[n3].DimFilFix(90).M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushN3);
+					r.FillR(r.R, Consts.BrushN3);
 				}
 			}).D(D);
 		}
@@ -88,7 +88,7 @@ sealed class PopNodeComplexDemo : Win
 			{
 				using (r[p3].Dim(190, 340).Pop().M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushP3);
+					r.FillR(r.R, Consts.BrushP3);
 					using (r[c3]) { }
 				}
 			}).D(D);
@@ -104,7 +104,7 @@ sealed class PopNodeComplexDemo : Win
 			{
 				using (r[n7].M)
 				{
-					r.Gfx.FillR(r.Gfx.R, Consts.BrushN7);
+					r.FillR(r.R, Consts.BrushN7);
 				}
 			}).D(D);
 		}

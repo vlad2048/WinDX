@@ -3,7 +3,6 @@ using PowRxVar;
 using RenderLib.Renderers.GDIPlus.Utils;
 using RenderLib.Structs;
 using SysWinInterfaces;
-using WinAPI.User32;
 using WinAPI.Utils.Exts;
 
 namespace RenderLib.Renderers.GDIPlus;
@@ -69,6 +68,12 @@ public sealed class GDIPlus_Gfx : IGfx
 	}
 
 	private bool DrawDisabled => measureOnly || R.IsDegenerate;
+
+	/*public void Test()
+	{
+		Gfx.FillRectangle(brush, new R(20, 10, 50, 40).ToDrawRect());
+	}
+	private static readonly SolidBrush brush = new(Color.Red);*/
 
 	public void PushClip(R clipR)
 	{
