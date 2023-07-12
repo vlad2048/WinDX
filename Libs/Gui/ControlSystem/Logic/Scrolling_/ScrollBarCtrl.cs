@@ -1,20 +1,19 @@
 ﻿using System.Reactive.Linq;
 using ControlSystem.Logic.Scrolling_.State;
 using ControlSystem.Logic.Scrolling_.Structs;
+using ControlSystem.Logic.Scrolling_.Structs.Enum;
 using ControlSystem.Structs;
-using ControlSystem.Utils;
 using LoggingConfig.Threading_;
 using PowBasics.Geom;
 using PowRxVar;
 using UserEvents.Structs;
-using UserEvents.Utils;
 using C = ControlSystem.Logic.Scrolling_.ScrollBarConsts;
 
 namespace ControlSystem.Logic.Scrolling_;
 
 public sealed class ScrollBarCtrl : Ctrl
 {
-	public ScrollBarCtrl(Dir dir, ScrollDimState state, IObservable<IUserEvt> nodeEvt)
+	public ScrollBarCtrl(Dir dir, ScrollState state, IObservable<IUserEvt> nodeEvt)
 	{
 		var nodeRoot = new NodeState().D(D);
 		var nodeStack = new NodeState().D(D);
@@ -24,12 +23,11 @@ public sealed class ScrollBarCtrl : Ctrl
 		var nodeTrackInc = new NodeState().D(D);
 		var nodeThumb = new NodeState().D(D);
 
-		var thumbPos = 0;
-
 		ScrollBarCtrlUtils.HookBtn(out var btnDecState, state, ScrollBtnDecInc.Dec, nodeBtnDec).D(D);
 		ScrollBarCtrlUtils.HookBtn(out var btnIncState, state, ScrollBtnDecInc.Inc, nodeBtnInc).D(D);
+		ScrollBarCtrlUtils.HookTrack(state, ScrollBtnDecInc.Dec, nodeTrackDec).D(D);
+		ScrollBarCtrlUtils.HookTrack(state, ScrollBtnDecInc.Inc, nodeTrackInc).D(D);
 
-		//nodeBtnInc.Evt.WhenMouseMove().Log().D(D);
 
 		if (dir == Dir.Vert)
 		{
@@ -62,6 +60,8 @@ public sealed class ScrollBarCtrl : Ctrl
 				{
 					r.FillR(C.BackColor);
 
+					// Button Decrement
+					// ----------------
 					using (r[nodeBtnDec].Dim(dir, 17, 15).M)
 					{
 						var (bmp, col) = C.GetBtnBmpCol(dir, ScrollBtnDecInc.Dec, btnDecState.V);
@@ -69,14 +69,30 @@ public sealed class ScrollBarCtrl : Ctrl
 						r.DrawBmp(bmp);
 					}
 
+					// Track Dec
+					// ---------
+					using (r[nodeTrackDec].Dim(dir, state.TrackDecLng, 15).M)
+					{
+						//r.FillR();
+					}
 
-					using (r[nodeThumb].DimFil().M)
+					// Thumb
+					// -----
+					using (r[nodeThumb].Dim(dir, state.ThumbLng, 15).M)
 					{
 						var thumbBrush = C.GetThumbBackColor(ScrollBtnState.Normal);
 						r.FillR(thumbBrush);
 					}
 
+					// Track Inc
+					// ---------
+					using (r[nodeTrackInc].Dim(dir, state.TrackIncLng, 15).M)
+					{
+						//r.FillR();
+					}
 
+					// Button Increment
+					// ----------------
 					using (r[nodeBtnInc].Dim(dir, 17, 15).M)
 					{
 						var (bmp, col) = C.GetBtnBmpCol(dir, ScrollBtnDecInc.Inc, btnIncState.V);
@@ -96,7 +112,7 @@ file static class ScrollBarCtrlUtils
 {
 	public static IDisposable HookBtn(
 		out IRoVar<ScrollBtnState> btnState,
-		ScrollDimState state,
+		ScrollState state,
 		ScrollBtnDecInc decInc,
 		NodeState node
 	)
@@ -105,24 +121,31 @@ file static class ScrollBarCtrlUtils
 		btnState = node.Evt.IsMouseOver().D(d).SelectVar(e => e ? ScrollBtnState.Hover : ScrollBtnState.Normal);
 
 		node.Evt.WhenRepeatedClick(node).D(d)
-			.Delay(TimeSpan.FromMilliseconds(10))
 			.ObserveOnUIThread()
 			.Select(_ => new UnitScrollCmd(state.Dir, decInc))
 			.Where(state.CanRunScrollCmd)
 			.Subscribe(state.RunScrollCmd).D(d);
 
-		/*node.Evt.WhenMouseDown()
-			//.Select(_ => Obs.Interval(TimeSpan.FromMilliseconds(1000))).Switch()
-			//.Delay(TimeSpan.FromMilliseconds(1000))
-			.ObserveOnUIThread()
-			.Select(_ => new UnitScrollCmd(state.Dir, decInc))
-			.Where(state.CanRunScrollCmd)
-			.Subscribe(state.RunScrollCmd).D(d);*/
-
-
 		return d;
 	}
 
+
+	public static IDisposable HookTrack(
+		ScrollState state,
+		ScrollBtnDecInc decInc,
+		NodeState node
+	)
+	{
+		var d = new Disp();
+
+		node.Evt.WhenRepeatedClick(node).D(d)
+			.ObserveOnUIThread()
+			.Select(_ => new PageScrollCmd(state.Dir, decInc))
+			.Where(state.CanRunScrollCmd)
+			.Subscribe(state.RunScrollCmd).D(d);
+
+		return d;
+	}
 
 
 	public static (Pt, Pt) GetInnerLine(R r, Dir dir) => dir switch

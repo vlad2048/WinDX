@@ -1,8 +1,8 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
+using System.Windows.Forms;
 using PowBasics.Geom;
 using PowRxVar;
-using WinAPI.User32;
 
 namespace UserEvents.Structs;
 
@@ -57,13 +57,13 @@ public static class IUIEvtExts
 	// ************
 	// * Keyboard *
 	// ************
-	public static IObservable<Unit> WhenKeyDown(this IObservable<IUserEvt> evt, VirtualKey key) =>
+	public static IObservable<Unit> WhenKeyDown(this IObservable<IUserEvt> evt, Keys key) =>
 		evt
 			.OfType<KeyDownUserEvt>()
 			.Where(e => e.Key == key)
 			.ToUnit();
 
-	public static IObservable<Unit> WhenKeyUp(this IObservable<IUserEvt> evt, VirtualKey key) =>
+	public static IObservable<Unit> WhenKeyUp(this IObservable<IUserEvt> evt, Keys key) =>
 		evt
 			.OfType<KeyUpUserEvt>()
 			.Where(e => e.Key == key)

@@ -20,7 +20,7 @@ static partial class Setup
 
 		IObservable<Unit> WhenKey(Keys key) => Obs.Merge(
 			ui.Events().KeyDown.Where(e => e.KeyCode == key).ToUnit(),
-			WinMan.MainWins.Items.MergeMany(win => win.Evt.WhenKeyDown((VirtualKey)key))
+			WinMan.MainWins.Items.MergeMany(win => win.Evt.WhenKeyDown(key))
 		);
 
 		ui.eventsShowItem.Events().CheckedChanged.Subscribe(_ => showEvents.V = ui.eventsShowItem.Checked).D(d);

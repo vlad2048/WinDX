@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Linq;
 using ControlSystem.Logic.Scrolling_.Structs;
+using ControlSystem.Logic.Scrolling_.Structs.Enum;
 using ControlSystem.Structs;
 using PowBasics.ColorCode;
 using PowBasics.ColorCode.Utils;
@@ -65,7 +66,7 @@ file static class WriterExt
     {
         var x = s.ScrollState.X;
         var y = s.ScrollState.Y;
-        var (isX, isY) = (x.Enabled, y.Enabled);
+        var (isX, isY) = (x.State.IsEnabled(), y.State.IsEnabled());
 
 
         w.WriteLine();
@@ -82,8 +83,7 @@ file static class WriterExt
 		w.Write("ScrollY".PadLeft(PadValues), C.Title);
 		w.WriteLine();
 
-        P("enabled", x.Enabled, y.Enabled, C.Key);
-        POpt("visible", x.Visible, y.Visible, C.Key);
+        P("State", x.State.Fmt(), y.State.Fmt(), C.Key);
         POpt("View", x.ViewLng, y.ViewLng, C.Val);
         POpt("Cont", x.ContLng, y.ContLng, C.Val);
 		POpt("ScrollOfs", x.ScrollOfs, y.ScrollOfs, C.Val);
@@ -100,6 +100,10 @@ file static class WriterExt
         {
             "True" => C.True,
             "False" => C.False,
+			"Disabled" => C.Disabled,
+			"NotNeeded" => C.NotNeeded,
+			"TooSmall" => C.TooSmall,
+			"Visible" => C.Visible,
             _ => origCol
         };
         void P(string header, object colXObj, object colYObj, Color valCol)
@@ -131,7 +135,7 @@ file static class WriterExt
 
     private static class C
     {
-        public static readonly Color RKey = Color.FromArgb(184, 156, 55);
+        //public static readonly Color RKey = Color.FromArgb(184, 156, 55);
         public static readonly Color RVal = Color.FromArgb(224, 232, 132);
 
         public static readonly Color Title = Color.FromArgb(255, 130, 220);
@@ -139,8 +143,13 @@ file static class WriterExt
         public static readonly Color Key = Color.FromArgb(110, 110, 110);
         public static readonly Color Val = Color.FromArgb(42, 126, 201);
         public static readonly Color ValMinor = Color.FromArgb(17, 74, 125);
+
         public static readonly Color False = Color.FromArgb(224, 103, 90);
         public static readonly Color True = Color.FromArgb(95, 227, 152);
+        public static readonly Color Disabled = Color.FromArgb(79, 79, 79);
+        public static readonly Color NotNeeded = Color.FromArgb(145, 145, 145);
+        public static readonly Color TooSmall = Color.FromArgb(227, 142, 68);
+        public static readonly Color Visible = Color.FromArgb(94, 227, 152);
 
         public static readonly Color Sep = Color.FromArgb(30, 21, 112);
 

@@ -48,6 +48,10 @@ partial class WinSpectorWin
 		windowsToolStripMenuItem = new ToolStripMenuItem();
 		windowRedrawItem = new ToolStripMenuItem();
 		windowUnselectItem = new ToolStripMenuItem();
+		windowLogRedrawItem = new ToolStripMenuItem();
+		windowLogNextRedrawItem = new ToolStripMenuItem();
+		windowLogNext2RedrawsItem = new ToolStripMenuItem();
+		windowResizeItem = new ToolStripMenuItem();
 		layoutToolStripMenuItem = new ToolStripMenuItem();
 		layoutShowSysCtrlsItem = new ToolStripMenuItem();
 		layoutOpenInFlexBuilderItem = new ToolStripMenuItem();
@@ -57,9 +61,6 @@ partial class WinSpectorWin
 		eventsShowItem = new ToolStripMenuItem();
 		eventsEnabledItem = new ToolStripMenuItem();
 		eventsClearItem = new ToolStripMenuItem();
-		windowLogRedrawItem = new ToolStripMenuItem();
-		windowLogNextRedrawItem = new ToolStripMenuItem();
-		windowLogNext2RedrawsItem = new ToolStripMenuItem();
 		((System.ComponentModel.ISupportInitialize)layoutTree).BeginInit();
 		layoutTreeContextMenu.SuspendLayout();
 		windowsGroupBox.SuspendLayout();
@@ -214,7 +215,7 @@ partial class WinSpectorWin
 		// 
 		// windowsToolStripMenuItem
 		// 
-		windowsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { windowRedrawItem, windowUnselectItem, windowLogRedrawItem, windowLogNextRedrawItem, windowLogNext2RedrawsItem });
+		windowsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { windowRedrawItem, windowUnselectItem, windowLogRedrawItem, windowLogNextRedrawItem, windowLogNext2RedrawsItem, windowResizeItem });
 		windowsToolStripMenuItem.Name = "windowsToolStripMenuItem";
 		windowsToolStripMenuItem.Size = new Size(68, 20);
 		windowsToolStripMenuItem.Text = "&Windows";
@@ -223,13 +224,37 @@ partial class WinSpectorWin
 		// 
 		windowRedrawItem.Name = "windowRedrawItem";
 		windowRedrawItem.Size = new Size(180, 22);
-		windowRedrawItem.Text = "&Redraw";
+		windowRedrawItem.Text = "&Redraw (Ctrl R)";
 		// 
 		// windowUnselectItem
 		// 
 		windowUnselectItem.Name = "windowUnselectItem";
 		windowUnselectItem.Size = new Size(180, 22);
 		windowUnselectItem.Text = "&Unselect";
+		// 
+		// windowLogRedrawItem
+		// 
+		windowLogRedrawItem.Name = "windowLogRedrawItem";
+		windowLogRedrawItem.Size = new Size(180, 22);
+		windowLogRedrawItem.Text = "Log Redraw";
+		// 
+		// windowLogNextRedrawItem
+		// 
+		windowLogNextRedrawItem.Name = "windowLogNextRedrawItem";
+		windowLogNextRedrawItem.Size = new Size(180, 22);
+		windowLogNextRedrawItem.Text = "Log Next Redraw";
+		// 
+		// windowLogNext2RedrawsItem
+		// 
+		windowLogNext2RedrawsItem.Name = "windowLogNext2RedrawsItem";
+		windowLogNext2RedrawsItem.Size = new Size(180, 22);
+		windowLogNext2RedrawsItem.Text = "Log Next 2 Redraws";
+		// 
+		// windowResizeItem
+		// 
+		windowResizeItem.Name = "windowResizeItem";
+		windowResizeItem.Size = new Size(180, 22);
+		windowResizeItem.Text = "Re&size... (Ctrl +/-)";
 		// 
 		// layoutToolStripMenuItem
 		// 
@@ -287,24 +312,6 @@ partial class WinSpectorWin
 		eventsClearItem.Name = "eventsClearItem";
 		eventsClearItem.Size = new Size(133, 22);
 		eventsClearItem.Text = "Clear (C)";
-		// 
-		// windowLogRedrawItem
-		// 
-		windowLogRedrawItem.Name = "windowLogRedrawItem";
-		windowLogRedrawItem.Size = new Size(180, 22);
-		windowLogRedrawItem.Text = "Log Redraw";
-		// 
-		// windowLogNextRedrawItem
-		// 
-		windowLogNextRedrawItem.Name = "windowLogNextRedrawItem";
-		windowLogNextRedrawItem.Size = new Size(180, 22);
-		windowLogNextRedrawItem.Text = "Log Next Redraw";
-		// 
-		// windowLogNext2RedrawsItem
-		// 
-		windowLogNext2RedrawsItem.Name = "windowLogNext2RedrawsItem";
-		windowLogNext2RedrawsItem.Size = new Size(180, 22);
-		windowLogNext2RedrawsItem.Text = "Log Next 2 Redraws";
 		// 
 		// WinSpectorWin
 		// 
@@ -368,4 +375,5 @@ partial class WinSpectorWin
 	public ToolStripMenuItem windowLogRedrawItem;
 	public ToolStripMenuItem windowLogNextRedrawItem;
 	public ToolStripMenuItem windowLogNext2RedrawsItem;
+	public ToolStripMenuItem windowResizeItem;
 }

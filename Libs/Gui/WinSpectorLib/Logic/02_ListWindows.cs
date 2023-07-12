@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Linq;
+using ControlSystem;
 using PowMaybe;
 using PowRxVar;
 using PowWinForms.ListBoxSourceListViewing;
@@ -8,15 +9,23 @@ using PowTrees.Algorithms;
 using UserEvents;
 using WinFormsTooling.Utils.Exts;
 using ControlSystem.Utils;
+using WinSpectorLib.Controls;
 
 namespace WinSpectorLib.Logic;
 
 static partial class Setup
 {
-	public static IDisposable ListWindowsAndGetVirtualTree(WinSpectorWin ui, out IRoMayVar<MixLayout> selLayout, IRoVar<bool> showSysCtrls)
+	public static IDisposable ListWindowsAndGetVirtualTree(
+		WinSpectorWin ui,
+		out IRoMayVar<MixLayout> selLayout,
+		IRoVar<bool> showSysCtrls,
+		SpectorPrefs prefs
+	)
 	{
 		var d = new Disp();
 		ListBoxSourceListViewer.View(out var selWin, WinMan.MainWins.Items, ui.winList).D(d);
+
+		ui.windowUnselectItem.Events().Click.Subscribe(_ => selWin.V = May.None<Win>()).D(d);
 
 		var parts = selWin.SwitchMayVar(e => e.PartitionSetVar);
 
@@ -36,6 +45,7 @@ static partial class Setup
 		ui.windowLogRedrawItem.EnableWhenSome(selWin).D(d);
 		ui.windowLogNextRedrawItem.EnableWhenSome(selWin).D(d);
 		ui.windowLogNext2RedrawsItem.EnableWhenSome(selWin).D(d);
+		ui.windowResizeItem.EnableWhenSome(selWin).D(d);
 
 		ui.windowRedrawItem.Events().Click.Subscribe(_ =>
 		{
@@ -60,6 +70,13 @@ static partial class Setup
 		{
 			var win = selWin.V.Ensure();
 			win.SpectorDrawState.SetRenderCountToLog(2);
+		}).D(d);
+
+		ui.windowResizeItem.Events().Click.Subscribe(_ =>
+		{
+			var win = selWin.V.Ensure();
+			var dlg = new ResizeDialog(win, prefs);
+			dlg.ShowDialog();
 		}).D(d);
 
 		return d;

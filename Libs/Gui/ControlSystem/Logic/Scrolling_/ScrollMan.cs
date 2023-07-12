@@ -1,5 +1,6 @@
-﻿using System.Reactive.Disposables;
-using ControlSystem.Logic.Popup_.Structs;
+﻿using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Logic.Scrolling_.Structs;
+using ControlSystem.Logic.Scrolling_.Structs.Enum;
 using ControlSystem.Logic.Scrolling_.Utils;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
@@ -82,10 +83,10 @@ sealed class ScrollMan : IDisposable
 		{
 			var nodeR = partition.RMap[nodeState];
 			var nfo = partition.GetScrollInfos(nodeState);
-			var both = nfo.Visible == BoolVec.True;
+			var both = nfo.State.X.IsVisible() && nfo.State.Y.IsVisible();
 
 			ScrollManLocalUtils.RenderIf(
-				nfo.Visible.Dir(Dir.Horz),
+				nfo.State.Dir(Dir.Horz).IsVisible(),
 				sys,
 				nodeState,
 				() => (
@@ -96,7 +97,7 @@ sealed class ScrollMan : IDisposable
 			);
 
 			ScrollManLocalUtils.RenderIf(
-				nfo.Visible.Dir(Dir.Vert),
+				nfo.State.Dir(Dir.Vert).IsVisible(),
 				sys,
 				nodeState,
 				() => (
@@ -128,55 +129,10 @@ sealed class ScrollMan : IDisposable
 		foreach (var nodeState in nodeStates)
 		{
 			var nfo = partition.GetScrollInfos(nodeState);
-			nfo.State.UpdateFromLayout(nfo);
+			nodeState.ScrollState.UpdateFromLayout(nfo);
 		}
 	}
-	
-
-
-	private sealed class Duo : IDisposable
-	{
-		private readonly Disp d = new();
-		public void Dispose() => d.Dispose();
-
-		private readonly ScrollBarCtrl? scrollBarX;
-		private readonly ScrollBarCtrl? scrollBarY;
-		private readonly ScrollBarCornerCtrl? scrollBarCorner;
-
-		public Duo(StFlexNode st)
-		{
-			var scroll = st.Flex.Flags.Scroll;
-			if (scroll == BoolVec.False) throw new ArgumentException("Impossible");
-
-			scrollBarX = scroll.X ? new ScrollBarCtrl(Dir.Horz, st.State.ScrollState.X, st.State.Evt).D(d) : null;
-			scrollBarY = scroll.Y ? new ScrollBarCtrl(Dir.Vert, st.State.ScrollState.Y, st.State.Evt).D(d) : null;
-			scrollBarCorner = (scroll == BoolVec.True) ? new ScrollBarCornerCtrl().D(d) : null;
-		}
-
-		public ScrollBarCtrl Get(Dir dir) => dir switch
-		{
-			Dir.Horz => scrollBarX ?? throw new ArgumentException("Impossible"),
-			Dir.Vert => scrollBarY ?? throw new ArgumentException("Impossible"),
-		};
-
-		public ScrollBarCornerCtrl GetCorner() => scrollBarCorner ?? throw new ArgumentException("Impossible");
-	}
 }
-
-sealed class SysPartitionMut
-{
-	public Dictionary<NodeState, List<MixNode>> Forest { get; } = new();
-	public Dictionary<NodeState, List<Ctrl>> CtrlTriggers { get; } = new();
-	public Dictionary<NodeState, R> RMap { get; } = new();
-
-	public SysPartition ToSysPartition() => new(
-		Forest.ToDictionary(e => e.Key, e => e.Value.ToArray()),
-		CtrlTriggers.ToDictionary(e => e.Key, e => e.Value.ToArray()),
-		RMap
-	);
-}
-
-
 
 file static class ScrollManLocalUtils
 {
@@ -212,30 +168,5 @@ file static class ScrollManLocalUtils
 			.RMap;
 
 		return (tree.Root, rMap);
-	}
-}
-
-
-
-
-
-file static class ScrollManDictionaryExtLocal
-{
-	public static Dictionary<K1, Dictionary<K2, V>> D<K1, K2, V>(this Dictionary<K1, Dictionary<K2, V>> dicts, IRoDispBase d)
-		where K1 : notnull
-		where K2 : notnull
-		where V : IDisposable
-	{
-		Disposable.Create(() =>
-		{
-			foreach (var dict in dicts.Values)
-			{
-				foreach (var val in dict.Values)
-					val.Dispose();
-				dict.Clear();
-			}
-			dicts.Clear();
-		}).D(d);
-		return dicts;
 	}
 }

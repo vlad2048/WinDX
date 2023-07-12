@@ -1,4 +1,6 @@
-﻿using ControlSystem.Logic.Popup_.Structs;
+﻿using ControlSystem.Logic.Invalidate_;
+using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Logic.Rendering_;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Utils;
@@ -6,9 +8,9 @@ using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib;
-using RenderLib.Renderers.GDIPlus;
 using SysWinInterfaces;
 using SysWinLib;
+using SysWinLib.Defaults;
 using SysWinLib.Structs;
 using UserEvents;
 using UserEvents.Structs;
@@ -56,7 +58,8 @@ sealed class PopupWin : Ctrl, IWin
 		this.D(sysWin.D);
 
 
-		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
+		var rendererSwitcher = new RendererSwitcher(sysWin, null).D(D);
+
 
 		Obs.Merge(
 			mainWin.ScreenPt.ToUnit(),
@@ -72,7 +75,7 @@ sealed class PopupWin : Ctrl, IWin
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
 		{
 			using var d = new Disp();
-			var gfx = renderer.GetGfx(false).D(d);
+			var gfx = rendererSwitcher.Renderer.GetGfx(false).D(d);
 			RenderUtils.RenderTree(
 				subPartitionRebased,
 				gfx,
@@ -99,6 +102,7 @@ file static class PopupWinUtils
 	{
 		var win = new SysWin(e =>
 		{
+			e.WinClass = WinClasses.PopupWindow;
 			e.CreateWindowParams = new CreateWindowParams
 			{
 				Name = "Popup",
@@ -110,7 +114,7 @@ file static class PopupWinUtils
 				Styles =
 					WindowStyles.WS_VISIBLE |
 					WindowStyles.WS_POPUP |
-					WindowStyles.WS_CLIPSIBLINGS |
+					//WindowStyles.WS_CLIPSIBLINGS |
 					//WindowStyles.WS_ |
 					0,
 
@@ -123,7 +127,6 @@ file static class PopupWinUtils
 
 				Parent = winParentHandle,
 			};
-			// ReSharper disable once AccessToModifiedClosure
 			e.NCStrat = NCStrats.Always(HitTestResult.HTCLIENT);
 		});
 		win.Init();

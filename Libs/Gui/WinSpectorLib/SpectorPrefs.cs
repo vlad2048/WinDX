@@ -9,6 +9,7 @@ sealed class SpectorPrefs
 {
 	public bool ShowEvents { get; set; }
 	public bool ShowSysCtrls { get; set; }
+	public (int, int) ResizeSz { get; set; } = (20, 10);
 
 
 	public void Save() => Saving?.Invoke(null, EventArgs.Empty);
@@ -20,6 +21,7 @@ sealed class SpectorPrefs
 			{
 				e.ShowEvents,
 				e.ShowSysCtrls,
+				e.ResizeSz,
 			})
 			.PersistOn(nameof(Saving));
 }

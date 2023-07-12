@@ -1,7 +1,6 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using ControlSystem.Logic.Scrolling_;
 using ControlSystem.Logic.Scrolling_.State;
 using PowBasics.Geom;
 using PowRxVar;
@@ -53,7 +52,7 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	/// </summary>
 	public void DispatchEvt(IUserEvt evt) => whenEvt.OnNext(evt);
 
-	public ScrollState ScrollState { get; }
+	public ScrollStateVec ScrollState { get; }
 
 	public IObservable<Unit> WhenChanged => Obs.Merge(R.ToUnit(), ScrollState.WhenChanged);
 	public IObservable<Unit> WhenInvalidateRequired => ScrollState.WhenInvalidateRequired;
@@ -63,7 +62,7 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 		Name = name ?? string.Empty;
 		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(D);
 		whenEvt = new Subject<IUserEvt>().D(D);
-		ScrollState = new ScrollState().D(D);
+		ScrollState = new ScrollStateVec().D(D);
 	}
 
 	public override string ToString() => Name;

@@ -1,4 +1,5 @@
-﻿using PowBasics.Geom;
+﻿using ControlSystem.Logic.Scrolling_.Structs.Enum;
+using PowBasics.Geom;
 
 namespace ControlSystem.Logic.Scrolling_.Structs;
 

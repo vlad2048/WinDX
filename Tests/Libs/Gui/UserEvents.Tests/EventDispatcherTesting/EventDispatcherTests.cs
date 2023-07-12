@@ -1,4 +1,5 @@
-﻿using PowBasics.Geom;
+﻿using System.Windows.Forms;
+using PowBasics.Geom;
 using PowRxVar;
 using TestBase;
 using UserEvents.Structs;
@@ -237,8 +238,8 @@ file static class Win2NodesTestsUtils
     }
     public static IUserEvt BtnDown() => new MouseButtonDownUserEvt(mousePos, MouseBtn.Left);
     public static IUserEvt BtnUp() => new MouseButtonUpUserEvt(mousePos, MouseBtn.Left);
-    public static IUserEvt KeyDown() => new KeyDownUserEvt(VirtualKey.K);
-    public static IUserEvt KeyUp() => new KeyUpUserEvt(VirtualKey.K);
+    public static IUserEvt KeyDown() => new KeyDownUserEvt(Keys.K);
+    public static IUserEvt KeyUp() => new KeyUpUserEvt(Keys.K);
 
 
 
@@ -256,6 +257,6 @@ file static class Win2NodesTestsUtils
     }
     public static NodeEvt BtnDown(NodeZ node) => new(node.Node, new MouseButtonDownUserEvt(mousePos, MouseBtn.Left));
     public static NodeEvt BtnUp(NodeZ node) => new(node.Node, new MouseButtonUpUserEvt(mousePos, MouseBtn.Left));
-    public static NodeEvt KeyDown(NodeZ node) => new(node.Node, new KeyDownUserEvt(VirtualKey.K));
-    public static NodeEvt KeyUp(NodeZ node) => new(node.Node, new KeyUpUserEvt(VirtualKey.K));
+    public static NodeEvt KeyDown(NodeZ node) => new(node.Node, new KeyDownUserEvt(Keys.K));
+    public static NodeEvt KeyUp(NodeZ node) => new(node.Node, new KeyUpUserEvt(Keys.K));
 }

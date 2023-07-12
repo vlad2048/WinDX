@@ -1,23 +1,36 @@
 ﻿using System.Reactive.Linq;
+using System.Reactive.Subjects;
+using ControlSystem;
 using ControlSystem.Structs;
+using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
 using PowWinForms;
+using UserEvents;
+using WinAPI.User32;
 using WinSpectorLib.Logic;
 using WinSpectorLib.Structs;
+using WinSpectorLib.Utils;
+using Message = System.Windows.Forms.Message;
 
 namespace WinSpectorLib;
 
 sealed partial class WinSpectorWin : Form
 {
+	private readonly SpectorPrefs prefs = null!;
+	private readonly ISubject<ShortcutMsg> whenShortcut = null!;
+	private IObservable<ShortcutMsg> WhenShortcut => whenShortcut.AsObservable();
+	private IRoMayVar<MixLayout> selLayout = null!;
+
 	public WinSpectorWin(params DemoNfo[] demos)
 	{
 		InitializeComponent();
 		if (WinFormsUtils.IsDesignMode) return;
 
-		var prefs = new SpectorPrefs().Track();
+		prefs = new SpectorPrefs().Track();
 		var ui = this;
 
+		whenShortcut = new Subject<ShortcutMsg>().D(this);
 		var showEvents = prefs.VarMake(e => e.ShowEvents).D(this);
 		var showSysCtrls = prefs.VarMake(e => e.ShowSysCtrls).D(this);
 		var trackedState = VarMay.Make<NodeState>().D(this);
@@ -29,7 +42,8 @@ sealed partial class WinSpectorWin : Form
 
 			WinUtils.HookShowEvents(ui, showEvents).D(d);
 			Setup.ShowDemos(ui, demos).D(d);
-			Setup.ListWindowsAndGetVirtualTree(ui, out var selLayout, showSysCtrls).D(d);
+			Setup.ListWindowsAndGetVirtualTree(ui, out selLayout, showSysCtrls, prefs).D(d);
+			WinUtils.SetupShortcuts((WhenShortcut, selLayout), prefs).D(d);
 
 			selLayout.Subscribe(_ => trackedState.V = May.None<NodeState>()).D(d);
 
@@ -42,11 +56,34 @@ sealed partial class WinSpectorWin : Form
 
 		});
 	}
+
+	protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+	{
+		var m = new ShortcutMsg(keyData);
+		whenShortcut.OnNext(m);
+		return m.Handled switch {
+			true => true,
+			false => base.ProcessCmdKey(ref msg, keyData)
+		};
+
+	}
 }
 
 
 file static class WinUtils
 {
+	public static IDisposable SetupShortcuts((IObservable<ShortcutMsg>, IRoMayVar<MixLayout>) t, SpectorPrefs prefs)
+	{
+		var d = new Disp();
+		t.WhenShortcut(Keys.Control | Keys.Add).Subscribe(win => win.SetSize(win.ScreenR.V.Size + prefs.ResizeSz.ToSz())).D(d);
+		t.WhenShortcut(Keys.Control | Keys.Subtract).Subscribe(win => win.SetSize(win.ScreenR.V.Size - prefs.ResizeSz.ToSz())).D(d);
+
+		t.WhenShortcut(Keys.Control | Keys.R).Subscribe(win => win.Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw)).D(d);
+
+		return d;
+	}
+
+
 	public static IDisposable HookShowEvents(
 		WinSpectorWin ui,
 		IRoVar<bool> showEvents

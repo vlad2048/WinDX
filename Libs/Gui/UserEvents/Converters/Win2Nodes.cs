@@ -4,7 +4,7 @@ using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
 using UserEvents.Structs;
-using UserEvents.Utils;
+#pragma warning disable CS8604
 
 #pragma warning disable CS8602
 
@@ -55,8 +55,7 @@ public static class UserEventConverter
 
 		HandleMouseLeave(
 			mayHovVar,
-			winEvt,
-			nodeLock
+			winEvt
 		).D(d);
 
 		return d;
@@ -218,8 +217,7 @@ public static class UserEventConverter
 
 	private static IDisposable HandleMouseLeave(
 		IRwMayVar<NodeZ> mayHovVar,
-		IObservable<IUserEvt> winEvt,
-		IRoMayVar<INode> nodeLock
+		IObservable<IUserEvt> winEvt
 	)
 	{
 		var d = new Disp();
@@ -258,11 +256,4 @@ public static class UserEventConverter
 	}
 
 	private static bool Send(this NodeZ node, IUserEvt evt) => node.Node.Send(evt);
-
-
-	private static bool IsLocked(this NodeZ node, IRoMayVar<INode> nodeLock) => nodeLock.V.IsSome(out var nodeLockState) switch
-	{
-		true => node.Node != nodeLockState,
-		false => true
-	};
 }

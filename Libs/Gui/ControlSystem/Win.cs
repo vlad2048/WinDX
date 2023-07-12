@@ -2,6 +2,7 @@
 using ControlSystem.Logic.Invalidate_;
 using ControlSystem.Logic.Popup_;
 using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Logic.Rendering_;
 using ControlSystem.Logic.Scrolling_;
 using ControlSystem.Logic.Scrolling_.Utils;
 using ControlSystem.Structs;
@@ -19,6 +20,8 @@ using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
 using RenderLib;
+using RenderLib.Renderers;
+using RenderLib.Renderers.GDIPlus;
 using SysWinLib;
 using SysWinLib.Structs;
 using TreePusherLib.ConvertExts.Structs;
@@ -26,6 +29,7 @@ using UserEvents;
 using UserEvents.Generators;
 using UserEvents.Structs;
 using WinAPI.User32;
+using WinAPI.Utils.Exts;
 using WinAPI.Windows;
 
 namespace ControlSystem;
@@ -60,6 +64,7 @@ public class Win : Ctrl, IMainWin
 	public IObservable<IUserEvt> Evt { get; }
 	public IRoTracker<IWin> Wins => rwWins;
 	public IInvalidator Invalidator => fullInvalidator;
+	public void SetSize(Sz sz) => sysWin.SetR(new R(ScreenR.V.Pos, sz), WindowPositionFlags.SWP_NOMOVE | WindowPositionFlags.SWP_NOACTIVATE);
 
 
 	public override string ToString() => GetType().Name;
@@ -86,9 +91,9 @@ public class Win : Ctrl, IMainWin
 		Wins.MergeManyTrackers(e => e.Nodes).SelectTracker(e => e.Item).DispatchEvents(out var nodeLock, this).D(D);
 		nodeLock.PipeTo(SpectorDrawState.LockedNode);
 
+		var rendererSwitcher = new RendererSwitcher(sysWin, Invalidator).D(D);
 
-		var renderer = RendererGetter.Get(RendererType.GDIPlus, sysWin).D(D);
-		var scrollMan = new ScrollMan(renderer).D(D);
+		var scrollMan = new ScrollMan(rendererSwitcher.Renderer).D(D);
 
 		var isAdded = false;
 		void AddIFN() { if (isAdded) return; isAdded = true; WinMan.AddWin(this); }
@@ -121,7 +126,7 @@ public class Win : Ctrl, IMainWin
 			if (isLayoutRequired)
 			{
 				partitionSet.V = this
-					.BuildCtrlTree(renderer)
+					.BuildCtrlTree(rendererSwitcher.Renderer)
 					.SolveTree(this, sysWin.ClientR.V.Size, out var mixLayout)
 					.SplitPopups()
 					.AddScrollBars(scrollMan)
@@ -137,7 +142,9 @@ public class Win : Ctrl, IMainWin
 
 
 			using var d = new Disp();
-			var gfx = renderer.GetGfx(false).D(d);
+			var gfx = rendererSwitcher.Renderer.GetGfx(false).D(d);
+			//var gdi = (GDIPlus_Gfx)gfx;
+			//gdi.Gfx.ExcludeClip(new R(20, 70, 200, 300).ToDrawRect());
 			RenderUtils.RenderTree(
 				partitionSet.V.MainPartition,
 				gfx,

@@ -26,7 +26,23 @@ public enum RedrawReason
 	SpectorOverlay,
 	SpectorRequestFullRedraw,
 	UserCode,
+	RendererSwitched,
 }
+
+public static class RedrawReasonExt
+{
+	public static bool IsLayoutRequired(this RedrawReason e) => e switch
+	{
+		RedrawReason.Resize => true,
+		RedrawReason.Ctrl => true,
+		RedrawReason.Node => true,
+		RedrawReason.SpectorOverlay => false,
+		RedrawReason.SpectorRequestFullRedraw => true,
+		RedrawReason.UserCode => true,
+		RedrawReason.RendererSwitched => false,
+	};
+}
+
 
 public interface IInvalidator
 {
@@ -38,4 +54,5 @@ public interface IMainWinUserEventsSupport : IWinUserEventsSupport
 	IObservable<IUserEvt> Evt { get; }
 	IInvalidator Invalidator { get; }
 	IRoTracker<IWin> Wins { get; }
+	void SetSize(Sz sz);
 }

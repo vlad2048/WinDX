@@ -1,8 +1,10 @@
-﻿using PowBasics.Geom;
+﻿using System.Reactive.Disposables;
+using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Renderers.GDIPlus.Utils;
 using RenderLib.Structs;
 using SysWinInterfaces;
+using WinAPI.User32;
 using WinAPI.Utils.Exts;
 
 namespace RenderLib.Renderers.GDIPlus;
@@ -43,6 +45,14 @@ public sealed class GDIPlus_WinCtx : IRenderWinCtx
 
 public sealed class GDIPlus_Gfx : IGfx
 {
+	private enum EGdiMethod
+	{
+		FromHwnd,
+		GetWindowDC,
+		BeginPaint,
+	}
+
+	private const EGdiMethod GdiMethod = EGdiMethod.FromHwnd;
 	private const TextFormatFlags TextFormatFlags = System.Windows.Forms.TextFormatFlags.PreserveGraphicsClipping;
 	private static readonly Size TextProposedSize = new(int.MaxValue, int.MaxValue);
 
@@ -61,10 +71,34 @@ public sealed class GDIPlus_Gfx : IGfx
 		this.pencils = pencils;
 		this.measureOnly = measureOnly;
 		R = win.ClientR.V;
-		Gfx = Graphics.FromHwnd(win.Handle).D(d);
 
-		//var hdc = User32Methods.GetWindowDC(win.Handle);
-		//Gfx = Graphics.FromHdc(hdc).D(d);
+		switch (GdiMethod)
+		{
+			case EGdiMethod.FromHwnd:
+			{
+				Gfx = Graphics.FromHwnd(win.Handle).D(d);
+				break;
+			}
+
+			case EGdiMethod.GetWindowDC:
+			{
+				var hdc = User32Methods.GetWindowDC(win.Handle);
+				Gfx = Graphics.FromHdc(hdc).D(d);
+				break;
+			}
+
+			case EGdiMethod.BeginPaint:
+			{
+				var hdc = User32Methods.BeginPaint(win.Handle, out var ps);
+				Gfx = Graphics.FromHdc(hdc).D(d);
+				Disposable.Create(() =>
+				{
+					User32Methods.EndPaint(win.Handle, ref ps);
+				}).D(d);
+				break;
+			}
+		}
+
 	}
 
 	private bool DrawDisabled => measureOnly || R.IsDegenerate;

@@ -17,7 +17,7 @@ static class SpectorWinRenderUtils
 		IGfx gfx
 	)
 	{
-		if (layout.IsEmpty) return;
+		if (layout.IsEmpty || Cfg.V.Tweaks.DisableWinSpectorDrawing) return;
 
 		gfx.R = layout.RMap.Values.First().WithZeroPos();
 

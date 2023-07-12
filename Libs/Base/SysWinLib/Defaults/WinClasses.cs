@@ -7,6 +7,9 @@ namespace SysWinLib.Defaults;
 
 public static class WinClasses
 {
+	public static string MainWindow => mainWindow.Value;
+	public static string PopupWindow => popupWindow.Value;
+
 	private static readonly Lazy<string> mainWindow = new(() => RegisterClassUtils.Register(
 		"MainWindow",
 		new RegisterClassParams
@@ -21,5 +24,18 @@ public static class WinClasses
 			BackgroundBrush = Gdi32Helpers.GetStockObject(StockObject.BLACK_BRUSH),
 		}
 	));
-	public static string MainWindow => mainWindow.Value;
+
+	private static readonly Lazy<string> popupWindow = new(() => RegisterClassUtils.Register(
+		"PopupWindow",
+		new RegisterClassParams
+		{
+			Styles =
+				WindowClassStyles.CS_HREDRAW |
+				WindowClassStyles.CS_VREDRAW |
+				0
+			,
+			WinProc = SysWin.WndProc,
+			BackgroundBrush = Gdi32Helpers.GetStockObject(StockObject.BLACK_BRUSH),
+		}
+	));
 }

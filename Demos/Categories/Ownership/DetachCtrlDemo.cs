@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Windows.Forms;
 using ControlSystem;
 using ControlSystem.Structs;
 using LayoutSystem.Flex.LayStrats;
@@ -32,7 +33,7 @@ sealed class DetachCtrlDemo : Win
 		Win? winDetached = null;
 
 		// Toggle Attached (if not disposed)
-		Evt.WhenKeyDown(VirtualKey.A).Subscribe(_ =>
+		Evt.WhenKeyDown(Keys.A).Subscribe(_ =>
 		{
 			switch (state.V)
 			{
@@ -55,7 +56,7 @@ sealed class DetachCtrlDemo : Win
 		}).D(D);
 
 		// Dispose (if not disposed)
-		Evt.WhenKeyDown(VirtualKey.D).Subscribe(_ =>
+		Evt.WhenKeyDown(Keys.D).Subscribe(_ =>
 		{
 			if (state.V == State.Disposed) return;
 
@@ -69,7 +70,7 @@ sealed class DetachCtrlDemo : Win
 		}).D(D);
 
 		// Create (if disposed)
-		Evt.WhenKeyDown(VirtualKey.C).Subscribe(_ =>
+		Evt.WhenKeyDown(Keys.C).Subscribe(_ =>
 		{
 			if (state.V != State.Disposed) return;
 			if (serD.Value != null || winDetached != null || ctrlDetach != null) throw new ArgumentException("Impossible");

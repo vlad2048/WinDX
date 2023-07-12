@@ -1,5 +1,6 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Windows.Forms;
 using DynamicData;
 using PowBasics.Geom;
 using PowRxVar;
@@ -242,8 +243,8 @@ public static class UserEventGenerator
 			msg.WhenMOUSEMOVE	().Select(e => new MouseMoveUserEvt			(e.Point.ToPt()						     )),
 			msg.WhenMOUSELEAVE	().Select(_ => new MouseLeaveUserEvt		(									     )),
 
-			msg.WhenKEYDOWN		().Select(e => new KeyDownUserEvt			(e.Key								     )),
-			msg.WhenKEYUP		().Select(e => new KeyUpUserEvt				(e.Key								     )),
+			msg.WhenKEYDOWN		().Select(e => new KeyDownUserEvt			(e.Key.ToKeys()						     )),
+			msg.WhenKEYUP		().Select(e => new KeyUpUserEvt				(e.Key.ToKeys()						     )),
 			msg.WhenCHAR		().Select(e => new KeyCharUserEvt			(e.Key								     )),
 
 			msg.WhenSETFOCUS	().Select(_ => new GotFocusUserEvt			(									     )),
@@ -262,4 +263,24 @@ public static class UserEventGenerator
 	private static bool IsInactive		(this WindowActivateFlag flag) => flag is WindowActivateFlag.WA_INACTIVE;
 	private static bool IsClickActive	(this WindowActivateFlag flag) => flag is WindowActivateFlag.WA_CLICKACTIVE;
 // @formatter:on
+
+
+	private static Keys ToKeys(this VirtualKey key)
+	{
+		var isCtrl = User32Methods.GetKeyState(VirtualKey.CONTROL).IsPressed;
+		var isAlt = User32Methods.GetKeyState(VirtualKey.MENU).IsPressed;
+		var isShift = User32Methods.GetKeyState(VirtualKey.SHIFT).IsPressed;
+		var res = (Keys)key;
+
+		void Add(bool cond, Keys flag)
+		{
+			if (cond)
+				res |= flag;
+		}
+
+		Add(isCtrl, Keys.Control);
+		Add(isAlt, Keys.Alt);
+		Add(isShift, Keys.Shift);
+		return res;
+	}
 }

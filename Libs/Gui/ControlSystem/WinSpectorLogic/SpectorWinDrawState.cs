@@ -42,11 +42,14 @@ sealed class SpectorWinDrawState : IDisposable
         SelNode = VarMay.Make<MixNode>().D(d);
         HovNode = VarMay.Make<MixNode>().D(d);
         LockedNode = VarMay.Make<INode>().D(d);
-        WhenChanged = Obs.Merge(
-	        SelNode.Skip(1).ToUnit(),
-            HovNode.Skip(1).ToUnit(),
-            LockedNode.Skip(1).ToUnit()
-        );
+
+        WhenChanged =
+	        Obs.Merge(
+		        SelNode.Skip(1).ToUnit(),
+	            HovNode.Skip(1).ToUnit(),
+	            LockedNode.Skip(1).ToUnit()
+	        )
+		        .Where(_ => !Cfg.V.Tweaks.DisableWinSpectorDrawing);
 
         subMap = wins
 	        .Items

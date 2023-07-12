@@ -1,5 +1,5 @@
 ﻿using System.Drawing;
-using ControlSystem.Logic.Scrolling_.Structs;
+using ControlSystem.Logic.Scrolling_.Structs.Enum;
 using PowBasics.Geom;
 using RenderLib.Structs;
 
@@ -7,6 +7,12 @@ namespace ControlSystem.Logic.Scrolling_;
 
 static class ScrollBarConsts
 {
+	public const int ScrollUnit = 16;
+	public const int WheelMult = 3;
+
+	public const int BtnLength = 17;
+	public const int MinThumbLength = 17;
+
 	public static readonly PenDef EdgeInnerColor = new(Color.White, 1);
 	public static readonly PenDef EdgeOuterColor = new(Color.FromArgb(0xF0, 0xF0, 0xF0), 1);
 	public static readonly BrushDef BackColor = new SolidBrushDef(Color.FromArgb(0xF0, 0xF0, 0xF0));

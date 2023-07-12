@@ -1,6 +1,8 @@
 ﻿using ControlSystem.Logic.Popup_;
 using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Logic.Scrolling_.State;
+using ControlSystem.Logic.Scrolling_.Structs;
+using ControlSystem.Logic.Scrolling_.Structs.Enum;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using LayoutSystem.Flex.Structs;
@@ -10,57 +12,33 @@ using PowMaybe;
 
 namespace ControlSystem.Logic.Scrolling_.Utils;
 
-sealed record ScrollNfo(
-	ScrollState State,
-	BoolVec Enabled,
-	BoolVec Visible,
-	Sz ViewSz,
-	Sz ContSz,
-	R ViewR
-)
-{
-	public static ScrollNfo MkEmpty(NodeState state) => new(
-		state.ScrollState,
-		BoolVec.False,
-		BoolVec.False,
-		Sz.Empty,
-		Sz.Empty,
-		R.Empty
-	);
-}
-
 static class ScrollUtils
 {
 	public static ScrollNfo GetScrollInfos(this Partition partition, NodeState state)
 	{
 		if (!partition.NodeMap.ContainsKey(state))
-			return ScrollNfo.MkEmpty(state);
+			return ScrollNfo.Empty;
 
 		var node = partition.NodeMap[state];
 		var stNode = (StFlexNode)node.V;
-		var scrollEnabled = stNode.Flex.Flags.Scroll;
-		var scrollVisible = partition.AreScrollBarsVisible(state);
-		var crossSz = GeomMaker.SzDirFun(dir => scrollVisible.Dir(dir.Neg()) ? FlexFlags.ScrollBarCrossDims.Dir(dir) : 0);
-		var viewSz = partition.RMap[state].Size - crossSz;
-		var contSz = node
+		var enabled = stNode.Flex.Flags.Scroll;
+		var view = partition.RMap[state].Size;
+		var cont = node
 			.GetFirstChildrenWhere(e => e is StFlexNode st && partition.RMap.ContainsKey(st.State))
 			.Select(e => partition.RMap[((StFlexNode)e.V).State] + ((StFlexNode)e.V).Flex.Marg)
 			.Union()
 			.Size;
-		//var nodeR = partition.RMap[state];
-		//var trakSz = GeomMaker.SzDirFun(dir => scrollVisible.Dir(dir) switch
-		//{
-		//	false => 0,
-		//	truer => Math.Max(0, GetScrollBarR(nodeR, dir, scrollVisible == BoolVec.True).Dir(dir) - 2 * 17)
-		//});
+		var (stateX, stateY) = ScrollStateCalculator.Get(enabled, view, cont);
+		var viewSub = new Sz(
+			stateY.IsVisible() ? FlexFlags.ScrollBarCrossDims.Width : 0,
+			stateX.IsVisible() ? FlexFlags.ScrollBarCrossDims.Height : 0
+		);
+
 		return new ScrollNfo(
-			stNode.State.ScrollState,
-			scrollEnabled,
-			scrollVisible,
-			viewSz,
-			contSz,
-			//trakSz,
-			new R(partition.GetNodeR(state).Ensure().Pos, viewSz)
+			(stateX, stateY),
+			view - viewSub,
+			cont,
+			new R(partition.GetNodeR(state).Ensure().Pos, view - viewSub)
 		);
 	}
 
@@ -99,33 +77,6 @@ static class ScrollUtils
 		{
 			Partitions = partitionSet.Partitions.SelectToArray(partition => partition.ApplyOfsMap(ofsMap))
 		};
-	}
-
-
-	private static Partition ApplyOfsMap(this Partition partition, IReadOnlyDictionary<NodeState, Pt> ofsMap) =>
-		partition with
-		{
-			RMap = partition.RMap.ToDictionary(
-				kv => kv.Key,
-				kv => kv.Value - ofsMap[kv.Key]
-			)
-		};
-
-
-
-
-
-	private static BoolVec AreScrollBarsVisible(this Partition partition, NodeState state)
-	{
-		var node = partition.NodeMap[state];
-		var scrollEnabled = ((StFlexNode)node.V).Flex.Flags.Scroll;
-		var viewSz = partition.RMap[state].Size;
-		var contSz = node
-			.GetFirstChildrenWhere(e => e is StFlexNode st && partition.RMap.ContainsKey(st.State))
-			.Select(e => partition.RMap[((StFlexNode)e.V).State] + ((StFlexNode)e.V).Flex.Marg)
-			.Union()
-			.Size;
-		return IsScrollNeeded(scrollEnabled, viewSz, contSz);
 	}
 
 
@@ -173,7 +124,7 @@ static class ScrollUtils
 	{
 		var cross = FlexFlags.ScrollBarCrossDims;
 		var isX = r.Height >= cross.Height;
-		var isY = r.Width >= FlexFlags.ScrollBarCrossDims.Width;
+		var isY = r.Width >= cross.Width;
 		if (!isX || !isY) throw new ArgumentException("Impossible");
 		return new R(
 			r.X + r.Width - cross.Width,
@@ -181,6 +132,35 @@ static class ScrollUtils
 			cross.Width,
 			cross.Height
 		);
+	}
+
+
+
+	
+	private static Partition ApplyOfsMap(this Partition partition, IReadOnlyDictionary<NodeState, Pt> ofsMap) =>
+		partition with
+		{
+			RMap = partition.RMap.ToDictionary(
+				kv => kv.Key,
+				kv => kv.Value - ofsMap[kv.Key]
+			)
+		};
+
+
+
+
+
+	private static BoolVec AreScrollBarsVisible(this Partition partition, NodeState state)
+	{
+		var node = partition.NodeMap[state];
+		var scrollEnabled = ((StFlexNode)node.V).Flex.Flags.Scroll;
+		var viewSz = partition.RMap[state].Size;
+		var contSz = node
+			.GetFirstChildrenWhere(e => e is StFlexNode st && partition.RMap.ContainsKey(st.State))
+			.Select(e => partition.RMap[((StFlexNode)e.V).State] + ((StFlexNode)e.V).Flex.Marg)
+			.Union()
+			.Size;
+		return IsScrollNeeded(scrollEnabled, viewSz, contSz);
 	}
 
 
@@ -192,8 +172,14 @@ static class ScrollUtils
 		(scrollEnabled.X, scrollEnabled.Y) switch
 		{
 			(false, false) => BoolVec.False,
-			(truer, false) => new BoolVec(contSz.Width > viewSz.Width && viewSz.Height >= FlexFlags.ScrollBarCrossDims.Height, false),
-			(false, truer) => new BoolVec(false, contSz.Height > viewSz.Height && viewSz.Width >= FlexFlags.ScrollBarCrossDims.Width),
+			(truer, false) => new BoolVec(
+				contSz.Width > viewSz.Width && viewSz.Height >= FlexFlags.ScrollBarCrossDims.Height,
+				false
+			),
+			(false, truer) => new BoolVec(
+				false,
+				contSz.Height > viewSz.Height && viewSz.Width >= FlexFlags.ScrollBarCrossDims.Width
+			),
 			(truer, truer) => IsScrollNeededWhenTotallyEnabled(viewSz, contSz)
 		};
 

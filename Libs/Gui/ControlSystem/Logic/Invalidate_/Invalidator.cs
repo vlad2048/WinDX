@@ -26,10 +26,21 @@ sealed class Invalidator : IInvalidator, IDisposable
 	{
 		reasonTracker = Tracker.Make<RedrawReason>().D(d);
 
-		reasonTracker.ItemsList.CountChanged.Where(e => e > 0).Subscribe(_ =>
+		reasonTracker.Items
+			.Where(_ =>
+			{
+				var arr = reasonTracker.ItemsArr;
+				return arr.Any(e => e != RedrawReason.Resize);
+			})
+			.Subscribe(_ =>
+			{
+				mainWin.SysInvalidate();
+			}).D(d);
+
+		/*reasonTracker.ItemsList.CountChanged.Where(e => e > 0).Subscribe(_ =>
 		{
 			mainWin.SysInvalidate();
-		}).D(d);
+		}).D(d);*/
 	}
 
 	public bool IsLayoutRequired()
@@ -45,20 +56,6 @@ sealed class Invalidator : IInvalidator, IDisposable
 	}
 }
 
-
-
-file static class InvalidatorExt
-{
-	public static bool IsLayoutRequired(this RedrawReason e) => e switch
-	{
-		RedrawReason.Resize => true,
-		RedrawReason.Ctrl => true,
-		RedrawReason.Node => true,
-		RedrawReason.SpectorOverlay => false,
-		RedrawReason.SpectorRequestFullRedraw => true,
-		RedrawReason.UserCode => true,
-	};
-}
 
 
 

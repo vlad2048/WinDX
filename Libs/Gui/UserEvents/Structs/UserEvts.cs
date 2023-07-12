@@ -1,4 +1,5 @@
-﻿using PowBasics.Geom;
+﻿using System.Windows.Forms;
+using PowBasics.Geom;
 using WinAPI.User32;
 // ReSharper disable WithExpressionModifiesAllMembers
 
@@ -35,8 +36,8 @@ public sealed record       MouseMoveUserEvt(Pt Pos)					: IUserEvtMousePos			{ p
 public sealed record      MouseEnterUserEvt(Pt Pos)					: IUserEvtMousePos			{ public bool Handled { get; set; } public override string ToString() => $"Enter {Pos}";									     }
 public sealed record      MouseLeaveUserEvt							: IUserEvtMouse				{ public bool Handled { get; set; } public override string ToString() => "Leave";											     }
 
-public sealed record         KeyDownUserEvt(VirtualKey Key)			: IUserEvtKeyboard			{ public bool Handled { get; set; } public override string ToString() => $"'{Key}' down";									     }
-public sealed record           KeyUpUserEvt(VirtualKey Key)			: IUserEvtKeyboard			{ public bool Handled { get; set; } public override string ToString() => $"'{Key}' up";									     }
+public sealed record         KeyDownUserEvt(Keys Key)				: IUserEvtKeyboard			{ public bool Handled { get; set; } public override string ToString() => $"'{Key}' down";									     }
+public sealed record           KeyUpUserEvt(Keys Key)				: IUserEvtKeyboard			{ public bool Handled { get; set; } public override string ToString() => $"'{Key}' up";									     }
 public sealed record         KeyCharUserEvt(char Char)				: IUserEvtKeyboard			{ public bool Handled { get; set; } public override string ToString() => $"'{Char}' char";								     }
 
 public sealed record        GotFocusUserEvt							: IUserEvtWindow			{ public bool Handled { get; set; } public override string ToString() => "Got focus";										     }

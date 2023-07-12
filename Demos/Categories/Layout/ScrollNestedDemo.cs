@@ -3,6 +3,7 @@ using ControlSystem;
 using ControlSystem.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
+using PowBasics.StringsExt;
 using RenderLib.Structs;
 using PowRxVar;
 using WinAPI.User32;
@@ -14,10 +15,10 @@ sealed class ScrollNestedDemo : Win
 	public ScrollNestedDemo() : base(opt =>
 	{
 		opt.R = new R(-400, 50, 300, 400);
-		opt.Styles =
+		/*opt.Styles =
 			WindowStyles.WS_VISIBLE |
 			WindowStyles.WS_CLIPCHILDREN |
-			0;
+			0;*/
 	})
 	{
 		var nodeRoot = new NodeState("nodeRoot").D(D);
@@ -25,7 +26,7 @@ sealed class ScrollNestedDemo : Win
 		var nodeMiddle = new NodeState("nodeMiddle").D(D);
 		var nodeBottom = new NodeState("nodeBottom").D(D);
 		var nodeScroll = new NodeState("nodeScroll").D(D);
-		var nodesLines = Enumerable.Range(0, 2).SelectToArray((_, i) => new NodeState($"nodeLines[{i}]").D(D));
+		var nodesLines = Enumerable.Range(0, TextLines.Length).SelectToArray((_, i) => new NodeState($"nodeLines[{i}]").D(D));
 
 		var nodeScroll2 = new NodeState("nodeScroll2").D(D);
 		var nodesLines2 = Enumerable.Range(0, 1).SelectToArray((_, i) => new NodeState($"nodeLines2[{i}]").D(D));
@@ -44,7 +45,7 @@ sealed class ScrollNestedDemo : Win
 					r.FillR(Consts.InterBrush);
 				}
 
-				using (r[nodeScroll].StratStack(Dir.Vert).ScrollXY().Pop().Dim(140, 100).Marg(20).M)
+				using (r[nodeScroll].StratStack(Dir.Vert).ScrollXY()/*.Dim(200, 300)*/.Marg(20).M)
 				{
 					r.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines.Length; i++)
@@ -56,7 +57,7 @@ sealed class ScrollNestedDemo : Win
 							//if (i != 0)
 							{
 								r.FillR(Consts.LineBrush);
-								r.DrawText($"[{i}] 01234567890123456789 01234567890123456789 01234567890123456789 01234567890123456789 Line {i}", Consts.Font, Consts.TextColor);
+								r.DrawText($"[{i}] {TextLines[i]}", Consts.Font, Consts.TextColor);
 							}
 							/*else
 							{
@@ -120,4 +121,31 @@ sealed class ScrollNestedDemo : Win
 		public static readonly FontDef Font = FontDef.Default;
 		public static readonly Color TextColor = Color.Black;
 	}
+
+	private const string Text =
+		"""
+		France (French: [fʁɑ̃s] Listen), officially the French Republic (French: République française [ʁepyblik fʁɑ̃s�
+		�z]),[14] is a country located primarily in Western Europe. It also includes overseas regions and territories
+		in the Americas and the Atlantic, Pacific and Indian Oceans,[XII] giving it one of the largest discontiguous 
+		exclusive economic zones in the world. Its metropolitan area extends from the Rhine to the Atlantic Ocean and 
+		from the Mediterranean Sea to the English Channel and the North Sea; overseas territories include French Guiana 
+		in South America, Saint Pierre and Miquelon in the North Atlantic, the French West Indies, and many islands in 
+		Oceania and the Indian Ocean. Its eighteen integral regions (five of which are overseas) span a combined area 
+		of 643,801 km2 (248,573 sq mi) and had a total population of over 68 million as of January 2023.[5][8] France 
+		is a unitary semi-presidential republic with its capital in Paris, the country's largest city and main cultural 
+		and commercial centre; other major urban areas include Marseille, Lyon, Toulouse, Lille, Bordeaux, Strasbourg and Nice.
+
+		France (French: [fʁɑ̃s] Listen), officially the French Republic (French: République française [ʁepyblik fʁɑ̃s�
+		�z]),[14] is a country located primarily in Western Europe. It also includes overseas regions and territories
+		in the Americas and the Atlantic, Pacific and Indian Oceans,[XII] giving it one of the largest discontiguous 
+		exclusive economic zones in the world. Its metropolitan area extends from the Rhine to the Atlantic Ocean and 
+		from the Mediterranean Sea to the English Channel and the North Sea; overseas territories include French Guiana 
+		in South America, Saint Pierre and Miquelon in the North Atlantic, the French West Indies, and many islands in 
+		Oceania and the Indian Ocean. Its eighteen integral regions (five of which are overseas) span a combined area 
+		of 643,801 km2 (248,573 sq mi) and had a total population of over 68 million as of January 2023.[5][8] France 
+		is a unitary semi-presidential republic with its capital in Paris, the country's largest city and main cultural 
+		and commercial centre; other major urban areas include Marseille, Lyon, Toulouse, Lille, Bordeaux, Strasbourg and Nice.
+		""";
+
+	private static readonly string[] TextLines = Text.SplitInLines();
 }
