@@ -13,7 +13,7 @@ namespace ControlSystem.Utils;
 
 static class MixTreeUtils
 {
-	public static ReconstructedTree<IMixNode> BuildCtrlTree(this Ctrl ctrl, IRenderWinCtx renderer)
+	public static ReconstructedTree<IMixNode> BuildTree(this Ctrl ctrl, IRenderWinCtx renderer)
 	{
 		using var d = new Disp();
 		using var gfx = renderer.GetGfx(true).D(d);
@@ -31,7 +31,7 @@ static class MixTreeUtils
 			);
 	}
 
-	public static MixLayout ResolveCtrlTree(this ReconstructedTree<IMixNode> tree, FreeSz freeSz, Win win)
+	public static MixLayout SolveTree(this ReconstructedTree<IMixNode> tree, FreeSz freeSz, Win win)
 	{
 		var mixRoot = tree.Root.ApplyTextMeasures();
 

@@ -1,5 +1,4 @@
-﻿using ControlSystem.Logic.Invalidate_;
-using ControlSystem.Logic.Popup_.Structs;
+﻿using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Logic.Rendering_;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
@@ -7,7 +6,6 @@ using ControlSystem.WinSpectorLogic.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
-using RenderLib;
 using SysWinInterfaces;
 using SysWinLib;
 using SysWinLib.Defaults;
@@ -35,6 +33,7 @@ sealed class PopupWin : Ctrl, IWin
 	public Pt PopupOffset => layoutR.V.Pos;
 	public IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
 	public IRoVar<R> ScreenR => sysWin.ScreenR;
+	public IRoVar<Sz> ClientSz => sysWin.ClientSz;
 	public IRoTracker<NodeZ> Nodes => rwNodes;
 	public IRoTracker<ICtrl> Ctrls => rwCtrls;
 	public void SysInvalidate() => sysWin.Invalidate();

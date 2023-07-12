@@ -29,7 +29,7 @@ class Program
 	{
 		//VarDbg.BreakpointOnDispAlloc(21);
 
-		Thread.CurrentThread.Name = "Main-Thread";
+		Thread.CurrentThread.Name = "Main";
 
 		if (RunSingleDemo)
 		{

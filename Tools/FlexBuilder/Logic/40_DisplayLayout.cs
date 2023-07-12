@@ -125,8 +125,8 @@ static partial class Setup
 
 	private static void HookWinSizeBothWaysAndPersistPos(IRoMayVar<FlexLayout> layout, UserPrefs userPrefs, Action<FreeSz> winSzMutator, SysWin win)
 	{
-		win.ClientR
-			.Subscribe(r => { winSzMutator(FreeSzMaker.FromSz(r.Size)); }).D(win.D);
+		win.ClientSz
+			.Subscribe(sz => { winSzMutator(FreeSzMaker.FromSz(sz)); }).D(win.D);
 
 		win.ScreenPt
 			.Throttle(TimeSpan.FromSeconds(1))

@@ -19,17 +19,12 @@ using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
 using PowTrees.Algorithms;
-using RenderLib;
-using RenderLib.Renderers;
-using RenderLib.Renderers.GDIPlus;
 using SysWinLib;
 using SysWinLib.Structs;
-using TreePusherLib.ConvertExts.Structs;
 using UserEvents;
 using UserEvents.Generators;
 using UserEvents.Structs;
 using WinAPI.User32;
-using WinAPI.Utils.Exts;
 using WinAPI.Windows;
 
 namespace ControlSystem;
@@ -55,6 +50,7 @@ public class Win : Ctrl, IMainWin
 	public Pt PopupOffset => Pt.Empty;
 	public IRoVar<Pt> ScreenPt => sysWin.ScreenPt;
 	public IRoVar<R> ScreenR => sysWin.ScreenR;
+	public IRoVar<Sz> ClientSz => sysWin.ClientSz;
 	public IRoTracker<NodeZ> Nodes => rwNodes;
 	public IRoTracker<ICtrl> Ctrls => rwCtrls;
 	public void SysInvalidate() => sysWin.Invalidate();
@@ -101,7 +97,7 @@ public class Win : Ctrl, IMainWin
 
 		// Invalidate Triggers
 		// ===================
-		sysWin.ClientR.Trigger(() => Invalidator.Invalidate(RedrawReason.Resize)).D(D);
+		sysWin.ClientSz.Trigger(() => Invalidator.Invalidate(RedrawReason.Resize)).D(D);
 		SpectorDrawState.WhenChanged.Trigger(() => Invalidator.Invalidate(RedrawReason.SpectorOverlay)).D(D);
 
 		Wins.MergeManyTrackers(e => e.Ctrls)
@@ -126,11 +122,11 @@ public class Win : Ctrl, IMainWin
 			if (isLayoutRequired)
 			{
 				partitionSet.V = this
-					.BuildCtrlTree(rendererSwitcher.Renderer)
-					.SolveTree(this, sysWin.ClientR.V.Size, out var mixLayout)
-					.SplitPopups()
+					.BuildTree(rendererSwitcher.Renderer)
+					.SolveTree(FreeSzMaker.FromSz(ClientSz.V), this)
+					.SplitIntoPartitions()
 					.AddScrollBars(scrollMan)
-					.ApplyScrollOffsets(mixLayout)
+					.ApplyScrollOffsets()
 					.CreatePopups(popupMan)
 					.Assign_CtrlWins_and_NodeRs(this, popupMan);
 
@@ -163,30 +159,12 @@ public class Win : Ctrl, IMainWin
 
 file static class WinUtils
 {
-	public static MixLayout SolveTree(
-		this ReconstructedTree<IMixNode> tree,
-		Win win,
-		Sz clientSz,
-		out MixLayout mixLayout
-	)
-		=> mixLayout = tree.ResolveCtrlTree(FreeSzMaker.FromSz(clientSz), win);
-
-	public static PartitionSet AddScrollBars(this PartitionSet partitionSet, ScrollMan scrollMan)
-		=> scrollMan.AddScrollBars(partitionSet);
-	
-	public static PartitionSet SplitPopups(this MixLayout layout)
-		=> PopupSplitter.Split(layout);
-
-	
-
 	public static PartitionSet Assign_CtrlWins_and_NodeRs(
 		this PartitionSet partitionSet,
 		Win win,
 		PopupMan popupMan
 	)
 	{
-
-
 		(
 			from partition in partitionSet.Partitions
 			from ctrl in partition.CtrlSet

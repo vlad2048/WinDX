@@ -70,7 +70,7 @@ public sealed class GDIPlus_Gfx : IGfx
 	{
 		this.pencils = pencils;
 		this.measureOnly = measureOnly;
-		R = win.ClientR.V;
+		R = new R(Pt.Empty, win.ClientSz.V);
 
 		switch (GdiMethod)
 		{

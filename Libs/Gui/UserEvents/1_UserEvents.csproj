@@ -7,7 +7,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="DynamicData" Version="7.14.2" />
-		<PackageReference Include="PowBasics" Version="0.0.28" />
+		<PackageReference Include="PowBasics" Version="0.0.30" />
 		<PackageReference Include="PowRxVar.Maybe" Version="0.0.45" />
 	</ItemGroup>
 

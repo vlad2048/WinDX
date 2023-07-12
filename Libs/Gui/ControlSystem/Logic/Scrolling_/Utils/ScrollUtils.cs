@@ -43,7 +43,7 @@ static class ScrollUtils
 	}
 
 
-	public static PartitionSet ApplyScrollOffsets(this PartitionSet partitionSet, MixLayout mixLayout)
+	public static PartitionSet ApplyScrollOffsets(this PartitionSet partitionSet)
 	{
 		var states = partitionSet.Partitions.SelectMany(e => e.NodeStates).ToArray();
 		var ofsMap = states.ToDictionary(e => e, _ => Pt.Empty);
@@ -51,6 +51,7 @@ static class ScrollUtils
 		var statesWithOfs = states.WhereToArray(e => e.ScrollState.ScrollOfs != Pt.Empty);
 
 		var extraStateLinks = partitionSet.Partitions.Select(e => e.SysPartition.GetStateLinks()).Merge();
+		var mixLayout = partitionSet.MixLayout;
 
 		foreach (var state in statesWithOfs)
 		{

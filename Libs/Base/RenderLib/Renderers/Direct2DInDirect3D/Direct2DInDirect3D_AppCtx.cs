@@ -128,17 +128,17 @@ public sealed class Direct2DInDirect3D_WinCtx : IRenderWinCtx
 				appCtx.DXGIFactory,
 				appCtx.D3DDevice,
 				win.Handle,
-				win.ClientR.V.Size
+				win.ClientSz.V
 			).D(d);
 
 			InitResizeResources();
 		}).D(d);
 
-		win.ClientR
-			.Where(clientR => clientR is { Width: >= 1, Height: >= 1 } && win.IsInit.V)
-			.Subscribe(clientR =>
+		win.ClientSz
+			.Where(sz => sz is { Width: >= 1, Height: >= 1 } && win.IsInit.V)
+			.Subscribe(sz =>
 			{
-				Resize(clientR.Size);
+				Resize(sz);
 			}).D(d);
 
 		d.D(win.D);
@@ -214,7 +214,7 @@ public sealed class Direct2DInDirect3D_Gfx : IGfx
 		WinCtx = winCtx;
 		AppCtx = winCtx.AppCtx;
 		pencils = winCtx.Pencils;
-		R = win.ClientR.V;
+		R = new R(Pt.Empty, win.ClientSz.V);
 		T = winCtx.D2DRenderTarget;
 		D2DFactory = winCtx.AppCtx.D2DFactory;
 		DWRITEFactory = winCtx.AppCtx.DWRITEFactory;

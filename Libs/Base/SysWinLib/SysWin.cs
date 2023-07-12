@@ -47,9 +47,9 @@ public sealed class SysWin : ISysWin
 	public IntPtr Handle { get; private set; }
 	public IObservable<IPacket> WhenMsg => whenMsg.AsObservable();
 	public IRoVar<bool> IsInit { get; }
-	public IRoVar<R> ClientR { get; }
 	public IRoVar<Pt> ScreenPt { get; }
 	public IRoVar<R> ScreenR { get; }
+	public IRoVar<Sz> ClientSz { get; }
 
 	public SysWin(
 		Action<SysWinOpt>? optFun = null
@@ -69,19 +69,20 @@ public sealed class SysWin : ISysWin
 		// RType.Win				: correct 256x256
 		// RType.WinWithGripAreas	: correct 256x256
 
-		ClientR = Var.Make(
-			R.Empty,
+		ClientSz = Var.Make(
+			Sz.Empty,
 			Obs.Merge(
 				// hooking to WM_CREATE is just so other code doesn't get ClientR=Empty in WM_CREATE.
-				WhenMsg.WhenCREATE().Select(_ => this.GetR(RType.WinWithGripAreas).WithZeroPos()),
-				WhenMsg.WhenWINDOWPOSCHANGED().Select(e => new R(Pt.Empty, new Sz(e.Position.Width, e.Position.Height)))
+				WhenMsg.WhenCREATE().Select(_ => this.GetR(RType.WinWithGripAreas).Size),
+				WhenMsg.WhenWINDOWPOSCHANGED().Select(e => new Sz(e.Position.Width, e.Position.Height))
 			)
 		).D(D);
+
 		ScreenPt = Var.Make(
 			Pt.Empty,
 			WhenMsg.WhenWINDOWPOSCHANGED().Select(e => new Pt(e.Position.X, e.Position.Y))
 		).D(D);
-		ScreenR = Var.Expr(() => ClientR.V + ScreenPt.V);
+		ScreenR = Var.Expr(() => new R(ScreenPt.V, ClientSz.V));
 		IsInit = Var.Make(false, WhenMsg.WhenCREATE().Select(_ => true)).D(D);
 
 		gcHandle = GCHandle.Alloc(this);

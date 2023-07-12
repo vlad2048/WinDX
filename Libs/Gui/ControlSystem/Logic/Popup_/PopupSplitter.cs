@@ -3,13 +3,12 @@ using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using PowBasics.CollectionsExt;
-using PowBasics.Geom;
 
 namespace ControlSystem.Logic.Popup_;
 
 static class PopupSplitter
 {
-	public static PartitionSet Split(MixLayout mixLayout)
+	public static PartitionSet SplitIntoPartitions(this MixLayout mixLayout)
 	{
 		var backMap = mixLayout.MixRoot.ToDictionary(e => e.V);
 		var partitions = mixLayout.MixRoot

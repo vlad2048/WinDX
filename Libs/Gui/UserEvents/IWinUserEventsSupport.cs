@@ -12,6 +12,7 @@ public interface IWinUserEventsSupport
 	Pt PopupOffset { get; }
 	IRoVar<Pt> ScreenPt { get; }
 	IRoVar<R> ScreenR { get; }
+	IRoVar<Sz> ClientSz { get; }
 	IRoTracker<NodeZ> Nodes { get; }
 	IRoTracker<ICtrl> Ctrls { get; }
 	void SysInvalidate();

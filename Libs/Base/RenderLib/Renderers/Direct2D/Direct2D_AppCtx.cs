@@ -73,11 +73,11 @@ public sealed class Direct2D_WinCtx : IRenderWinCtx
 			InitResizeResources();
 		}).D(d);
 
-		win.ClientR
-			.Where(clientR => clientR is { Width: >= 1, Height: >= 1 } && win.IsInit.V)
-			.Subscribe(clientR =>
+		win.ClientSz
+			.Where(sz => sz is { Width: >= 1, Height: >= 1 } && win.IsInit.V)
+			.Subscribe(sz =>
 			{
-				Resize(clientR.Size);
+				Resize(sz);
 			}).D(d);
 
 		d.D(win.D);
@@ -102,7 +102,7 @@ public sealed class Direct2D_WinCtx : IRenderWinCtx
 		resizeSerialD.Value = null;
 		resizeSerialD.Value = new Disp();
 
-		var sz = win.ClientR.V.Size;
+		var sz = win.ClientSz.V;
 		//var dpi = User32Methods.GetDpiForWindow(win.Handle);
 		var renderTargetProperties = new D2D.RenderTargetProperties(
 			/*D2D.RenderTargetType.Default,
@@ -151,7 +151,7 @@ public sealed class Direct2D_Gfx : IGfx
 	{
 		this.win = win;
 		this.measureOnly = measureOnly;
-		R = win.ClientR.V;
+		R = new R(Pt.Empty, win.ClientSz.V);
 		T = winCtx.D2DHwndRenderTarget;
 		D2DFactory = winCtx.appCtx.D2DFactory;
 		DWRITEFactory = winCtx.appCtx.DWRITEFactory;

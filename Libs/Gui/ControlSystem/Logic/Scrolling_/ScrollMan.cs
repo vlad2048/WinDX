@@ -13,7 +13,10 @@ using RenderLib.Renderers;
 namespace ControlSystem.Logic.Scrolling_;
 
 
-
+static class ScrollManExt
+{
+	public static PartitionSet AddScrollBars(this PartitionSet partitionSet, ScrollMan scrollMan) => scrollMan.AddScrollBars(partitionSet);
+}
 
 sealed class ScrollMan : IDisposable
 {
@@ -160,10 +163,10 @@ file static class ScrollManLocalUtils
 	private static (MixNode, IReadOnlyDictionary<NodeState, R>) RenderCtrl(Ctrl ctrl, R nodeR, IRenderWinCtx renderer)
 	{
 		var tree = ctrl
-			.BuildCtrlTree(renderer);
+			.BuildTree(renderer);
 
 		var rMap = tree
-			.ResolveCtrlTree(FreeSzMaker.FromSz(nodeR.Size), null!)
+			.SolveTree(FreeSzMaker.FromSz(nodeR.Size), null!)
 			.Translate(nodeR.Pos)
 			.RMap;
 

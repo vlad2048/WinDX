@@ -24,9 +24,9 @@ public interface ISysWinRenderingSupport
 	IRoVar<bool> IsInit { get; }
 
 	/// <summary>
-	/// The client area (X=Y=0)
+	/// The client area
 	/// </summary>
-	IRoVar<R> ClientR { get; }
+	IRoVar<Sz> ClientSz { get; }
 }
 
 

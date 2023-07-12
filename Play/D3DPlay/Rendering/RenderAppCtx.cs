@@ -83,7 +83,7 @@ public sealed class RenderWinCtx : IDisposable
 			appCtx.DXGIFactory,
 			appCtx.D3DDevice,
 			win.Handle,
-			win.ClientR.V.Size
+			win.ClientSz.V
 		).D(d);
 
 		resizeSerialD = new SerialDisp<Disp>().D(d);
