@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using LayoutSystem.StructsShared;
@@ -13,7 +14,7 @@ namespace WinSpectorLib.Logic;
 
 static partial class Setup
 {
-	public static IDisposable OpenInFlexBuilder(WinSpectorWin ui, IRoMayVar<MixLayout> selLayout)
+	public static IDisposable OpenInFlexBuilder(WinSpectorWin ui, IRoMayVar<PartitionSet> selLayout)
 	{
 		var d = new Disp();
 
@@ -25,8 +26,8 @@ static partial class Setup
 		{
 			var selLayoutVal = selLayout.V.Ensure();
 			var layoutDef = new LayoutDef(
-				selLayoutVal.WinSize,
-				selLayoutVal.MixRoot
+				selLayoutVal.Nfo.WinSize,
+				selLayoutVal.Root
 					.OfTypeTree<IMixNode, StFlexNode>()
 					.Map(e => e.Flex)
 			);

@@ -14,9 +14,65 @@ static class SpectorWinRenderUtils
 	public static void Render(
 		SpectorWinDrawState state,
 		Partition layout,
-		IGfx gfx
+		IGfx gfx,
+		Pt ofs
 	)
 	{
+		if (Cfg.V.Tweaks.DisableWinSpectorDrawing) return;
+
+		gfx.R = layout.R - ofs;
+
+		bool GetR(IRoMayVar<MixNode> mayNodVar, out R nodeR)
+		{
+			nodeR = R.Empty;
+			if (mayNodVar.V.IsNone(out var nod)) return false;
+			if (nod.IsNodeState())
+			{
+				nodeR = layout.Set.RMap[nod.GetNodeState()];
+				return true;
+			}
+			if (nod.IsCtrl())
+			{
+				nodeR = nod.GetCtrlR(layout.Set);
+				return true;
+			}
+			return false;
+		}
+
+		bool GetRSt(IRoMayVar<INode> mayNodeVar, out R nodeR)
+		{
+			nodeR = R.Empty;
+			if (mayNodeVar.V.IsSome(out var st))
+			{
+				nodeR = layout.Set.RMap[(NodeState)st];
+				return true;
+			}
+			return false;
+		}
+
+		var isSel = GetR(state.SelNode, out var selR);
+		var isHov = GetR(state.HovNode, out var hovR);
+		var isLock = GetRSt(state.LockedNode, out var lockR);
+		if (isSel && isHov)
+		{
+			gfx.DrawSelHov(selR);
+		}
+		else
+		{
+			if (isSel)
+				gfx.DrawSel(selR);
+			if (isHov)
+				gfx.DrawHov(hovR);
+		}
+
+		if (isLock)
+		{
+			gfx.DrawLock(lockR);
+		}
+
+
+
+		/*
 		if (layout.IsEmpty || Cfg.V.Tweaks.DisableWinSpectorDrawing) return;
 
 		gfx.R = layout.RMap.Values.First().WithZeroPos();
@@ -62,6 +118,7 @@ static class SpectorWinRenderUtils
 		{
 			gfx.DrawLock(lockR);
 		}
+		*/
 	}
 }
 

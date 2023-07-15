@@ -1,12 +1,28 @@
 ﻿using System.Reactive.Disposables;
+using ControlSystem.Structs;
 using PowBasics.CollectionsExt;
+using PowBasics.Geom;
 using PowRxVar;
 
 namespace ControlSystem.Utils;
 
 public static class DictionaryExt
 {
-	public static IReadOnlyDictionary<K, V> Merge<K, V>(this IEnumerable<IReadOnlyDictionary<K, V>> source) where K : notnull
+	public static void MergeInto<K, V>(this IReadOnlyDictionary<K, V> srcDict, Dictionary<K, V> dstDict) where K : notnull
+	{
+		foreach (var (key, val) in srcDict)
+			dstDict[key] = val;
+	}
+
+	public static void ApplyOffsets<K>(this Dictionary<K, R> dict, IReadOnlyDictionary<K, Pt> ofsMap) where K : notnull
+	{
+		foreach (var (key, ofs) in ofsMap)
+			dict[key] += ofs;
+	}
+
+	public static V[] GetOrEmpty<K, V>(this IReadOnlyDictionary<K, V[]> dict, K key) where K : notnull => dict.GetValueOrDefault(key, Array.Empty<V>());
+
+	/*public static IReadOnlyDictionary<K, V> Merge<K, V>(this IEnumerable<IReadOnlyDictionary<K, V>> source) where K : notnull
 	{
 		var res = new Dictionary<K, V>();
 		foreach (var dict in source)
@@ -53,5 +69,5 @@ public static class DictionaryExt
 			dicts.Clear();
 		}).D(d);
 		return dicts;
-	}
+	}*/
 }

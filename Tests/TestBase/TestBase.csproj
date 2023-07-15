@@ -16,7 +16,7 @@
 		<PackageReference Include="coverlet.collector" Version="3.2.0" />
 		<PackageReference Include="PowBasics" Version="0.0.30" />
 		<PackageReference Include="PowRxVar" Version="0.0.45" />
-		<PackageReference Include="PowTrees" Version="0.0.39" />
+		<PackageReference Include="PowTrees" Version="0.0.41" />
 		<PackageReference Include="Shouldly" Version="4.2.1" />
 	</ItemGroup>
 

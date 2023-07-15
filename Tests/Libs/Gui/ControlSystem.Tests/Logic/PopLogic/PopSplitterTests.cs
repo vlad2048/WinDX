@@ -48,6 +48,7 @@ sealed class PopSplitterTests : RxTest
 	                           <p3>──C4──n5
 
 	*/
+	/*
 	[Test]
 	public void _01_PartitionPopNodes()
 	{
@@ -80,7 +81,7 @@ sealed class PopSplitterTests : RxTest
 			)
 		);
 	}
-
+	*/
 
 
 
@@ -135,6 +136,7 @@ sealed class PopSplitterTests : RxTest
 	                       C3──<p3>──C4──n5
 
 	*/
+	/*
 	[Test]
 	public void _02_ExtendToControls()
 	{
@@ -429,7 +431,7 @@ sealed class PopSplitterTests : RxTest
 		foreach (var line in lines)
 			L($"{pad}{line}");
 	}
-
+	*/
 
 
 

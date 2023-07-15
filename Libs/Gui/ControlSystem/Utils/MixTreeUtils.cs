@@ -1,4 +1,5 @@
-﻿using ControlSystem.Structs;
+﻿using ControlSystem.Logic.Rendering_;
+using ControlSystem.Structs;
 using LayoutSystem.Flex;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
@@ -19,14 +20,17 @@ static class MixTreeUtils
 		using var gfx = renderer.GetGfx(true).D(d);
 		var (treeEvtSig, treeEvtObs) = TreeEvents<IMixNode>.Make().D(d);
 		var pusher = new TreePusher<IMixNode>(treeEvtSig);
-		var renderArgs = new RenderArgs(gfx, pusher, false, string.Empty).D(d);
+		var r = new RenderArgs(gfx, pusher).D(d);
+
+		r.WhenCtrlPushNext.Subscribe(ctrl => ctrl.SignalRender(r)).D(d);
+
 		return
 			treeEvtObs.ToTree(
-				onPush: CtrlPushTriggersRender(renderArgs),
+				onPush: _ => { },
 				onPop: _ => { },
 				runAction: () =>
 				{
-					using (renderArgs[ctrl]) { }
+					using (r[ctrl]) { }
 				}
 			);
 	}

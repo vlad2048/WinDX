@@ -1,4 +1,5 @@
 ﻿using BrightIdeasSoftware;
+using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
@@ -14,7 +15,7 @@ static partial class Setup
 {
 	public static IDisposable ViewLayout(
 		WinSpectorWin ui,
-		IRoMayVar<MixLayout> selLayout,
+		IRoMayVar<PartitionSet> selLayout,
 		IRwVar<bool> showEvents,
 		IRwMayVar<NodeState> trackedState
 	)
@@ -24,7 +25,7 @@ static partial class Setup
 		var ctrl = ui.layoutTree;
 		PrepareTree(ctrl, selLayout, ui.eventDisplayer);
 
-		var rootMayVar = selLayout.SelectVarMay(e => e.MixRoot);
+		var rootMayVar = selLayout.SelectVarMay(e => e.Root);
 		ctrl.SetRoot(rootMayVar).D(d);
 
 		var selNode = VarMay.Make<MixNode>().D(d);
@@ -35,7 +36,7 @@ static partial class Setup
 		Obs.Merge(selNode, hovNode).Subscribe(_ =>
 		{
 			if (selLayout.V.IsNone(out var selLayoutVal)) return;
-			var win = selLayoutVal.Win;
+			var win = selLayoutVal.Nfo.MainWin;
 			win.SpectorDrawState.SelNode.V = selNode.V;
 			win.SpectorDrawState.HovNode.V = hovNode.V;
 		}).D(d);
@@ -92,7 +93,7 @@ static partial class Setup
 		public const string Tracked = "Tracked";
 	}
 
-	private static void PrepareTree(TreeListView ctrl, IRoMayVar<MixLayout> selLayout, EventDisplayer eventDisplayer)
+	private static void PrepareTree(TreeListView ctrl, IRoMayVar<PartitionSet> selLayout, EventDisplayer eventDisplayer)
 	{
 		var warningIcon = Resource.LayoutTree_Warning;
 		var errorIcon = Resource.LayoutTree_Error;
@@ -197,7 +198,7 @@ static partial class Setup
 			switch (nod.V)
 			{
 				case StFlexNode { State: var nodState }:
-					var warn = selLayoutVal.WarningMap.GetDimWarningForColumn(nodState, WarningDir.Horz | WarningDir.Vert);
+					var warn = selLayoutVal.GetDimWarningForColumn(nodState, WarningDir.Horz | WarningDir.Vert);
 					if (warn == null) return (null, null);
 					return (
 						warningIcon,
@@ -210,7 +211,7 @@ static partial class Setup
 
 
 				case CtrlNode { Ctrl: var ctr }:
-					return selLayoutVal.UnbalancedCtrls.TryGetValue(ctr, out var errNode) switch
+					return selLayoutVal.Nfo.UnbalancedCtrls.TryGetValue(ctr, out var errNode) switch
 					{
 						true => (
 							errorIcon,
@@ -236,17 +237,17 @@ static partial class Setup
 		});
 	}
 
-	private static FlexWarning? GetDimWarningForColumn(this IReadOnlyDictionary<NodeState, FlexWarning> warningMap, NodeState nodState, WarningDir colDir)
+	private static FlexWarning? GetDimWarningForColumn(this PartitionSet set, NodeState nodState, WarningDir colDir)
 	{
-		if (!warningMap.TryGetValue(nodState, out var warn)) return null;
+		if (!set.Nfo.WarningMap.TryGetValue(nodState, out var warn)) return null;
 		if ((colDir & warn.Dir) == 0) return null;
 		return warn;
 	}
 
-	private static FlexWarning? GetDimWarningForColumn(this IRoMayVar<MixLayout> selLayout, NodeState nodState, WarningDir colDir) =>
+	private static FlexWarning? GetDimWarningForColumn(this IRoMayVar<PartitionSet> selLayout, NodeState nodState, WarningDir colDir) =>
 		selLayout.V.IsSome(out var selLayoutVal) switch
 		{
-			true => selLayoutVal.WarningMap.GetDimWarningForColumn(nodState, colDir),
+			true => selLayoutVal.GetDimWarningForColumn(nodState, colDir),
 			false => null
 		};
 

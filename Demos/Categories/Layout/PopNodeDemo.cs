@@ -11,10 +11,10 @@ sealed class PopNodeDemo : Win
 {
 	public PopNodeDemo() : base(opt => opt.R = new R(-300, 50, 150, 200))
 	{
-		var nodeRoot = new NodeState().D(D);
-		var nodeFill1 = new NodeState().D(D);
-		var nodeFill2 = new NodeState().D(D);
-		var nodePop = new NodeState().D(D);
+		var nodeRoot = new NodeState("root").D(D);
+		var nodeFill1 = new NodeState("fill1").D(D);
+		var nodeFill2 = new NodeState("fill2").D(D);
+		var nodePop = new NodeState("pop").D(D);
 
 		WhenRender.Subscribe(r =>
 		{

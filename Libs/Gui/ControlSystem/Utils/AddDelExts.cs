@@ -5,6 +5,24 @@ namespace ControlSystem.Utils;
 
 static class AddDelExts
 {
+	public static void Update<K, V>(this Dictionary<K, V> dict, K[] keys, Func<K, V> genFun)
+		where K : notnull
+		where V : IDisposable
+	{
+		var keysAdd = keys.WhereNotToArray(dict.ContainsKey);
+		var keysDel = dict.Keys.WhereNotToArray(keys.Contains);
+		foreach (var keyDel in keysDel)
+		{
+			var val = dict[keyDel];
+			val.Dispose();
+			dict.Remove(keyDel);
+		}
+
+		foreach (var keyAdd in keysAdd)
+			dict[keyAdd] = genFun(keyAdd);
+	}
+
+	/*
 	public static (K[] adds, K[] dels) GetAddDels<K, V>(this IReadOnlyDictionary<K, V> map, K[] arr) where K : notnull => (
 		arr.WhereNotToArray(map.ContainsKey),
 		map.Keys.WhereNotToArray(arr.Contains)
@@ -33,4 +51,5 @@ static class AddDelExts
 		arr.WhereToArray(e => !cache.Lookup(e).HasValue),
 		cache.Keys.WhereNotToArray(arr.Contains)
 	);
+	*/
 }

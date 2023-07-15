@@ -1,5 +1,47 @@
 ﻿using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Logic.Scrolling_.Structs;
+using ControlSystem.Structs;
+using ControlSystem.Utils;
+using DynamicData;
+using PowRxVar;
+using RenderLib.Renderers;
+
+namespace ControlSystem.Logic.Scrolling_;
+
+
+sealed class ScrollMan : IDisposable
+{
+	private readonly Disp d = new();
+	public void Dispose() => d.Dispose();
+
+	private readonly Dictionary<NodeState, Duo> map;
+
+	public Duo GetDuo(NodeState nodeState) => map[nodeState];
+
+	public ScrollMan()
+	{
+		map = new Dictionary<NodeState, Duo>().D(d);
+	}
+
+	public void CreateScrollBars(PartitionSet set)
+	{
+		var nodeStates = set.Root.GetAllNodeStatesWithScrollingEnabled();
+		map.Update(
+			nodeStates,
+			nodeState => new Duo((StFlexNode)set.Lookups.NodeState2Nod[nodeState].V)
+		);
+	}
+}
+
+
+
+
+
+
+
+/*
+using ControlSystem.Logic.Popup_.Structs;
+using ControlSystem.Logic.Scrolling_.Structs;
 using ControlSystem.Logic.Scrolling_.Structs.Enum;
 using ControlSystem.Logic.Scrolling_.Utils;
 using ControlSystem.Structs;
@@ -173,3 +215,4 @@ file static class ScrollManLocalUtils
 		return (tree.Root, rMap);
 	}
 }
+*/

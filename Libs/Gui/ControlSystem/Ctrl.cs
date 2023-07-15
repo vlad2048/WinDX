@@ -1,7 +1,7 @@
 ﻿using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using ControlSystem.Structs;
+using ControlSystem.Logic.Rendering_;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;

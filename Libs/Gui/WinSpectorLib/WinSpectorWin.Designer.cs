@@ -53,7 +53,6 @@ partial class WinSpectorWin
 		windowLogNext2RedrawsItem = new ToolStripMenuItem();
 		windowResizeItem = new ToolStripMenuItem();
 		layoutToolStripMenuItem = new ToolStripMenuItem();
-		layoutShowSysCtrlsItem = new ToolStripMenuItem();
 		layoutOpenInFlexBuilderItem = new ToolStripMenuItem();
 		toolStripSeparator3 = new ToolStripSeparator();
 		stopPrintingTrackedNodeStateMenuItem = new ToolStripMenuItem();
@@ -61,6 +60,8 @@ partial class WinSpectorWin
 		eventsShowItem = new ToolStripMenuItem();
 		eventsEnabledItem = new ToolStripMenuItem();
 		eventsClearItem = new ToolStripMenuItem();
+		toolStripSeparator4 = new ToolStripSeparator();
+		windowClearConsoleItem = new ToolStripMenuItem();
 		((System.ComponentModel.ISupportInitialize)layoutTree).BeginInit();
 		layoutTreeContextMenu.SuspendLayout();
 		windowsGroupBox.SuspendLayout();
@@ -215,7 +216,7 @@ partial class WinSpectorWin
 		// 
 		// windowsToolStripMenuItem
 		// 
-		windowsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { windowRedrawItem, windowUnselectItem, windowLogRedrawItem, windowLogNextRedrawItem, windowLogNext2RedrawsItem, windowResizeItem });
+		windowsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { windowRedrawItem, windowUnselectItem, windowLogRedrawItem, windowLogNextRedrawItem, windowLogNext2RedrawsItem, windowResizeItem, toolStripSeparator4, windowClearConsoleItem });
 		windowsToolStripMenuItem.Name = "windowsToolStripMenuItem";
 		windowsToolStripMenuItem.Size = new Size(68, 20);
 		windowsToolStripMenuItem.Text = "&Windows";
@@ -223,52 +224,45 @@ partial class WinSpectorWin
 		// windowRedrawItem
 		// 
 		windowRedrawItem.Name = "windowRedrawItem";
-		windowRedrawItem.Size = new Size(180, 22);
-		windowRedrawItem.Text = "&Redraw (Ctrl R)";
+		windowRedrawItem.Size = new Size(188, 22);
+		windowRedrawItem.Text = "&Redraw";
 		// 
 		// windowUnselectItem
 		// 
 		windowUnselectItem.Name = "windowUnselectItem";
-		windowUnselectItem.Size = new Size(180, 22);
+		windowUnselectItem.Size = new Size(188, 22);
 		windowUnselectItem.Text = "&Unselect";
 		// 
 		// windowLogRedrawItem
 		// 
 		windowLogRedrawItem.Name = "windowLogRedrawItem";
-		windowLogRedrawItem.Size = new Size(180, 22);
-		windowLogRedrawItem.Text = "Log Redraw";
+		windowLogRedrawItem.Size = new Size(188, 22);
+		windowLogRedrawItem.Text = "Log Redraw (Ctrl R)";
 		// 
 		// windowLogNextRedrawItem
 		// 
 		windowLogNextRedrawItem.Name = "windowLogNextRedrawItem";
-		windowLogNextRedrawItem.Size = new Size(180, 22);
+		windowLogNextRedrawItem.Size = new Size(188, 22);
 		windowLogNextRedrawItem.Text = "Log Next Redraw";
 		// 
 		// windowLogNext2RedrawsItem
 		// 
 		windowLogNext2RedrawsItem.Name = "windowLogNext2RedrawsItem";
-		windowLogNext2RedrawsItem.Size = new Size(180, 22);
+		windowLogNext2RedrawsItem.Size = new Size(188, 22);
 		windowLogNext2RedrawsItem.Text = "Log Next 2 Redraws";
 		// 
 		// windowResizeItem
 		// 
 		windowResizeItem.Name = "windowResizeItem";
-		windowResizeItem.Size = new Size(180, 22);
+		windowResizeItem.Size = new Size(188, 22);
 		windowResizeItem.Text = "Re&size... (Ctrl +/-)";
 		// 
 		// layoutToolStripMenuItem
 		// 
-		layoutToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { layoutShowSysCtrlsItem, layoutOpenInFlexBuilderItem, toolStripSeparator3, stopPrintingTrackedNodeStateMenuItem });
+		layoutToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { layoutOpenInFlexBuilderItem, toolStripSeparator3, stopPrintingTrackedNodeStateMenuItem });
 		layoutToolStripMenuItem.Name = "layoutToolStripMenuItem";
 		layoutToolStripMenuItem.Size = new Size(55, 20);
 		layoutToolStripMenuItem.Text = "&Layout";
-		// 
-		// layoutShowSysCtrlsItem
-		// 
-		layoutShowSysCtrlsItem.CheckOnClick = true;
-		layoutShowSysCtrlsItem.Name = "layoutShowSysCtrlsItem";
-		layoutShowSysCtrlsItem.Size = new Size(202, 22);
-		layoutShowSysCtrlsItem.Text = "Show &system controls";
 		// 
 		// layoutOpenInFlexBuilderItem
 		// 
@@ -312,6 +306,17 @@ partial class WinSpectorWin
 		eventsClearItem.Name = "eventsClearItem";
 		eventsClearItem.Size = new Size(133, 22);
 		eventsClearItem.Text = "Clear (C)";
+		// 
+		// toolStripSeparator4
+		// 
+		toolStripSeparator4.Name = "toolStripSeparator4";
+		toolStripSeparator4.Size = new Size(185, 6);
+		// 
+		// windowClearConsoleItem
+		// 
+		windowClearConsoleItem.Name = "windowClearConsoleItem";
+		windowClearConsoleItem.Size = new Size(188, 22);
+		windowClearConsoleItem.Text = "Clear Console (Ctrl C)";
 		// 
 		// WinSpectorWin
 		// 
@@ -361,7 +366,6 @@ partial class WinSpectorWin
 	public ToolStripMenuItem windowRedrawItem;
 	public ToolStripMenuItem windowUnselectItem;
 	private ToolStripMenuItem layoutToolStripMenuItem;
-	public ToolStripMenuItem layoutShowSysCtrlsItem;
 	private ToolStripMenuItem eventsToolStripMenuItem;
 	public ToolStripMenuItem eventsShowItem;
 	public ToolStripMenuItem eventsEnabledItem;
@@ -376,4 +380,6 @@ partial class WinSpectorWin
 	public ToolStripMenuItem windowLogNextRedrawItem;
 	public ToolStripMenuItem windowLogNext2RedrawsItem;
 	public ToolStripMenuItem windowResizeItem;
+	private ToolStripSeparator toolStripSeparator4;
+	public ToolStripMenuItem windowClearConsoleItem;
 }

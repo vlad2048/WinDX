@@ -1,14 +1,80 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using ControlSystem.Logic.Popup_.Structs;
+﻿using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
-using PowBasics.CollectionsExt;
 
 namespace ControlSystem.Logic.Popup_;
 
 static class PopupSplitter
 {
 	public static PartitionSet SplitIntoPartitions(this MixLayout mixLayout)
+	{
+		var root = mixLayout.MixRoot;
+		var queue = new Queue<Seed>();
+		queue.Enqueue(new Seed(null, root.GetCtrl(), root));
+		var zOrderWin = 0;
+		
+		TNod<Partition> BuildPartition(Seed seed)
+		{
+			// TODO: simplify (we don't need the complexity of ExtendDownToAndExcluding)
+			var (partitionRoot, boundary) = seed.StartNode.ExtendDownToAndExcluding(e => e.IsPop());
+			var partition = new Partition(
+				seed.StartNode.IsPop() switch
+				{
+					false => null,
+					truer => seed.StartNode.GetNodeState()
+				},
+				seed.DadPartition?.V.NodeStateId,
+				seed.RenderCtrl,
+				zOrderWin++
+				//partitionRoot.GetAllNodeStates().ToHashSet()
+			);
+			var partitionNode = Nod.Make(partition);
+			queue.EnqueueRange(
+				boundary.Select(e => new Seed(
+					partitionNode,
+					e.FindParentCtrl(),
+					e
+				))
+			);
+			return partitionNode;
+		}
+
+
+		TNod<Partition>? partitionRoot = null;
+
+		while (queue.TryDequeue(out var seed))
+		{
+			var partitionNode = BuildPartition(seed);
+			partitionRoot ??= partitionNode;
+			seed.DadPartition?.AddChild(partitionNode);
+		}
+
+		var set = new PartitionSet(
+			root,
+			mixLayout.RMap.ToDictionary(e => e.Key, e => e.Value),
+			partitionRoot ?? throw new ArgumentException("Impossible"),
+			new PartitionSetWinSpectorNfo(
+				mixLayout.WinSize,
+				mixLayout.Win,
+				mixLayout.WarningMap,
+				mixLayout.UnbalancedCtrls
+			)
+		);
+
+		return set;
+	}
+
+
+	private sealed record Seed(
+		TNod<Partition>? DadPartition,
+		Ctrl RenderCtrl,
+		MixNode StartNode
+	);
+
+
+
+
+	/*public static PartitionSet SplitIntoPartitions(this MixLayout mixLayout)
 	{
 		var backMap = mixLayout.MixRoot.ToDictionary(e => e.V);
 		var partitions = mixLayout.MixRoot
@@ -221,5 +287,5 @@ static class PopupSplitter
 	{
 		foreach (var elt in source)
 			queue.Enqueue(elt);
-	}
+	}*/
 }

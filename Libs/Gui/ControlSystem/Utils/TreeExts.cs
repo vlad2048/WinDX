@@ -2,6 +2,21 @@
 
 static class TreeExts
 {
+	public static T[] GetNodesUntil<T>(this TNod<T> root, Func<T, bool> predicate)
+	{
+		var list = new List<T>();
+		void Rec(TNod<T> nod)
+		{
+			if (predicate(nod.V)) return;
+			list.Add(nod.V);
+			foreach (var kid in nod.Children)
+				Rec(kid);
+		}
+		Rec(root);
+		return list.ToArray();
+	}
+
+
 	/// <summary>
 	/// <![CDATA[
 	///    ┌──n1

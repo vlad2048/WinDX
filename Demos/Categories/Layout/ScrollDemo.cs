@@ -12,11 +12,11 @@ sealed class ScrollDemo : Win
 {
 	public ScrollDemo() : base(opt => opt.R = new R(-400, 50, 300, 400))
 	{
-		var nodeRoot = new NodeState().D(D);
-		var nodeTop = new NodeState().D(D);
-		var nodeScroll = new NodeState().D(D);
-		var nodeBottom = new NodeState().D(D);
-		var nodesLines = Enumerable.Range(0, 29).SelectToArray(_ => new NodeState().D(D));
+		var nodeRoot = new NodeState("root").D(D);
+		var nodeTop = new NodeState("top").D(D);
+		var nodeScroll = new NodeState("scroll").D(D);
+		var nodeBottom = new NodeState("bottom").D(D);
+		var nodesLines = Enumerable.Range(0, 2).Select((e, i) => (e, i)).SelectToArray(t => new NodeState($"line_{t.i}").D(D));
 
 		WhenRender.Subscribe(r =>
 		{
@@ -26,7 +26,7 @@ sealed class ScrollDemo : Win
 
 				using (r[nodeTop].DimFilFix(50).M) { }
 
-				using (r[nodeScroll].StratStack(Dir.Vert).ScrollXY().Marg(20).M)
+				using (r[nodeScroll].DimFixFil(100).StratStack(Dir.Vert).ScrollX().M)
 				{
 					r.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines.Length; i++)

@@ -1,14 +1,160 @@
 ﻿using ControlSystem.Structs;
-using LayoutSystem.Flex.Structs;
+using ControlSystem.Utils;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
-using PowMaybe;
-using PowRxVar;
-using UserEvents;
 using UserEvents.Structs;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
+/*
+
+We split the layout along the Pop nodes to display each part in its own popup window
+(the first part is displayed on the main window)
+
+************
+* Example: *
+************
+
+- Full tree:
+  ----------
+	    ┌──n1
+	C1──┤      ┌──C2
+	    └──n2──┤        ┌──n3──<p2>──n4
+	           └──<p1>──┤
+	                    └──C3──<p3>──C4──n5
+
+C1, C2, C3, C4		are Ctrls
+n1, n2, n3, n4, n5	are NonPopNodes
+<p1>, <p2>, <p3>	are PopNodes
+
+
+- [0] MainPartition: (the first one displayed on the main window)
+  ------------------
+	    ┌──n1
+	C1──┤      ┌──C2
+	    └──n2──┤
+	           └──⬤
+
+  NodeStateId		= null			NodeStates		= { n1, n2 }		ZOrderWin			= 0
+  ParentNodeStateId	= null			Ctrls			= { C1, C2 }		RootNode			= C1
+  RenderCtrl		= C1			CtrlsToRender	= { C1, C2 }
+  
+  
+- [1] Partition: (displayed in its own popup window)
+  --------------
+	                    ┌──n3──⬤
+	              <p1>──┤
+	                    └──C3──⬤
+
+  NodeStateId		= <p1>			NodeStates		= { <p1>, n3 }		ZOrderWin			= 1
+  ParentNodeStateId	= null			Ctrls			= {     C3 }		RootNode			= <p1>
+  RenderCtrl		= C1			CtrlsToRender	= { C1, C3 }
+
+- [2] Partition: (displayed in its own popup window)
+  --------------
+	                           <p2>──n4
+
+  NodeStateId		= <p1>			NodeStates		= { <p2>, n4 }		ZOrderWin			= 2
+  ParentNodeStateId	= <p1>			Ctrls			= { }				RootNode			= <p2>
+  RenderCtrl		= C1			CtrlsToRender	= { C1 }
+
+- [3] Partition: (displayed in its own popup window)
+  --------------
+	                           <p3>──C4──n5
+
+  NodeStateId		= <p3>			NodeStates		= { <p3>, n5 }		ZOrderWin			= 3
+  ParentNodeStateId	= <p1>			Ctrls			= {     C4 }		RootNode			= <p3>
+  RenderCtrl		= C3			CtrlsToRender	= { C3, C4 }
+
+
+**************
+* Invariants *
+**************
+  - NodeStates of the partitions form a partition of all the NodeStates
+  - Ctrls      of the partitions form a partition of all the Ctrls
+  - RootNode is
+      - main  partition -> the root Ctrl
+      - popup partition -> its associated popup node (corresponds to NodeStateId)
+  - RenderCtrl is
+      - main  partition -> the root Ctrl
+      - popup partition -> the closest Ctrl above the RootNode
+  - CtrlsToRender = { RenderCtrl } ∪ Ctrls   (for the main partition, RenderCtrl ∊ Ctrls)
+
+
+*/
+sealed class Partition : IEquatable<Partition>
+{
+	public NodeState? NodeStateId { get; }				// for MainWin->null, for PopupWins->NodeState of the Pop node (included in NodeStateSet)
+	public NodeState? ParentNodeStateId { get; }
+	public Ctrl RenderCtrl { get; }						// the Ctrl we need to render for this window
+	public int ZOrderWin { get; }
+	public PartitionSet Set { get; set; } = null!;
+
+
+	// **********************
+	// * Derived Properties *
+	// **********************
+	// Used for:
+	//   - dispatching events
+	//   - call invalidate when the node requires it
+	public NodeState[] NodeStates => RootNode.GetAllNodeStatesUntil(e => e != RootNode.V && e.IsPop());
+	public NodeZ[] NodeStatesZ => NodeStates.Select((e, i) => (e, i)).SelectToArray(t => new NodeZ(t.e, new ZOrder(ZOrderWin, false, t.i)));
+
+	// Used for:
+	//   - call invalidate when the ctrl requires it
+	public Ctrl[] Ctrls => RootNode.GetAllCtrlsUntil(e => e.IsPop());
+
+	// Used for:
+	//   - determine which ctrls to call render for while rendering
+	public HashSet<Ctrl> CtrlsToRender => Ctrls.Prepend(RenderCtrl).Distinct().ToHashSet();
+
+	public R R => NodeStateId switch
+	{
+		null => RootNode.GetCtrlR(Set),
+		not null => Set.RMap[RootNode.GetNodeState()]
+	};
+
+	private MixNode RootNode => NodeStateId switch
+	{
+		null => Set.Root,
+		not null => Set.Lookups.NodeState2Nod[NodeStateId]
+	};
+
+
+	public Partition(
+		NodeState? nodeStateId,
+		NodeState? parentNodeStateId,
+		Ctrl renderCtrl,
+		int zOrderWin
+	)
+	{
+		ParentNodeStateId = parentNodeStateId;
+		RenderCtrl = renderCtrl;
+		ZOrderWin = zOrderWin;
+		NodeStateId = nodeStateId;
+	}
+
+
+	public bool Equals(Partition? other)
+	{
+		if (ReferenceEquals(null, other)) return false;
+		if (ReferenceEquals(this, other)) return true;
+		return Equals(NodeStateId, other.NodeStateId);
+	}
+	public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is Partition other && Equals(other);
+	public override int GetHashCode() => NodeStateId != null ? NodeStateId.GetHashCode() : 0;
+	public static bool operator ==(Partition? left, Partition? right) => Equals(left, right);
+	public static bool operator !=(Partition? left, Partition? right) => !Equals(left, right);
+}
+
+
+
+
+
+
+
+
+/*
 /// <summary>
 /// Represents the portion of the partition added by the system (used for ScrollBars)
 /// </summary>
@@ -35,21 +181,6 @@ static class SysPartitionExt
 		sysPartition.CtrlTriggers.Values.SelectMany(e => e).OfType<ICtrl>().ToArray();
 }
 
-/*sealed record SysPartition(
-	IReadOnlyDictionary<NodeState, Ctrl[]> CtrlTriggers,
-	IReadOnlyDictionary<NodeState, R> RMap,
-	IReadOnlyDictionary<NodeState, NodeState[]> StateLinks
-)
-{
-	public NodeState[] NodeStates => RMap.Keys.ToArray();
-	public ICtrl[] Ctrls => CtrlTriggers.Values.SelectMany(e => e).OfType<ICtrl>().ToArray();
-
-	public static readonly SysPartition Empty = new(
-		new Dictionary<NodeState, Ctrl[]>(),
-		new Dictionary<NodeState, R>(),
-		new Dictionary<NodeState, NodeState[]>()
-	);
-}*/
 
 
 /// <summary>
@@ -188,3 +319,4 @@ file static class PartitionExtLocal
 			.OfType<CtrlNode>()
 			.SelectToArray(e => e.Ctrl);
 }
+*/

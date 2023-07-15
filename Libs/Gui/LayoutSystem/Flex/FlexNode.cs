@@ -11,7 +11,6 @@ public sealed record FlexNode(
 	Marg Marg
 )
 {
-	//public override string ToString() => $"{Dim} - {Strat} ({Flags})";
 	public override string ToString() => $"{Strat} ({Flags})";
 
 	[JsonIgnore]

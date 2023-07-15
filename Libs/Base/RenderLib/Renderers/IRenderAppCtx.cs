@@ -22,6 +22,7 @@ public interface IRenderWinCtx : IDisposable
 public interface IGfx : IDisposable
 {
 	R R { get; set; }
+	bool DrawDisabled { get; }
 	void PushClip(R clipR);
 	void PopClip();
 

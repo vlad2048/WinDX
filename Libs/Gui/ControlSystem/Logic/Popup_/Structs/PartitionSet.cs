@@ -1,12 +1,124 @@
 ﻿using ControlSystem.Structs;
-using LayoutSystem.Flex;
+using ControlSystem.Utils;
 using LayoutSystem.Flex.Structs;
-using LayoutSystem.Utils;
 using PowBasics.CollectionsExt;
-using PowRxVar;
+using PowBasics.Geom;
+using System.Windows.Forms;
+using UserEvents;
+using UserEvents.Structs;
 
 namespace ControlSystem.Logic.Popup_.Structs;
 
+
+sealed record PartitionSetWinSpectorNfo(
+	FreeSz WinSize,
+	Win MainWin,
+	IReadOnlyDictionary<NodeState, FlexWarning> WarningMap,
+	IReadOnlyDictionary<Ctrl, IMixNode> UnbalancedCtrls
+);
+
+
+sealed class PartitionSet
+{
+	public MixNode Root { get; }
+	public Dictionary<NodeState, R> RMap { get; }
+	public TNod<Partition> PartitionRoot { get; }
+	public Dictionary<NodeState, Ctrl[]> ExtraCtrlsToRenderOnPop { get; } = new();
+	public PartitionSetWinSpectorNfo Nfo { get; }
+
+
+	// **********************
+	// * Derived Properties *
+	// **********************
+	public Partition MainPartition => PartitionRoot.V;
+	public Partition[] Partitions => PartitionRoot.SelectToArray(e => e.V);
+	public Partition[] PopupPartitions => Partitions.Skip(1).ToArray();
+	public LookupMaps Lookups { get; private set; }
+
+
+	public PartitionSet(MixNode root, Dictionary<NodeState, R> rMap, TNod<Partition> partitionRoot, PartitionSetWinSpectorNfo nfo)
+	{
+		Root = root;
+		RMap = rMap;
+		PartitionRoot = partitionRoot;
+		Nfo = nfo;
+		foreach (var partition in Partitions)
+			partition.Set = this;
+		Lookups = new LookupMaps(Root);
+	}
+
+	public void RecomputeLookupMaps() => Lookups = new LookupMaps(Root);
+
+	public class LookupMaps
+	{
+		public IReadOnlyDictionary<NodeState, MixNode> NodeState2Nod { get; }
+		public IReadOnlyDictionary<Ctrl, MixNode> Ctrl2Nod { get; }
+
+		public LookupMaps(MixNode root)
+		{
+			NodeState2Nod = root.Where(e => e.IsNodeState()).ToDictionary(e => e.GetNodeState());
+			Ctrl2Nod = root.Where(e => e.IsCtrl()).ToDictionary(e => e.GetCtrl());
+		}
+	}
+}
+
+
+static class PartitionExt
+{
+	public static void UpdateFromPartition(this (IRwTracker<NodeZ> nodes, IRwTracker<ICtrl> ctrls) trackers, Partition partition)
+	{
+		trackers.nodes.Update(partition.NodeStatesZ);
+		trackers.ctrls.Update(partition.Ctrls.OfType<ICtrl>().ToArray());
+	}
+
+
+	public static PartitionSet VerifyInvariants(this PartitionSet set)
+	{
+		VerifyPartition(
+			set.Root.GetAllNodeStates(),
+			set.Partitions.SelectMany(e => e.NodeStates).ToArray()
+		);
+		VerifyPartition(
+			set.Root.GetAllCtrls(),
+			set.Partitions.SelectMany(e => e.Ctrls).ToArray()
+		);
+		VerifyAreTheSameNotOrdered(
+			set.Root.GetAllNodeStates(),
+			set.RMap.Keys.ToArray()
+		);
+		return set;
+	}
+
+	private static void VerifyPartition<T>(T[] allItems, T[] subItems)
+	{
+		var t = typeof(T).Name;
+		var subItemsUniq = subItems.Distinct().ToArray();
+		if (subItemsUniq.Length != subItems.Length) throw new ArgumentException($"Invariant broken. {t} do not form a partition (there is overlap)");
+		var subOnly = subItems.WhereToArray(e => !allItems.Contains(e));
+		var allOnly = allItems.WhereToArray(e => !subItems.Contains(e));
+		if (subOnly.Length > 0) throw new ArgumentException($"Invariant broken. {t} do not form a partition (the whole is smaller than the parts)");
+		if (allOnly.Length > 0) throw new ArgumentException($"Invariant broken. {t} do not form a partition (the whole is bigger than the parts)");
+		if (subItems.Length != allItems.Length) throw new ArgumentException($"Invariant broken. {t} do not form a partition (length do not match)");
+	}
+
+	private static void VerifyAreTheSameNotOrdered<T>(T[] us, T[] vs)
+	{
+		var t = typeof(T).Name;
+		if (!AreDistinct(us)) throw new ArgumentException($"{t} are not distinct (1)");
+		if (!AreDistinct(vs)) throw new ArgumentException($"{t} are not distinct (2)");
+		var usOnly = us.WhereNotToArray(vs.Contains);
+		var vsOnly = vs.WhereNotToArray(us.Contains);
+		if (usOnly.Length > 0) throw new ArgumentException($"{t} more us than vs");
+		if (vsOnly.Length > 0) throw new ArgumentException($"{t} more vs than us");
+	}
+
+	private static bool AreDistinct<T>(T[] arr) => arr.Distinct().ToArray().Length == arr.Length;
+}
+
+
+
+
+/*
 /// <summary>
 /// Contains all the layout partitions across the main window and the popup windows
 /// </summary>
@@ -78,3 +190,4 @@ sealed record PartitionSet(
 		MixLayout.Empty
     );
 }
+*/

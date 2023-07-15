@@ -7,6 +7,7 @@ namespace UserEvents;
 
 public interface IWinUserEventsSupport
 {
+	INode? Id { get; }
 	nint Handle { get; }
 	IObservable<IPacket> SysEvt { get; }
 	Pt PopupOffset { get; }

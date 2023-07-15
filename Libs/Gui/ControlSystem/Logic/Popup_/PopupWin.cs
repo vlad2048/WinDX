@@ -3,7 +3,6 @@ using ControlSystem.Logic.Rendering_;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Utils;
-using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using PowRxVar;
 using SysWinInterfaces;
@@ -24,10 +23,10 @@ sealed class PopupWin : Ctrl, IWin
 	private readonly IRwTracker<NodeZ> rwNodes;
 	private readonly IRwTracker<ICtrl> rwCtrls;
 	private Partition subPartition;
-	private Partition subPartitionRebased;
 
 	// IWinUserEventsSupport
 	// =====================
+	public INode Id => subPartition.NodeStateId ?? throw new ArgumentException("A SubPartition should always have a NodeStateId");
 	public nint Handle => sysWin.Handle;
 	public IObservable<IPacket> SysEvt => sysWin.WhenMsg;
 	public Pt PopupOffset => layoutR.V.Pos;
@@ -52,7 +51,7 @@ sealed class PopupWin : Ctrl, IWin
 		rwCtrls = Tracker.Make<ICtrl>().D(D);
 
 		layoutR = Var.Make(R.Empty).D(D);
-		(this.subPartition, subPartitionRebased) = SetLayout(subPartition);
+		(this.subPartition, layoutR.V) = AssignLayout(subPartition);
 		sysWin = PopupWinUtils.MakeWin(layoutR.V, mainWin, winParentHandle).D(D);
 		this.D(sysWin.D);
 
@@ -76,21 +75,23 @@ sealed class PopupWin : Ctrl, IWin
 			using var d = new Disp();
 			var gfx = rendererSwitcher.Renderer.GetGfx(false).D(d);
 			RenderUtils.RenderTree(
-				subPartitionRebased,
+				subPartition,
 				gfx,
-				spectorDrawState.ShouldLogRender(this),
-				GetType().Name
+				-layoutR.V.Pos,
+				spectorDrawState.ShouldLogRender(this)
 			);
-			SpectorWinRenderUtils.Render(spectorDrawState, subPartitionRebased, gfx);
+			SpectorWinRenderUtils.Render(spectorDrawState, subPartition, gfx, -layoutR.V.Pos);
 		}).D(D);
 	}
 
-	public (Partition, Partition) SetLayout(Partition subPartition_)
+	public void SetLayout(Partition subPartition_) => (subPartition, layoutR.V) = AssignLayout(subPartition_);
+
+	private (Partition, R) AssignLayout(Partition subPartition_)
 	{
 		subPartition = subPartition_;
-		(subPartitionRebased, layoutR.V) = subPartition_.SplitOffset();
+		var r = subPartition.Set.RMap[subPartition.NodeStateId ?? throw new ArgumentException("Should not be null for a subpartition")];
 		(rwNodes, rwCtrls).UpdateFromPartition(subPartition);
-		return (subPartition, subPartitionRebased);
+		return (subPartition, r);
 	}
 }
 
@@ -130,21 +131,5 @@ file static class PopupWinUtils
 		});
 		win.Init();
 		return win;
-	}
-
-	public static (Partition, R) SplitOffset(this Partition part)
-	{
-		var r = part.RMap[part.Id ?? throw new ArgumentException("Should not be null for a subpartition")];
-		return (
-			part with
-			{
-				RMap = part.RMap.MapValues(e => e - r.Pos),
-				SysPartition = part.SysPartition with
-				{
-					RMap = part.SysPartition.RMap.MapValues(e => e - r.Pos),
-				}
-			},
-			r
-		);
 	}
 }

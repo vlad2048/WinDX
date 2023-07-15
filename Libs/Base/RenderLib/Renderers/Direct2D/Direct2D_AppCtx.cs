@@ -164,7 +164,7 @@ public sealed class Direct2D_Gfx : IGfx
 		}).D(d);
 	}
 
-	private bool DrawDisabled => measureOnly || R.IsDegenerate || !win.IsInit.V;
+	public bool DrawDisabled => measureOnly || R.IsDegenerate || !win.IsInit.V;
 
 	public void PushClip(R clipR)
 	{

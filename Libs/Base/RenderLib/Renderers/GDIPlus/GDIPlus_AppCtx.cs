@@ -101,7 +101,7 @@ public sealed class GDIPlus_Gfx : IGfx
 
 	}
 
-	private bool DrawDisabled => measureOnly || R.IsDegenerate;
+	public bool DrawDisabled => measureOnly || R.IsDegenerate;
 
 	/*public void Test()
 	{

@@ -1,24 +1,17 @@
-﻿using System.Drawing;
-using ControlSystem.Logic.Invalidate_;
+﻿using ControlSystem.Logic.Invalidate_;
 using ControlSystem.Logic.Popup_;
 using ControlSystem.Logic.Popup_.Structs;
 using ControlSystem.Logic.Rendering_;
 using ControlSystem.Logic.Scrolling_;
-using ControlSystem.Logic.Scrolling_.Utils;
 using ControlSystem.Structs;
 using ControlSystem.Utils;
 using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Utils;
 using DynamicData;
 using LayoutSystem.Flex.Structs;
-using PowBasics.CollectionsExt;
-using PowBasics.ColorCode;
-using PowBasics.ColorCode.Structs;
-using PowBasics.ColorCode.Utils;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
-using PowTrees.Algorithms;
 using SysWinLib;
 using SysWinLib.Structs;
 using UserEvents;
@@ -40,11 +33,12 @@ public class Win : Ctrl, IMainWin
 
 	// WinSpector
 	// ==========
-	internal IRoVar<PartitionSet> PartitionSetVar { get; }
+	internal IRoMayVar<PartitionSet> PartSet { get; }
 	internal SpectorWinDrawState SpectorDrawState { get; }
 
 	// IWinUserEventsSupport
 	// =====================
+	public INode? Id => null;
 	public nint Handle => sysWin.Handle;
 	public IObservable<IPacket> SysEvt => sysWin.WhenMsg;
 	public Pt PopupOffset => Pt.Empty;
@@ -71,15 +65,21 @@ public class Win : Ctrl, IMainWin
 		rwNodes = Tracker.Make<NodeZ>().D(D);
 		rwCtrls = Tracker.Make<ICtrl>().D(D);
 		rwWins = Tracker.Make<IWin>().D(D);
+		var scrollMan = new ScrollMan().D(D);
 		fullInvalidator = new Invalidator(this).D(D);
-		var partitionSet = Var.Make(PartitionSet.Empty).D(D);
-		PartitionSetVar = partitionSet.ToReadOnly();
+		var partitionSet = VarMay.Make<PartitionSet>().D(D);
+		PartSet = partitionSet.ToReadOnlyMay();
+		SpectorDrawState = new SpectorWinDrawState(Wins).D(D);
+		var getWin = PartSet.MakePopups(rwWins, this, SpectorDrawState).D(D);
+
+		PartSet.WhenSome().Subscribe(set =>
+		{
+			set.Assign_CtrlWins_and_NodeRs(this, getWin);
+		}).D(D);
 
 		var opt = WinOpt.Build(optFun);
 		sysWin = WinUtils.MakeWin(opt).D(D);
 		this.D(sysWin.D);
-		SpectorDrawState = new SpectorWinDrawState(Wins).D(D);
-		var popupMan = new PopupMan(this, rwWins, SpectorDrawState).D(D);
 
 
 		Evt = UserEventGenerator.MakeForWin(Wins).D(D);
@@ -89,10 +89,8 @@ public class Win : Ctrl, IMainWin
 
 		var rendererSwitcher = new RendererSwitcher(sysWin, Invalidator).D(D);
 
-		var scrollMan = new ScrollMan(rendererSwitcher.Renderer).D(D);
-
 		var isAdded = false;
-		void AddIFN() { if (isAdded) return; isAdded = true; WinMan.AddWin(this); }
+		void WinMan_AddWin() { if (isAdded) return; isAdded = true; WinMan.AddWin(this); }
 
 
 		// Invalidate Triggers
@@ -111,9 +109,6 @@ public class Win : Ctrl, IMainWin
 			.Trigger(() => Invalidator.Invalidate(RedrawReason.Node)).D(D);
 
 
-		//Evt.WhenKeyDown(VirtualKey.D).Trigger(() => ControlSystem.Logic.Popup_.PopupWin.Dbg = true).D(D);
-
-
 		// Layout / Render
 		// ===============
 		sysWin.WhenMsg.WhenPAINT().Subscribe(_ =>
@@ -121,33 +116,34 @@ public class Win : Ctrl, IMainWin
 			var isLayoutRequired = fullInvalidator.IsLayoutRequired();
 			if (isLayoutRequired)
 			{
-				partitionSet.V = this
-					.BuildTree(rendererSwitcher.Renderer)
-					.SolveTree(FreeSzMaker.FromSz(ClientSz.V), this)
-					.SplitIntoPartitions()
-					.AddScrollBars(scrollMan)
-					.ApplyScrollOffsets()
-					.CreatePopups(popupMan)
-					.Assign_CtrlWins_and_NodeRs(this, popupMan);
+				partitionSet.V = May.Some(
+					this
+						.BuildTree(rendererSwitcher.Renderer)
+						.SolveTree(FreeSzMaker.FromSz(ClientSz.V), this)
+						.SplitIntoPartitions()
+						.VerifyInvariants()
+						.HandleScrolling(scrollMan, rendererSwitcher.Renderer)
+						.VerifyInvariants()
+						//.Assign_CtrlWins_and_NodeRs(this, getWin)
+				);
 
-				(rwNodes, rwCtrls).UpdateFromPartition(partitionSet.V.MainPartition);
+				(rwNodes, rwCtrls).UpdateFromPartition(partitionSet.V.Ensure().MainPartition);
 
-				AddIFN();
+				WinMan_AddWin();
 				//WinUtils.LogPartitionSet(partitionSet.V);
 			}
 
 
 			using var d = new Disp();
 			var gfx = rendererSwitcher.Renderer.GetGfx(false).D(d);
-			//var gdi = (GDIPlus_Gfx)gfx;
-			//gdi.Gfx.ExcludeClip(new R(20, 70, 200, 300).ToDrawRect());
+			var mainPartition = partitionSet.V.Ensure().MainPartition;
 			RenderUtils.RenderTree(
-				partitionSet.V.MainPartition,
+				mainPartition,
 				gfx,
-				SpectorDrawState.ShouldLogRender(this),
-				GetType().Name
+				Pt.Empty,
+				SpectorDrawState.ShouldLogRender(this)
 			);
-			SpectorWinRenderUtils.Render(SpectorDrawState, partitionSet.V.MainPartition, gfx);
+			SpectorWinRenderUtils.Render(SpectorDrawState, mainPartition, gfx, Pt.Empty);
 
 			foreach (var popupWin in Wins.ItemsArr.Skip(1))
 				popupWin.SysInvalidate();
@@ -160,62 +156,30 @@ public class Win : Ctrl, IMainWin
 file static class WinUtils
 {
 	public static PartitionSet Assign_CtrlWins_and_NodeRs(
-		this PartitionSet partitionSet,
-		Win win,
-		PopupMan popupMan
-	)
+		this PartitionSet set,
+		Win mainWin,
+		Func<NodeState?, IWin> getWin)
 	{
-		(
-			from partition in partitionSet.Partitions
-			from ctrl in partition.CtrlSet
-			select (ctrl, partition)
-		)
-			.ForEach(t =>
+		var nodeStates = set.Root.GetAllNodeStates();
+		foreach (var nodeState in nodeStates)
+		{
+			nodeState.RSrc.V = set.RMap[nodeState];
+			L($"{nodeState}.R <- {set.RMap[nodeState]}");
+		}
+
+		foreach (var partition in set.Partitions)
+		{
+			var win = getWin(partition.NodeStateId);
+			var ctrls = partition.Ctrls;
+			foreach (var ctrl in ctrls)
 			{
-				t.ctrl.WinSrc.V = May.Some(win);
-				t.ctrl.PopupWinSrc.V = May.Some(popupMan.GetWin(t.partition.Id));
-			});
+				ctrl.WinSrc.V = May.Some(mainWin);
+				ctrl.PopupWinSrc.V = May.Some(win);
+			}
+		}
 
-		(
-			from partition in partitionSet.Partitions
-			from nodeState in partition.NodeStates
-			select (nodeState, r: partition.RMap[nodeState])
-		)
-			.ForEach(t =>
-			{
-				t.nodeState.RSrc.V = t.r;
-			});
-
-
-		(
-			from partition in partitionSet.Partitions
-			from ctrls in partition.SysPartition.CtrlTriggers.Values
-			from ctrl in ctrls
-			select (ctrl, partition)
-		)
-			.ForEach(t =>
-			{
-				t.ctrl.WinSrc.V = May.Some(win);
-				t.ctrl.PopupWinSrc.V = May.Some(popupMan.GetWin(t.partition.Id));
-			});
-
-		(
-			from partition in partitionSet.Partitions
-			from t in partition.SysPartition.RMap
-			select t
-		)
-			.ForEach(t =>
-			{
-				t.Key.RSrc.V = t.Value;
-			});
-
-		return partitionSet;
+		return set;
 	}
-
-
-
-	
-
 
 
 
@@ -245,7 +209,7 @@ file static class WinUtils
 
 
 
-	private static class Cols
+	/*private static class Cols
 	{
 		public static readonly Color PartitionArrowColor = Color.White;
 		public static readonly Color PartitionBoxColor = Color.FromArgb(94, 164, 230);
@@ -361,5 +325,5 @@ file static class WinUtils
 		txt.PrintToConsole();
 
 		//txt.RenderToHtml(@"C:\tmp\webtemplate\layout.html", typeof(Cols));
-	}
+	}*/
 }
