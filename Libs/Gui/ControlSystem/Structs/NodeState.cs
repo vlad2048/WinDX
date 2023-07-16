@@ -26,6 +26,7 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	/// Source for R
 	/// </summary>
 	internal IRwVar<R> RSrc { get; }
+	internal IRwVar<Pt> WinPosSrc { get; }
 
 	// **********
 	// * Public *
@@ -38,6 +39,7 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	/// ● For nodes in Popup windows, refers to the original rectangle relative to the main window. <br/>
 	/// </summary>
 	public IRoVar<R> R => RSrc.ToReadOnly();
+	public IRoVar<Pt> WinPos => WinPosSrc.ToReadOnly();
 
 
 	/// <summary>
@@ -61,6 +63,7 @@ public sealed class NodeState : INodeStateUserEventsSupport, IDisposable
 	{
 		Name = name ?? string.Empty;
 		RSrc = Var.Make(PowBasics.Geom.R.Empty).D(D);
+		WinPosSrc = Var.Make(Pt.Empty).D(D);
 		whenEvt = new Subject<IUserEvt>().D(D);
 		ScrollState = new ScrollStateVec().D(D);
 	}

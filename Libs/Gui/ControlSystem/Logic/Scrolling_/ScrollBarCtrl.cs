@@ -7,6 +7,7 @@ using LoggingConfig.Threading_;
 using PowBasics.Geom;
 using PowRxVar;
 using UserEvents.Structs;
+using UserEvents.Utils;
 using C = ControlSystem.Logic.Scrolling_.ScrollBarConsts;
 
 namespace ControlSystem.Logic.Scrolling_;
@@ -15,19 +16,21 @@ public sealed class ScrollBarCtrl : Ctrl
 {
 	public ScrollBarCtrl(Dir dir, ScrollState state, IObservable<IUserEvt> nodeEvt)
 	{
-		var nodeRoot = new NodeState().D(D);
-		var nodeStack = new NodeState().D(D);
-		var nodeBtnDec = new NodeState().D(D);
-		var nodeBtnInc = new NodeState().D(D);
-		var nodeTrackDec = new NodeState().D(D);
-		var nodeTrackInc = new NodeState().D(D);
-		var nodeThumb = new NodeState().D(D);
+		var nodeRoot = new NodeState($"sbc{dir}_root").D(D);
+		var nodeStack = new NodeState($"sbc{dir}_stack").D(D);
+		var nodeBtnDec = new NodeState($"sbc{dir}_btndec").D(D);
+		var nodeBtnInc = new NodeState($"sbc{dir}_btninc").D(D);
+		var nodeTrackDec = new NodeState($"sbc{dir}_trackdec").D(D);
+		var nodeTrackInc = new NodeState($"sbc{dir}_trackinc").D(D);
+		var nodeThumb = new NodeState($"sbc{dir}_thumb").D(D);
 
 		ScrollBarCtrlUtils.HookBtn(out var btnDecState, state, ScrollBtnDecInc.Dec, nodeBtnDec).D(D);
 		ScrollBarCtrlUtils.HookBtn(out var btnIncState, state, ScrollBtnDecInc.Inc, nodeBtnInc).D(D);
 		ScrollBarCtrlUtils.HookTrack(state, ScrollBtnDecInc.Dec, nodeTrackDec).D(D);
 		ScrollBarCtrlUtils.HookTrack(state, ScrollBtnDecInc.Inc, nodeTrackInc).D(D);
 
+		//nodeTrackDec.R.Log("nodeTrackDec").D(D);
+		//nodeTrackInc.R.Log("nodeTrackInc").D(D);
 
 		if (dir == Dir.Vert)
 		{
@@ -120,8 +123,13 @@ file static class ScrollBarCtrlUtils
 		var d = new Disp();
 		btnState = node.Evt.IsMouseOver().D(d).SelectVar(e => e ? ScrollBtnState.Hover : ScrollBtnState.Normal);
 
+		var mp = Var.Make(Pt.Empty, node.Evt.WhenMouseMove()).D(d);
+
 		node.Evt.WhenRepeatedClick(node).D(d)
-			.ObserveOnUIThread()
+			//.Do(_ => L($"Btn({decInc}, {node.R.V}.Contains({mp.V})"))
+			//.ObserveOnUIThread()
+		//node.Evt.WhenMouseDown(node)
+
 			.Select(_ => new UnitScrollCmd(state.Dir, decInc))
 			.Where(state.CanRunScrollCmd)
 			.Subscribe(state.RunScrollCmd).D(d);
@@ -133,13 +141,19 @@ file static class ScrollBarCtrlUtils
 	public static IDisposable HookTrack(
 		ScrollState state,
 		ScrollBtnDecInc decInc,
-		NodeState node
+		NodeState node,
+		bool dbg = false
 	)
 	{
 		var d = new Disp();
 
-		node.Evt.WhenRepeatedClick(node).D(d)
-			.ObserveOnUIThread()
+		//var mp = Var.Make(Pt.Empty, node.Evt.WhenMouseMove()).D(d);
+
+		node.Evt.WhenRepeatedClick(node, MouseBtn.Left, null, dbg).D(d)
+			//.Do(_ => L($"Track({decInc}, {node.R.V}.Contains({mp.V})"))
+			//.ObserveOnUIThread()
+		//node.Evt.WhenMouseDown(node)
+
 			.Select(_ => new PageScrollCmd(state.Dir, decInc))
 			.Where(state.CanRunScrollCmd)
 			.Subscribe(state.RunScrollCmd).D(d);

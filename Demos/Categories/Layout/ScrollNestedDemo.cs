@@ -45,7 +45,7 @@ sealed class ScrollNestedDemo : Win
 					r.FillR(Consts.InterBrush);
 				}
 
-				using (r[nodeScroll].StratStack(Dir.Vert).ScrollXY()/*.Dim(200, 300)*/.Marg(20).M)
+				using (r[nodeScroll].StratStack(Dir.Vert).Pop().ScrollXY()/*.Dim(200, 300)*/.Marg(20).M)
 				{
 					r.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines.Length; i++)

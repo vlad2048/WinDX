@@ -45,7 +45,7 @@ sealed class EventTester : IDisposable
         winWrapper = TestWinMaker.Make(whenEvt.AsObservable()).D(d);
 
         winWrapper.Win.Nodes
-	        .DispatchEvents(out _, winWrapper.Win).D(d);
+	        .DispatchEvents(out _, out _, winWrapper.Win).D(d);
     }
 
 

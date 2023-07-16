@@ -24,9 +24,10 @@ sealed class SpectorWinDrawState : IDisposable
 
     private readonly IObservableCache<SpectorSubWinDrawState, IWin> subMap;
 
-    public IRwMayVar<MixNode> SelNode { get; }
-    public IRwMayVar<MixNode> HovNode { get; }
-    public IRwMayVar<INode> LockedNode { get; }
+    public IRwMayVar<MixNode> NodeTreeSel { get; }
+    public IRwMayVar<MixNode> NodeTreeHov { get; }
+    public IRwMayVar<INode> NodeLock { get; }
+    public IRwMayVar<INode> NodeHovr { get; }
     public IObservable<Unit> WhenChanged { get; }
 
     public void SetRenderCountToLog(int cnt) => subMap.Items.ForEach(e => e.RenderCountToLog = cnt);
@@ -39,15 +40,17 @@ sealed class SpectorWinDrawState : IDisposable
 
     public SpectorWinDrawState(IRoTracker<IWin> wins)
     {
-        SelNode = VarMay.Make<MixNode>().D(d);
-        HovNode = VarMay.Make<MixNode>().D(d);
-        LockedNode = VarMay.Make<INode>().D(d);
+        NodeTreeSel = VarMay.Make<MixNode>().D(d);
+        NodeTreeHov = VarMay.Make<MixNode>().D(d);
+        NodeLock = VarMay.Make<INode>().D(d);
+        NodeHovr = VarMay.Make<INode>().D(d);
 
         WhenChanged =
 	        Obs.Merge(
-		        SelNode.Skip(1).ToUnit(),
-	            HovNode.Skip(1).ToUnit(),
-	            LockedNode.Skip(1).ToUnit()
+		        NodeTreeSel.Skip(1).ToUnit(),
+	            NodeTreeHov.Skip(1).ToUnit(),
+	            NodeLock.Skip(1).ToUnit(),
+		        NodeHovr.Skip(1).ToUnit()
 	        )
 		        .Where(_ => !Cfg.V.Tweaks.DisableWinSpectorDrawing);
 

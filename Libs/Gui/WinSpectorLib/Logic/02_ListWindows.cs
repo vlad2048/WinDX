@@ -20,46 +20,19 @@ static partial class Setup
 	public static IDisposable ListWindowsAndGetLayout(
 		WinSpectorWin ui,
 		out IRoMayVar<PartitionSet> selLayout,
+		out IRoMayVar<Win> selWinRo,
 		SpectorPrefs prefs
 	)
 	{
 		var d = new Disp();
 		ListBoxSourceListViewer.View(out var selWin, WinMan.MainWins.Items, ui.winList).D(d);
+		selWinRo = selWin;
 
 		ui.windowUnselectItem.Events().Click.Subscribe(_ => selWin.V = May.None<Win>()).D(d);
 
 		selLayout = selWin.SwitchMayMayVar(e => e.PartSet);
 
-		ui.windowRedrawItem.EnableWhenSome(selWin).D(d);
-		ui.windowLogRedrawItem.EnableWhenSome(selWin).D(d);
-		ui.windowLogNextRedrawItem.EnableWhenSome(selWin).D(d);
-		ui.windowLogNext2RedrawsItem.EnableWhenSome(selWin).D(d);
 		ui.windowResizeItem.EnableWhenSome(selWin).D(d);
-
-		ui.windowRedrawItem.Events().Click.Subscribe(_ =>
-		{
-			var win = selWin.V.Ensure();
-			win.Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw);
-		}).D(d);
-
-		ui.windowLogRedrawItem.Events().Click.Subscribe(_ =>
-		{
-			var win = selWin.V.Ensure();
-			win.SpectorDrawState.SetRenderCountToLog(1);
-			win.Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw);
-		}).D(d);
-
-		ui.windowLogNextRedrawItem.Events().Click.Subscribe(_ =>
-		{
-			var win = selWin.V.Ensure();
-			win.SpectorDrawState.SetRenderCountToLog(1);
-		}).D(d);
-
-		ui.windowLogNext2RedrawsItem.Events().Click.Subscribe(_ =>
-		{
-			var win = selWin.V.Ensure();
-			win.SpectorDrawState.SetRenderCountToLog(2);
-		}).D(d);
 
 		ui.windowResizeItem.Events().Click.Subscribe(_ =>
 		{

@@ -11,6 +11,12 @@ public static class LogUtils
 		ConUtils.WriteLine(s, C.Text);
 	}
 
+	public static void LIf(bool condition, string s)
+	{
+		if (condition)
+			L(s);
+	}
+
 	public static void LTitle(string s)
 	{
 		L("");

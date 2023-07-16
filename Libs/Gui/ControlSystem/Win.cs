@@ -84,8 +84,9 @@ public class Win : Ctrl, IMainWin
 
 		Evt = UserEventGenerator.MakeForWin(Wins).D(D);
 
-		Wins.MergeManyTrackers(e => e.Nodes).SelectTracker(e => e.Item).DispatchEvents(out var nodeLock, this).D(D);
-		nodeLock.PipeTo(SpectorDrawState.LockedNode);
+		Wins.MergeManyTrackers(e => e.Nodes).SelectTracker(e => e.Item).DispatchEvents(out var nodeLock, out var nodeHovr, this).D(D);
+		nodeLock.PipeTo(SpectorDrawState.NodeLock);
+		nodeHovr.PipeTo(SpectorDrawState.NodeHovr);
 
 		var rendererSwitcher = new RendererSwitcher(sysWin, Invalidator).D(D);
 
@@ -121,9 +122,9 @@ public class Win : Ctrl, IMainWin
 						.BuildTree(rendererSwitcher.Renderer)
 						.SolveTree(FreeSzMaker.FromSz(ClientSz.V), this)
 						.SplitIntoPartitions()
-						.VerifyInvariants()
+						.VerifyInvariants(0)
 						.HandleScrolling(scrollMan, rendererSwitcher.Renderer)
-						.VerifyInvariants()
+						.VerifyInvariants(1)
 						//.Assign_CtrlWins_and_NodeRs(this, getWin)
 				);
 
@@ -155,7 +156,7 @@ public class Win : Ctrl, IMainWin
 
 file static class WinUtils
 {
-	public static PartitionSet Assign_CtrlWins_and_NodeRs(
+	public static void Assign_CtrlWins_and_NodeRs(
 		this PartitionSet set,
 		Win mainWin,
 		Func<NodeState?, IWin> getWin)
@@ -164,7 +165,10 @@ file static class WinUtils
 		foreach (var nodeState in nodeStates)
 		{
 			nodeState.RSrc.V = set.RMap[nodeState];
-			L($"{nodeState}.R <- {set.RMap[nodeState]}");
+
+			var part = set.Partitions.Single(part => part.NodeStates.Contains(nodeState));
+			var win = getWin(part.NodeStateId);
+			nodeState.WinPosSrc.V = win.ScreenPt.V;
 		}
 
 		foreach (var partition in set.Partitions)
@@ -177,8 +181,6 @@ file static class WinUtils
 				ctrl.PopupWinSrc.V = May.Some(win);
 			}
 		}
-
-		return set;
 	}
 
 

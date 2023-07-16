@@ -54,7 +54,7 @@ n1, n2, n3, n4, n5	are NonPopNodes
   --------------
 	                           <p2>──n4
 
-  NodeStateId		= <p1>			NodeStates		= { <p2>, n4 }		ZOrderWin			= 2
+  NodeStateId		= <p2>			NodeStates		= { <p2>, n4 }		ZOrderWin			= 2
   ParentNodeStateId	= <p1>			Ctrls			= { }				RootNode			= <p2>
   RenderCtrl		= C1			CtrlsToRender	= { C1 }
 

@@ -10,6 +10,7 @@ public static class EventDispatcher
 	public static IDisposable DispatchEvents(
 		this IRoTracker<NodeZ> nodes,
 		out IRoMayVar<INode> nodeLock,
+		out IRoMayVar<INode> nodeHovr,
 		IMainWin mainWin
 	)
 	{
@@ -17,6 +18,7 @@ public static class EventDispatcher
 
 		UserEventConverter.MakeForNodes(
 			out nodeLock,
+			out nodeHovr,
 			nodes,
 			mainWin.Evt
 		).D(d);

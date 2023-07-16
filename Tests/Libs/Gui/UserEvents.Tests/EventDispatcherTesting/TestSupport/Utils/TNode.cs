@@ -19,6 +19,7 @@ sealed class TNode : INode, IDisposable
     public IRwVar<R> RSrc { get; }
 
     public IRoVar<R> R => RSrc.ToReadOnly();
+    public IRoVar<Pt> WinPos => Var.MakeConst(Pt.Empty);
     public IObservable<IUserEvt> Evt => whenEvt.AsObservable();
     public void DispatchEvt(IUserEvt evt) => whenEvt.OnNext(evt);
     public IObservable<Unit> WhenInvalidateRequired => Obs.Never<Unit>();

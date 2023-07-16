@@ -37,8 +37,8 @@ static partial class Setup
 		{
 			if (selLayout.V.IsNone(out var selLayoutVal)) return;
 			var win = selLayoutVal.Nfo.MainWin;
-			win.SpectorDrawState.SelNode.V = selNode.V;
-			win.SpectorDrawState.HovNode.V = hovNode.V;
+			win.SpectorDrawState.NodeTreeSel.V = selNode.V;
+			win.SpectorDrawState.NodeTreeHov.V = hovNode.V;
 		}).D(d);
 
 		SetupContextMenu(ui, selNode, showEvents, trackedState).D(d);

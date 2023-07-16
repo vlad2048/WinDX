@@ -40,14 +40,17 @@ sealed partial class WinSpectorWin : Form
 
 			WinUtils.HookShowEvents(ui, showEvents).D(d);
 			Setup.ShowDemos(ui, demos).D(d);
-			Setup.ListWindowsAndGetLayout(ui, out var selLayout, prefs).D(d);
-			WinUtils.SetupShortcuts((WhenShortcut, selLayout), prefs, ui).D(d);
+			Setup.ListWindowsAndGetLayout(ui, out var selLayout, out var selWin, prefs).D(d);
+			WinUtils.SetupShortcuts(WhenShortcut, selWin, ui, prefs, showEvents).D(d);
 
-			selLayout.Subscribe(_ => trackedState.V = May.None<NodeState>()).D(d);
+			selLayout.Subscribe(mayLay =>
+			{
+				if (trackedState.V.IsSome(out var trk) && (mayLay.IsNone(out var lay) || !lay.ContainsNodeState(trk)))
+					trackedState.V = May.None<NodeState>();
+			}).D(d);
 
 			Setup.ViewLayout(ui, selLayout, showEvents, trackedState).D(d);
 			Setup.OpenInFlexBuilder(ui, selLayout).D(d);
-			Setup.DisplayEvents(ui, showEvents).D(d);
 			Setup.PrintTrackedNodeState(ui, trackedState).D(d);
 
 			eventDisplayer.SetShowEvents(showEvents);
@@ -65,12 +68,79 @@ sealed partial class WinSpectorWin : Form
 		};
 
 	}
+
+
 }
 
 
 file static class WinUtils
 {
-	public static IDisposable SetupShortcuts((IObservable<ShortcutMsg>, IRoMayVar<PartitionSet>) t, SpectorPrefs prefs, WinSpectorWin ui)
+	public static bool ContainsNodeState(this PartitionSet set, NodeState nodeState) => set.Partitions.Any(part => part.NodeStates.Contains(nodeState));
+
+	public static IDisposable SetupShortcuts(
+		IObservable<ShortcutMsg> whenShortcut,
+		IRoMayVar<Win> selWin,
+		WinSpectorWin ui,
+		SpectorPrefs prefs,
+		IRwVar<bool> showEvents
+	)
+	{
+		var d = new Disp();
+
+
+		// ***********
+		// * Console *
+		// ***********
+		ShortcutUtils.SetAction(Keys.C, ui.eventsClearItem, whenShortcut,
+			ui.eventDisplayer.Clear
+		).D(d);
+
+
+		// ***********
+		// * Redraws *
+		// ***********
+		ShortcutUtils.SetWinAction(Keys.Control | Keys.R, ui.windowLogRedrawItem, whenShortcut, selWin, win =>
+		{
+			win.SpectorDrawState.SetRenderCountToLog(1);
+			win.Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw);
+		}).D(d);
+		ShortcutUtils.SetWinAction(ui.windowRedrawItem, selWin, win =>
+			win.Invalidator.Invalidate(RedrawReason.SpectorRequestFullRedraw)
+		).D(d);
+		ShortcutUtils.SetWinAction(ui.windowLogNextRedrawItem, selWin, win =>
+			win.SpectorDrawState.SetRenderCountToLog(1)
+		).D(d);
+		ShortcutUtils.SetWinAction(ui.windowLogNext2RedrawsItem, selWin, win =>
+			win.SpectorDrawState.SetRenderCountToLog(2)
+		).D(d);
+
+
+		// *****************
+		// * Window Resize *
+		// *****************
+		ShortcutUtils.SetWinAction(Keys.Control | Keys.Add, whenShortcut, selWin,
+			win => win.SetSize(win.ScreenR.V.Size + prefs.ResizeSz.ToSz())
+		).D(d);
+		ShortcutUtils.SetWinAction(Keys.Control | Keys.Subtract, whenShortcut, selWin, win =>
+			win.SetSize(win.ScreenR.V.Size - prefs.ResizeSz.ToSz())
+		).D(d);
+
+
+		// **********
+		// * Events *
+		// **********
+		ShortcutUtils.SetToggle(Keys.S, ui.eventsShowItem, whenShortcut,
+			showEvents
+		).D(d);
+		ShortcutUtils.SetToggle(Keys.E, ui.eventsShowItem, whenShortcut,
+			ui.eventDisplayer.IsPaused
+		).D(d);
+
+
+		return d;
+	}
+
+	/*public static IDisposable SetupShortcuts((IObservable<ShortcutMsg>, IRoMayVar<PartitionSet>) t, SpectorPrefs prefs, WinSpectorWin ui)
 	{
 		var d = new Disp();
 		t.WhenShortcut(Keys.Control | Keys.Add).Subscribe(win => win.SetSize(win.ScreenR.V.Size + prefs.ResizeSz.ToSz())).D(d);
@@ -89,7 +159,7 @@ file static class WinUtils
 
 
 		return d;
-	}
+	}*/
 
 
 	public static IDisposable HookShowEvents(

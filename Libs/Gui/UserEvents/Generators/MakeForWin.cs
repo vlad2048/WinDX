@@ -142,16 +142,7 @@ public static class UserEventGenerator
 		var sysEvts = sysEvtsItems.Select(e => e.Evt);
 		var whenEvt = new Subject<IUserEvt>().D(d);
 		void Send(IUserEvt evt) => whenEvt.OnNext(evt);
-		bool IsMouseOver()
-		{
-			var mp = GetMousePos();
-			/*L($"------------ Y = {mp.Y}");
-			if (mp.Y == 100 + 100)
-			{
-				var abc = 123;
-			}*/
-			return popups.ItemsArr.Any(e => e.ScreenR.V.Contains(mp));
-		}
+		bool IsMouseOver() => popups.ItemsArr.Any(e => e.ScreenR.V.Contains(MouseUtils.GetMousePos()));
 
 
 		// State
@@ -186,7 +177,6 @@ public static class UserEventGenerator
 
 		sysEvts.WhenMouseMove().Subscribe(_ => isMouseOver.V = true).D(d);
 		sysEvts.WhenMouseLeave().Where(_ => !IsMouseOver()).Subscribe(_ => isMouseOver.V = false).D(d);
-		//sysEvts.RunActionAfterIfNot<IUserEvt, MouseLeaveUserEvt, MouseMoveUserEvt>(() => isMouseOver.V = false, delay).D(d);
 
 
 		// Events (IUserEvtMouse + IUserEvtKeyboard)
@@ -205,25 +195,13 @@ public static class UserEventGenerator
 
 		evt = whenEvt.AsObservable();
 
-
-		if (log)
-		{
-			evt
-				.Log($"{Pad}{prefix}").D(d);
-		}
-
+		if (log) evt.Log($"{Pad}{prefix}").D(d);
 
 		return d;
 	}
 	
 
 	private static readonly string Pad = new(' ', 40);
-
-	private static Pt GetMousePos()
-	{
-		User32Methods.GetCursorPos(out var pt);
-		return pt.ToPt();
-	}
 
 
 

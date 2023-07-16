@@ -72,7 +72,7 @@ static class PartitionExt
 	}
 
 
-	public static PartitionSet VerifyInvariants(this PartitionSet set)
+	public static PartitionSet VerifyInvariants(this PartitionSet set, int step)
 	{
 		VerifyPartition(
 			set.Root.GetAllNodeStates(),

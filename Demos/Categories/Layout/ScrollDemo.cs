@@ -26,17 +26,17 @@ sealed class ScrollDemo : Win
 
 				using (r[nodeTop].DimFilFix(50).M) { }
 
-				using (r[nodeScroll].DimFixFil(100).StratStack(Dir.Vert).ScrollX().M)
+				using (r[nodeScroll].DimFixFil(200).StratStack(Dir.Vert).ScrollX().M)
 				{
 					r.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines.Length; i++)
 					{
 						var nodeLine = nodesLines[i];
 
-						using (r[nodeLine].DimFixFit(180).Marg(i > 0 ? 1 : 0, 0, 0, 0).M)
+						using (r[nodeLine].DimFixFit(500).Marg(i > 0 ? 1 : 0, 0, 0, 0).M)
 						{
 							r.FillR(Consts.LineBrush);
-							r.DrawText($"01234567890123456789 Line {i}", Consts.Font, Consts.TextColor);
+							r.DrawText($"012345 dscg 6789012 ytwsa 3456789 Line {i} 012345 dscg 6789012 ytwsa 3456789 Line {i}", Consts.Font, Consts.TextColor);
 						}
 					}
 				}

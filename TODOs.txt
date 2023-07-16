@@ -1,5 +1,6 @@
-- fix scroll update issue
+- set SpectorDrawState.NodeTreeSel/Hov to None when the window closes or the node is removed
+  otherwise you can get a DisposedException in 03_ViewLayout:40
+  win.SpectorDrawState.NodeTreeSel.V = selNode.V;
 
-- make coordinates relative to MainWin and not to the Nodes
 - think about how to handle Ctrls changing between the 2 rendering passes
 

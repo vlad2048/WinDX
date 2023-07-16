@@ -4,6 +4,7 @@ using ControlSystem.Structs;
 using PowBasics.Geom;
 using PowRxVar;
 using RenderLib.Structs;
+using UserEvents.Structs;
 
 namespace Demos.Categories.UserEvents;
 
@@ -11,13 +12,18 @@ sealed class UserEventsDemo : Win
 {
 	public UserEventsDemo() : base(opt => opt.R = new R(-250, 100, 230, 120))
 	{
-		var nodeRoot = new NodeState().D(D);
-		var nodeFill1 = new NodeState().D(D);
-		var nodeFill2 = new NodeState().D(D);
+		var nodeRoot = new NodeState("root").D(D);
+		var nodeFill1 = new NodeState("fill1").D(D);
+		var nodeFill2 = new NodeState("fill2").D(D);
 
 		//nodeRoot.Evt.Evt.Subscribe(e => L($"[Ctrl-R] - {e}")).D(D);
-		nodeFill1.Evt.Subscribe(e => L($"[Ctrl-1] - {e}")).D(D);
-		nodeFill2.Evt.Subscribe(e => L($"[Ctrl-2] - {e}")).D(D);
+		//nodeFill1.Evt.Subscribe(e => L($"[Ctrl-1] - {e}")).D(D);
+		//nodeFill2.Evt.Subscribe(e => L($"[Ctrl-2] - {e}")).D(D);
+
+		nodeFill1.Evt.WhenMouseUp().Subscribe(e =>
+		{
+			L($"nodeFill1 MouseUp({e})");
+		}).D(D);
 
 		WhenRender.Subscribe(r =>
 		{

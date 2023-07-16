@@ -9,6 +9,7 @@ public interface INodeStateUserEventsSupport
 {
 	Disp D { get; }
 	IRoVar<R> R { get; }
+	IRoVar<Pt> WinPos { get; }
 	IObservable<IUserEvt> Evt { get; }
 	void DispatchEvt(IUserEvt evt);
 	IObservable<Unit> WhenInvalidateRequired { get; }

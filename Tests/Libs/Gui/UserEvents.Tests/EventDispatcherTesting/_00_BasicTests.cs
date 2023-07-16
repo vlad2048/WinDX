@@ -1,16 +1,9 @@
-﻿using System.Windows.Forms;
-using PowBasics.Geom;
-using PowRxVar;
-using TestBase;
-using UserEvents.Structs;
-using UserEvents.Tests.EventDispatcherTesting.TestSupport;
-using UserEvents.Tests.EventDispatcherTesting.TestSupport.Utils;
-using WinAPI.User32;
-using static UserEvents.Tests.EventDispatcherTesting.Win2NodesTestsUtils;
+﻿using UserEvents.Tests.EventDispatcherTesting.TestSupport;
+using static UserEvents.Tests.EventDispatcherTesting.TestSupport.Utils.Win2NodesTestsUtils;
 using static UserEvents.Tests.EventDispatcherTesting.TestSupport.Utils.GeomData;
-#pragma warning disable CS8618
 
 namespace UserEvents.Tests.EventDispatcherTesting;
+
 
 /* X╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶┐
    ╷                                     ╷
@@ -26,15 +19,10 @@ namespace UserEvents.Tests.EventDispatcherTesting;
    ╷                                     ╷
    └╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶╶┘ */
 
-sealed class EventDispatcherTests : RxTest
+sealed class _00_BasicTests : EventDispatcherBaseTest
 {
-    private NodeZ R => new(tester.NodeR, new ZOrder(0, false, 0));
-    private NodeZ A => new(tester.NodeA, new ZOrder(0, false, 1));
-    private NodeZ B => new(tester.NodeB, new ZOrder(0, false, 2));
-
-
     [Test]
-    public void _00_MoveBasics()
+    public void _00_MoveToA_MoveWithinA_MoveToR()
     {
         User(Move(pA1));
         Check(
@@ -56,7 +44,7 @@ sealed class EventDispatcherTests : RxTest
     }
 
     [Test]
-    public void _01_MoveBothDirections()
+    public void _01_MoveToA_MoveToB_MoveToA()
     {
         User(Move(pA1));
         Check(
@@ -80,7 +68,7 @@ sealed class EventDispatcherTests : RxTest
     }
 
     [Test]
-    public void _10_Buttons()
+    public void _10_MoveToA_Down_Up()
     {
         User(Move(pA1));
         Check(
@@ -100,7 +88,7 @@ sealed class EventDispatcherTests : RxTest
     }
 
     [Test]
-    public void _20_NodeRemoved()
+    public void _20_MoveToA_RemoveA()
     {
         User(Move(pA1));
         Check(
@@ -117,7 +105,7 @@ sealed class EventDispatcherTests : RxTest
     }
 
     [Test]
-    public void _21_NodeAdded()
+    public void _21_RemoveA_MoveToWhereAWas_AddA()
     {
         DelNodes(A);
         Check();
@@ -137,7 +125,7 @@ sealed class EventDispatcherTests : RxTest
     }
 
     [Test]
-    public void _22_NodeMovedOut()
+    public void _22_MoveToA_MoveASomewhereElse()
     {
         User(Move(pA1));
         Check(
@@ -145,7 +133,7 @@ sealed class EventDispatcherTests : RxTest
             Move(A, pA1)
         );
 
-        tester.NodeA.RSrc.V = new R(70, 30, 30, 20);
+        MoveNode(A, rB);
         Check(
             Leave(A),
             Enter(R, pA1),
@@ -154,9 +142,9 @@ sealed class EventDispatcherTests : RxTest
     }
 
     [Test]
-    public void _23_NodeMovedIn()
+    public void _23_MoveASomewhereElse_MoveToWhereAWas_MoveABack()
     {
-		tester.NodeA.RSrc.V = new R(70, 30, 30, 20);
+	    MoveNode(A, rB);
         Check();
 
         User(Move(pA1));
@@ -165,7 +153,7 @@ sealed class EventDispatcherTests : RxTest
             Move(R, pA1)
         );
 
-        tester.NodeA.RSrc.V = rA;
+	    MoveNode(A, rA);
         Check(
             Leave(R),
             Enter(A, pA1),
@@ -174,7 +162,7 @@ sealed class EventDispatcherTests : RxTest
     }
 
     [Test]
-    public void _30_Leave()
+    public void _30_MoveToA_LeaveWin_MoveToB()
     {
         User(Move(pA1));
         Check(
@@ -193,70 +181,4 @@ sealed class EventDispatcherTests : RxTest
             Move(B, pB1)
         );
     }
-
-
-    private EventTester tester;
-
-    private void Check(params NodeEvt[] evts) => tester.Check(evts);
-
-    private void User(params IUserEvt[] events) => tester.User(events);
-    private void AddNodes(params NodeZ[] arr) => tester.AddNodes(arr);
-    private void DelNodes(params NodeZ[] arr) => tester.DelNodes(arr);
-
-
-    [SetUp]
-    public new void Setup()
-    {
-        ResetUtilsMousePos();
-        tester = new EventTester().D(D);
-        Check();
-        AddNodes(R, A, B);
-        Check();
-    }
-}
-
-
-file static class Win2NodesTestsUtils
-{
-    private static Pt mousePos = Pt.Empty;
-
-    public static void ResetUtilsMousePos() => mousePos = Pt.Empty;
-
-
-
-
-    public static IUserEvt Enter(Pt pt)
-    {
-        mousePos = pt;
-        return new MouseEnterUserEvt(pt);
-    }
-    public static IUserEvt Leave() => new MouseLeaveUserEvt();
-    public static IUserEvt Move(Pt pt)
-    {
-        mousePos = pt;
-        return new MouseMoveUserEvt(pt);
-    }
-    public static IUserEvt BtnDown() => new MouseButtonDownUserEvt(mousePos, MouseBtn.Left);
-    public static IUserEvt BtnUp() => new MouseButtonUpUserEvt(mousePos, MouseBtn.Left);
-    public static IUserEvt KeyDown() => new KeyDownUserEvt(Keys.K);
-    public static IUserEvt KeyUp() => new KeyUpUserEvt(Keys.K);
-
-
-
-
-    public static NodeEvt Enter(NodeZ node, Pt pt)
-    {
-        mousePos = pt;
-        return new NodeEvt(node.Node, new MouseEnterUserEvt(pt));
-    }
-    public static NodeEvt Leave(NodeZ node) => new(node.Node, new MouseLeaveUserEvt());
-    public static NodeEvt Move(NodeZ node, Pt pt)
-    {
-        mousePos = pt;
-        return new NodeEvt(node.Node, new MouseMoveUserEvt(pt));
-    }
-    public static NodeEvt BtnDown(NodeZ node) => new(node.Node, new MouseButtonDownUserEvt(mousePos, MouseBtn.Left));
-    public static NodeEvt BtnUp(NodeZ node) => new(node.Node, new MouseButtonUpUserEvt(mousePos, MouseBtn.Left));
-    public static NodeEvt KeyDown(NodeZ node) => new(node.Node, new KeyDownUserEvt(Keys.K));
-    public static NodeEvt KeyUp(NodeZ node) => new(node.Node, new KeyUpUserEvt(Keys.K));
 }

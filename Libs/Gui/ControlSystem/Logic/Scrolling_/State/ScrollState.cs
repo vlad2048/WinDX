@@ -200,8 +200,8 @@ file static class ScrollStateUtils
 			throw new ArgumentException("Impossible");
 
 		if (src == 0 && dst != 0) throw new ArgumentException("Postcondition 1 broken");
-		if (src != srcCount - 1 && dst == dstCount - 1) throw new ArgumentException("Postcondition 2 broken");
-		if (src == srcCount - 1 && dst != dstCount - 1) throw new ArgumentException("Postcondition 3 broken");
+		if (src != srcCount - 1 && dst != 0 && dst == dstCount - 1) throw new ArgumentException("Postcondition 2 broken");
+		if (src == srcCount - 1 && dst != 0 && dst != dstCount - 1) throw new ArgumentException("Postcondition 3 broken");
 
 		return dst;
 	}

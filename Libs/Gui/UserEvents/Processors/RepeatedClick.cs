@@ -14,26 +14,41 @@ public static class Processor_RepeatedClick
 		this IObservable<IUserEvt> evt,
 		INode node,
 		MouseBtn btn = MouseBtn.Left,
-		IScheduler? scheduler = null
+		IScheduler? scheduler = null,
+		bool dbg = false
 	)
 	{
 		var d = new Disp();
-		var mp = Pt.Empty;
-		evt.WhenMouseMove().Subscribe(e => mp = e).D(d);
+
+		var ptMin = new Pt(int.MinValue, int.MinValue);
+
+		var mp = Var.Make(
+			ptMin,
+			Obs.Merge(
+				evt.WhenMouseMove(),
+				evt.WhenMouseUp(btn).Select(_ => ptMin),
+				evt.WhenMouseDown()//.Do(e => LIf(dbg, $"MP(Down) <- {e}"))
+			)
+		).D(d);
+
+		//mp.LogIf(dbg, "mp <- ").D(d);
+
 
 		return
 		(
 			Obs.Merge(
-					evt.WhenMouseDown(btn).Select(_ => true),
+					evt.WhenMouseDown(node, btn).Select(_ => true),
 					evt.WhenMouseUp(btn).Select(_ => false)
 				)
+				//.Do(e => LIf(dbg, $"Switch({e})"))
 				.Select(v => v switch
 					{
 						true =>
 							Obs.Timer(InputConstants.RepeatClickDelay, InputConstants.RepeatClickSpeed, scheduler ?? DefaultScheduler.Instance)
 								.ToUnit()
 								.Prepend(Unit.Default)
-								.Where(_ => node.ContainsMouse(mp)),
+								.Where(_ => node.ContainsMouse(mp.V)),
+								//.Where(_ => node.ContainsMouse(MouseUtils.GetMousePos() - node.WinPos.V)),
 						false =>
 							Obs.Never<Unit>()
 					}

@@ -54,6 +54,11 @@ public static class IUIEvtExts
 		);
 
 
+	public static IObservable<Unit> WhenMouseDown(this IObservable<IUserEvt> evt, INode node, MouseBtn btn = MouseBtn.Left) => evt.WhenMouseDown(btn).Where(pt => node.R.V.Contains(pt)).ToUnit();
+	public static IObservable<Unit> WhenMouseUp(this IObservable<IUserEvt> evt, INode node, MouseBtn btn = MouseBtn.Left) => evt.WhenMouseUp(btn).Where(pt => node.R.V.Contains(pt)).ToUnit();
+
+
+
 	// ************
 	// * Keyboard *
 	// ************
