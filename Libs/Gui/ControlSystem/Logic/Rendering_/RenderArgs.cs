@@ -30,7 +30,7 @@ public sealed class RenderArgs : IGfx
 	private readonly ISubject<StFlexNode> whenFlexPushNext;
 	private readonly ISubject<StFlexNode> whenFlexPopPrev;
 	private readonly ISubject<StFlexNode> whenFlexPopNext;
-	private readonly ISubject<string> whenDraw;
+	private readonly ISubject<(string, Color?)> whenDraw;
 
 	public TreePusher<IMixNode> Pusher { get; }
 	public IObservable<Ctrl> WhenCtrlPushPrev => whenCtrlPushPrev.AsObservable();
@@ -41,7 +41,7 @@ public sealed class RenderArgs : IGfx
 	public IObservable<StFlexNode> WhenFlexPushNext => whenFlexPushNext.AsObservable();
 	public IObservable<StFlexNode> WhenFlexPopPrev => whenFlexPopPrev.AsObservable();
 	public IObservable<StFlexNode> WhenFlexPopNext => whenFlexPopNext.AsObservable();
-	public IObservable<string> WhenDraw => whenDraw.AsObservable();
+	public IObservable<(string, Color?)> WhenDraw => whenDraw.AsObservable();
 
 	public RenderStFlexNodeFluent this[NodeState nodeState] => new(this, nodeState);
 
@@ -65,7 +65,7 @@ public sealed class RenderArgs : IGfx
 		whenFlexPopPrev = new Subject<StFlexNode>().D(d);
 		whenFlexPopNext = new Subject<StFlexNode>().D(d);
 
-		whenDraw = new Subject<string>().D(d);
+		whenDraw = new Subject<(string, Color?)>().D(d);
 	}
 
 
@@ -121,10 +121,10 @@ public sealed class RenderArgs : IGfx
 
 	public bool DrawDisabled => Gfx.DrawDisabled;
 
-	private void EvtDraw(string str)
+	private void EvtDraw(string str, Color? col = null)
 	{
 		if (DrawDisabled) return;
-		whenDraw.OnNext(str);
+		whenDraw.OnNext((str, col));
 	}
 
 	public void PushClip(R clipR)
@@ -141,7 +141,7 @@ public sealed class RenderArgs : IGfx
 
 	public void FillR(R r, BrushDef brush)
 	{
-		EvtDraw($"FillR {r}");
+		EvtDraw($"FillR {r}", brush.GetColor());
 		Gfx.FillR(r, brush);
 	}
 
@@ -159,6 +159,7 @@ public sealed class RenderArgs : IGfx
 
 	public void DrawBmp(Bitmap bmp)
 	{
+		EvtDraw("DrawBmp");
 		Gfx.DrawBmp(bmp);
 	}
 
@@ -173,6 +174,16 @@ public sealed class RenderArgs : IGfx
 
 
 
+
+
+file static class RenderArgsExt
+{
+	public static Color? GetColor(this BrushDef brush) => brush switch
+	{
+		SolidBrushDef { Color: var color } => color,
+		_ => null
+	};
+}
 
 
 

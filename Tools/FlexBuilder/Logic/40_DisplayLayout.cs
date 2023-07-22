@@ -15,6 +15,7 @@ using SysWinLib.Structs;
 using WinAPI.User32;
 using WinAPI.Utils.Exts;
 using WinAPI.Windows;
+using WinFormsTooling.Shortcuts;
 using WinFormsTooling.Utils.Exts;
 using Color = System.Drawing.Color;
 
@@ -31,29 +32,14 @@ static partial class Setup
 		UserPrefs userPrefs,
 		IRoMayVar<Node> selNode,
 		IRoMayVar<Node> hoveredNode,
-		Action<FreeSz> winSzMutator
+		Action<FreeSz> winSzMutator,
+		IObservable<ShortcutMsg> whenShortcut
 	)
 	{
 		var d = new Disp();
-		var serD = new SerialDisp<Disp>().D(d);
 
 		ui.redrawStatusBtn.Events().Click.Subscribe(_ => layoutDefForRedraw.V = layoutDefForRedraw.V).D(d);
-
-		var isOpen = Var.Make(userPrefs.ExternalWindowVisible).D(d);
-
-		var renderer = Var.Make(
-			userPrefs.SelectedRenderer,
-			Obs.Merge(
-				ui.gdiplusStatusItem.Events().Click.Select(_ => RendererType.GDIPlus),
-				ui.direct2dStatusItem.Events().Click.Select(_ => RendererType.Direct2D),
-				ui.direct2dindirect3dStatusItem.Events().Click.Select(_ => RendererType.Direct2DInDirect3D)
-			)
-		).D(d);
-		renderer.Subscribe(r =>
-		{
-			userPrefs.SelectedRenderer = r;
-			userPrefs.Save();
-		}).D(d);
+		
 
 		layout.Subscribe(may => ui.calcWinSzStatusLabel.Text = may.IsSome(out var lay) switch
 		{
@@ -61,7 +47,32 @@ static partial class Setup
 			false => "_"
 		});
 
+		var isOpen = Var.Make(userPrefs.ExternalWindowVisible).D(d);
 
+		SelectRenderer(out var renderer, ui, userPrefs).D(d);
+		SetupEnabledItem(isOpen, layout, renderer, selNode, hoveredNode, winSzMutator, userPrefs).D(d);
+
+
+		return d;
+	}
+
+
+
+
+
+
+	private static IDisposable SetupEnabledItem(
+		IRwVar<bool> isOpen,
+		IRoMayVar<FlexLayout> layout,
+		IRoVar<RendererType> renderer,
+		IRoMayVar<Node> selNode,
+		IRoMayVar<Node> hoveredNode,
+		Action<FreeSz> winSzMutator,
+		UserPrefs userPrefs
+	)
+	{
+		var d = new Disp();
+		var serD = new SerialDisp<Disp>().D(d);
 
 		void Show()
 		{
@@ -101,7 +112,7 @@ static partial class Setup
 			Show();
 
 
-		ui.showWinStatusBtn.EnableWhenSome(layout).D(d);
+		/*ui.showWinStatusBtn.EnableWhenSome(layout).D(d);
 		isOpen.Subscribe(open =>
 		{
 			ui.showWinStatusBtn.Text = open ? "Hide" : "Show";
@@ -118,7 +129,7 @@ static partial class Setup
 					Show();
 				else
 					Hide();
-			}).D(d);
+			}).D(d);*/
 
 		return d;
 	}
@@ -246,15 +257,48 @@ static partial class Setup
 
 
 
-	/*private static IDisposable PersistRendererCombo(ComboBox rendererCombo, UserPrefs userPrefs)
+
+
+	private static IDisposable SelectRenderer(
+		out IRoVar<RendererType> renderer,
+		MainWin ui,
+		UserPrefs userPrefs
+	)
 	{
-		rendererCombo.SelectedIndex = (int)userPrefs.SelectedRenderer;
-		return rendererCombo.Events().SelectedIndexChanged.Subscribe(_ =>
+		var d = new Disp();
+
+		var items = new[] { ui.renderingRendererGDIPlusItem, ui.renderingRendererDirect2DItem, ui.renderingRendererDirect3DInDirect2DItem };
+		items[(int)userPrefs.SelectedRenderer].Checked = true;
+
+		IObservable<RendererType> Mk(ToolStripMenuItem item, RendererType type) =>
+			item.Events().Click
+				.Do(_ =>
+				{
+					foreach (var it in items)
+						if (it != item)
+							it.Checked = false;
+					item.Checked = true;
+				})
+				.Select(_ => type);
+
+		var rendererRw = Var.Make(
+			userPrefs.SelectedRenderer,
+			Obs.Merge(
+				Mk(items[0], RendererType.GDIPlus),
+				Mk(items[1], RendererType.Direct2D),
+				Mk(items[2], RendererType.Direct2DInDirect3D)
+			)
+		).D(d);
+		renderer = rendererRw;
+
+		renderer.Subscribe(r =>
 		{
-			userPrefs.SelectedRenderer = (RendererType)rendererCombo.SelectedIndex;
+			userPrefs.SelectedRenderer = r;
 			userPrefs.Save();
-		});
-	}*/
+		}).D(d);
+
+		return d;
+	}
 }
 
 

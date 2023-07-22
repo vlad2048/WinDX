@@ -6,6 +6,7 @@ using DynamicData;
 using PowMaybe;
 using PowRxVar;
 using UserEvents.Structs;
+using WinFormsTooling.Shortcuts;
 using WinFormsTooling.Utils.Exts;
 using WinSpectorLib.Structs;
 

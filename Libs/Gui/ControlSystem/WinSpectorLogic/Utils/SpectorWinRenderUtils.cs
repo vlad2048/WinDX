@@ -29,11 +29,13 @@ static class SpectorWinRenderUtils
 			if (nod.IsNodeState())
 			{
 				nodeR = layout.Set.RMap[nod.GetNodeState()];
+				nodeR -= layout.Offset;
 				return true;
 			}
 			if (nod.IsCtrl())
 			{
 				nodeR = nod.GetCtrlR(layout.Set);
+				nodeR -= layout.Offset;
 				return true;
 			}
 			return false;
@@ -45,6 +47,7 @@ static class SpectorWinRenderUtils
 			if (mayNodeVar.V.IsSome(out var st))
 			{
 				nodeR = layout.Set.RMap[(NodeState)st];
+				nodeR -= layout.Offset;
 				return true;
 			}
 			return false;

@@ -74,11 +74,14 @@ class RenderLogger
 		w.WriteLine($"(/{st.State})", isOn ? C.FlexOn : C.FlexOff);
 	}
 
-	public void Draw(string str)
+	public void Draw(string str, Color? col)
 	{
 		if (!enabled) return;
 		Pad();
-		w.WriteLine(str, C.Draw);
+		w.Write(str, C.Draw);
+		if (col.HasValue)
+			w.Write("  ████", col.Value);
+		w.WriteLine();
 	}
 
 

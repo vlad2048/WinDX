@@ -9,6 +9,7 @@ using PowRxVar;
 using PowWinForms;
 using UserEvents;
 using WinAPI.User32;
+using WinFormsTooling.Shortcuts;
 using WinSpectorLib.Logic;
 using WinSpectorLib.Structs;
 using WinSpectorLib.Utils;
@@ -66,11 +67,9 @@ sealed partial class WinSpectorWin : Form
 			true => true,
 			false => base.ProcessCmdKey(ref msg, keyData)
 		};
-
 	}
-
-
 }
+
 
 
 file static class WinUtils
@@ -91,8 +90,8 @@ file static class WinUtils
 		// ***********
 		// * Console *
 		// ***********
-		ShortcutUtils.SetAction(Keys.C, ui.eventsClearItem, whenShortcut,
-			ui.eventDisplayer.Clear
+		ShortcutUtils.SetAction(Keys.Control | Keys.C, ui.windowClearConsoleItem, whenShortcut,
+			Console.Clear
 		).D(d);
 
 
@@ -129,6 +128,9 @@ file static class WinUtils
 		// **********
 		// * Events *
 		// **********
+		ShortcutUtils.SetAction(Keys.C, ui.eventsClearItem, whenShortcut,
+			ui.eventDisplayer.Clear
+		).D(d);
 		ShortcutUtils.SetToggle(Keys.S, ui.eventsShowItem, whenShortcut,
 			showEvents
 		).D(d);

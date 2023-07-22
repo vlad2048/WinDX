@@ -38,12 +38,16 @@ partial class MainWin
 		nodeEditor = new Editors.NodeEditor();
 		menuStrip = new MenuStrip();
 		fileToolStripMenuItem = new ToolStripMenuItem();
-		newToolStripMenuItem = new ToolStripMenuItem();
-		openToolStripMenuItem = new ToolStripMenuItem();
-		saveToolStripMenuItem = new ToolStripMenuItem();
-		saveAsToolStripMenuItem = new ToolStripMenuItem();
+		fileNewItem = new ToolStripMenuItem();
+		fileOpenItem = new ToolStripMenuItem();
+		fileSaveItem = new ToolStripMenuItem();
+		fileSaveAsItem = new ToolStripMenuItem();
 		toolStripSeparator1 = new ToolStripSeparator();
-		quitToolStripMenuItem = new ToolStripMenuItem();
+		fileExitItem = new ToolStripMenuItem();
+		renderingToolStripMenuItem = new ToolStripMenuItem();
+		renderingEnabledItem = new ToolStripMenuItem();
+		renderingRedrawItem = new ToolStripMenuItem();
+		renderingWindowSizeItem = new ToolStripMenuItem();
 		winDimsXNumeric = new NumericUpDown();
 		statusStrip = new StatusStrip();
 		showWinStatusBtn = new ToolStripDropDownButton();
@@ -67,6 +71,10 @@ partial class MainWin
 		detailsTree = new BrightIdeasSoftware.TreeListView();
 		detailsRichTextBox = new RichTextBox();
 		performanceTab = new TabPage();
+		renderingRendererItem = new ToolStripMenuItem();
+		renderingRendererGDIPlusItem = new ToolStripMenuItem();
+		renderingRendererDirect2DItem = new ToolStripMenuItem();
+		renderingRendererDirect3DInDirect2DItem = new ToolStripMenuItem();
 		((System.ComponentModel.ISupportInitialize)layoutTree).BeginInit();
 		layoutTreeContextMenu.SuspendLayout();
 		menuStrip.SuspendLayout();
@@ -93,7 +101,7 @@ partial class MainWin
 		layoutTree.Location = new Point(6, 6);
 		layoutTree.Name = "layoutTree";
 		layoutTree.ShowGroups = false;
-		layoutTree.Size = new Size(522, 470);
+		layoutTree.Size = new Size(595, 494);
 		layoutTree.TabIndex = 5;
 		layoutTree.View = View.Details;
 		layoutTree.VirtualMode = true;
@@ -132,59 +140,84 @@ partial class MainWin
 		// 
 		nodeEditor.Location = new Point(6, 22);
 		nodeEditor.Name = "nodeEditor";
-		nodeEditor.Size = new Size(203, 348);
+		nodeEditor.Size = new Size(203, 356);
 		nodeEditor.TabIndex = 8;
 		// 
 		// menuStrip
 		// 
-		menuStrip.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem });
+		menuStrip.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem, renderingToolStripMenuItem });
 		menuStrip.Location = new Point(0, 0);
 		menuStrip.Name = "menuStrip";
-		menuStrip.Size = new Size(765, 24);
+		menuStrip.Size = new Size(838, 24);
 		menuStrip.TabIndex = 9;
 		menuStrip.Text = "menuStrip1";
 		// 
 		// fileToolStripMenuItem
 		// 
-		fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { newToolStripMenuItem, openToolStripMenuItem, saveToolStripMenuItem, saveAsToolStripMenuItem, toolStripSeparator1, quitToolStripMenuItem });
+		fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { fileNewItem, fileOpenItem, fileSaveItem, fileSaveAsItem, toolStripSeparator1, fileExitItem });
 		fileToolStripMenuItem.Name = "fileToolStripMenuItem";
 		fileToolStripMenuItem.Size = new Size(37, 20);
 		fileToolStripMenuItem.Text = "&File";
 		// 
-		// newToolStripMenuItem
+		// fileNewItem
 		// 
-		newToolStripMenuItem.Name = "newToolStripMenuItem";
-		newToolStripMenuItem.Size = new Size(123, 22);
-		newToolStripMenuItem.Text = "&New";
+		fileNewItem.Name = "fileNewItem";
+		fileNewItem.Size = new Size(123, 22);
+		fileNewItem.Text = "&New";
 		// 
-		// openToolStripMenuItem
+		// fileOpenItem
 		// 
-		openToolStripMenuItem.Name = "openToolStripMenuItem";
-		openToolStripMenuItem.Size = new Size(123, 22);
-		openToolStripMenuItem.Text = "&Open...";
+		fileOpenItem.Name = "fileOpenItem";
+		fileOpenItem.Size = new Size(123, 22);
+		fileOpenItem.Text = "&Open...";
 		// 
-		// saveToolStripMenuItem
+		// fileSaveItem
 		// 
-		saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-		saveToolStripMenuItem.Size = new Size(123, 22);
-		saveToolStripMenuItem.Text = "&Save";
+		fileSaveItem.Name = "fileSaveItem";
+		fileSaveItem.Size = new Size(123, 22);
+		fileSaveItem.Text = "&Save";
 		// 
-		// saveAsToolStripMenuItem
+		// fileSaveAsItem
 		// 
-		saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-		saveAsToolStripMenuItem.Size = new Size(123, 22);
-		saveAsToolStripMenuItem.Text = "Save &As...";
+		fileSaveAsItem.Name = "fileSaveAsItem";
+		fileSaveAsItem.Size = new Size(123, 22);
+		fileSaveAsItem.Text = "Save &As...";
 		// 
 		// toolStripSeparator1
 		// 
 		toolStripSeparator1.Name = "toolStripSeparator1";
 		toolStripSeparator1.Size = new Size(120, 6);
 		// 
-		// quitToolStripMenuItem
+		// fileExitItem
 		// 
-		quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-		quitToolStripMenuItem.Size = new Size(123, 22);
-		quitToolStripMenuItem.Text = "E&xit";
+		fileExitItem.Name = "fileExitItem";
+		fileExitItem.Size = new Size(123, 22);
+		fileExitItem.Text = "E&xit";
+		// 
+		// renderingToolStripMenuItem
+		// 
+		renderingToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { renderingEnabledItem, renderingRedrawItem, renderingWindowSizeItem, renderingRendererItem });
+		renderingToolStripMenuItem.Name = "renderingToolStripMenuItem";
+		renderingToolStripMenuItem.Size = new Size(73, 20);
+		renderingToolStripMenuItem.Text = "&Rendering";
+		// 
+		// renderingEnabledItem
+		// 
+		renderingEnabledItem.Name = "renderingEnabledItem";
+		renderingEnabledItem.Size = new Size(180, 22);
+		renderingEnabledItem.Text = "Enabled (Ctrl E)";
+		// 
+		// renderingRedrawItem
+		// 
+		renderingRedrawItem.Name = "renderingRedrawItem";
+		renderingRedrawItem.Size = new Size(180, 22);
+		renderingRedrawItem.Text = "Redraw (Ctrl R)";
+		// 
+		// renderingWindowSizeItem
+		// 
+		renderingWindowSizeItem.Name = "renderingWindowSizeItem";
+		renderingWindowSizeItem.Size = new Size(180, 22);
+		renderingWindowSizeItem.Text = "Window &Size...";
 		// 
 		// winDimsXNumeric
 		// 
@@ -198,9 +231,9 @@ partial class MainWin
 		// statusStrip
 		// 
 		statusStrip.Items.AddRange(new ToolStripItem[] { showWinStatusBtn, redrawStatusBtn, rendererStatusCombo, calcWinSzStatusLabel });
-		statusStrip.Location = new Point(0, 534);
+		statusStrip.Location = new Point(0, 558);
 		statusStrip.Name = "statusStrip";
-		statusStrip.Size = new Size(765, 41);
+		statusStrip.Size = new Size(838, 41);
 		statusStrip.TabIndex = 13;
 		statusStrip.Text = "statusStrip";
 		// 
@@ -282,7 +315,7 @@ partial class MainWin
 		groupBox1.Controls.Add(label2);
 		groupBox1.Controls.Add(winDimsXCheckBox);
 		groupBox1.Controls.Add(winDimsXNumeric);
-		groupBox1.Location = new Point(534, 6);
+		groupBox1.Location = new Point(607, 6);
 		groupBox1.Name = "groupBox1";
 		groupBox1.Size = new Size(217, 89);
 		groupBox1.TabIndex = 19;
@@ -329,9 +362,9 @@ partial class MainWin
 		// 
 		groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 		groupBox2.Controls.Add(nodeEditor);
-		groupBox2.Location = new Point(534, 101);
+		groupBox2.Location = new Point(607, 101);
 		groupBox2.Name = "groupBox2";
-		groupBox2.Size = new Size(217, 376);
+		groupBox2.Size = new Size(217, 384);
 		groupBox2.TabIndex = 20;
 		groupBox2.TabStop = false;
 		groupBox2.Text = "Node";
@@ -345,7 +378,7 @@ partial class MainWin
 		tabControl.Location = new Point(0, 24);
 		tabControl.Name = "tabControl";
 		tabControl.SelectedIndex = 0;
-		tabControl.Size = new Size(765, 510);
+		tabControl.Size = new Size(838, 534);
 		tabControl.TabIndex = 24;
 		// 
 		// editTab
@@ -356,7 +389,7 @@ partial class MainWin
 		editTab.Location = new Point(4, 24);
 		editTab.Name = "editTab";
 		editTab.Padding = new Padding(3);
-		editTab.Size = new Size(757, 482);
+		editTab.Size = new Size(830, 506);
 		editTab.TabIndex = 0;
 		editTab.Text = "Edit";
 		editTab.UseVisualStyleBackColor = true;
@@ -367,7 +400,7 @@ partial class MainWin
 		detailsTab.Location = new Point(4, 24);
 		detailsTab.Name = "detailsTab";
 		detailsTab.Padding = new Padding(3);
-		detailsTab.Size = new Size(757, 482);
+		detailsTab.Size = new Size(830, 506);
 		detailsTab.TabIndex = 1;
 		detailsTab.Text = "Details";
 		detailsTab.UseVisualStyleBackColor = true;
@@ -386,8 +419,8 @@ partial class MainWin
 		// splitContainer.Panel2
 		// 
 		splitContainer.Panel2.Controls.Add(detailsRichTextBox);
-		splitContainer.Size = new Size(751, 476);
-		splitContainer.SplitterDistance = 250;
+		splitContainer.Size = new Size(824, 500);
+		splitContainer.SplitterDistance = 274;
 		splitContainer.TabIndex = 1;
 		// 
 		// detailsTree
@@ -397,7 +430,7 @@ partial class MainWin
 		detailsTree.Location = new Point(0, 0);
 		detailsTree.Name = "detailsTree";
 		detailsTree.ShowGroups = false;
-		detailsTree.Size = new Size(246, 472);
+		detailsTree.Size = new Size(270, 496);
 		detailsTree.TabIndex = 0;
 		detailsTree.View = View.Details;
 		detailsTree.VirtualMode = true;
@@ -411,7 +444,7 @@ partial class MainWin
 		detailsRichTextBox.Location = new Point(0, 0);
 		detailsRichTextBox.Name = "detailsRichTextBox";
 		detailsRichTextBox.ReadOnly = true;
-		detailsRichTextBox.Size = new Size(493, 472);
+		detailsRichTextBox.Size = new Size(542, 496);
 		detailsRichTextBox.TabIndex = 0;
 		detailsRichTextBox.Text = "";
 		// 
@@ -419,16 +452,41 @@ partial class MainWin
 		// 
 		performanceTab.Location = new Point(4, 24);
 		performanceTab.Name = "performanceTab";
-		performanceTab.Size = new Size(757, 482);
+		performanceTab.Size = new Size(830, 506);
 		performanceTab.TabIndex = 2;
 		performanceTab.Text = "Performance";
 		performanceTab.UseVisualStyleBackColor = true;
+		// 
+		// renderingRendererItem
+		// 
+		renderingRendererItem.DropDownItems.AddRange(new ToolStripItem[] { renderingRendererGDIPlusItem, renderingRendererDirect2DItem, renderingRendererDirect3DInDirect2DItem });
+		renderingRendererItem.Name = "renderingRendererItem";
+		renderingRendererItem.Size = new Size(180, 22);
+		renderingRendererItem.Text = "&Renderer...";
+		// 
+		// renderingRendererGDIPlusItem
+		// 
+		renderingRendererGDIPlusItem.Name = "renderingRendererGDIPlusItem";
+		renderingRendererGDIPlusItem.Size = new Size(180, 22);
+		renderingRendererGDIPlusItem.Text = "GDIPlus";
+		// 
+		// renderingRendererDirect2DItem
+		// 
+		renderingRendererDirect2DItem.Name = "renderingRendererDirect2DItem";
+		renderingRendererDirect2DItem.Size = new Size(180, 22);
+		renderingRendererDirect2DItem.Text = "Direct2D";
+		// 
+		// renderingRendererDirect3DInDirect2DItem
+		// 
+		renderingRendererDirect3DInDirect2DItem.Name = "renderingRendererDirect3DInDirect2DItem";
+		renderingRendererDirect3DInDirect2DItem.Size = new Size(180, 22);
+		renderingRendererDirect3DInDirect2DItem.Text = "Direct3DInDirect2D";
 		// 
 		// MainWin
 		// 
 		AutoScaleDimensions = new SizeF(7F, 15F);
 		AutoScaleMode = AutoScaleMode.Font;
-		ClientSize = new Size(765, 575);
+		ClientSize = new Size(838, 599);
 		Controls.Add(tabControl);
 		Controls.Add(statusStrip);
 		Controls.Add(menuStrip);
@@ -471,12 +529,12 @@ partial class MainWin
 	private MenuStrip menuStrip;
 	private ToolStripMenuItem fileToolStripMenuItem;
 	private ToolStripSeparator toolStripSeparator1;
-	public ToolStripMenuItem openToolStripMenuItem;
-	public ToolStripMenuItem saveToolStripMenuItem;
-	public ToolStripMenuItem saveAsToolStripMenuItem;
-	public ToolStripMenuItem quitToolStripMenuItem;
+	public ToolStripMenuItem fileOpenItem;
+	public ToolStripMenuItem fileSaveItem;
+	public ToolStripMenuItem fileSaveAsItem;
+	public ToolStripMenuItem fileExitItem;
 	public NumericUpDown winDimsXNumeric;
-	public ToolStripMenuItem newToolStripMenuItem;
+	public ToolStripMenuItem fileNewItem;
 	public StatusStrip statusStrip;
 	private GroupBox groupBox1;
 	private Label label2;
@@ -499,4 +557,12 @@ partial class MainWin
 	public ToolStripDropDownButton showWinStatusBtn;
 	public RichTextBox detailsRichTextBox;
 	private TabPage performanceTab;
+	private ToolStripMenuItem renderingToolStripMenuItem;
+	public ToolStripMenuItem renderingEnabledItem;
+	public ToolStripMenuItem renderingRedrawItem;
+	public ToolStripMenuItem renderingWindowSizeItem;
+	private ToolStripMenuItem renderingRendererItem;
+	public ToolStripMenuItem renderingRendererGDIPlusItem;
+	public ToolStripMenuItem renderingRendererDirect2DItem;
+	public ToolStripMenuItem renderingRendererDirect3DInDirect2DItem;
 }

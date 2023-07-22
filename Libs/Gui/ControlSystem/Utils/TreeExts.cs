@@ -1,19 +1,34 @@
-﻿namespace ControlSystem.Utils;
+﻿using PowBasics.CollectionsExt;
+
+namespace ControlSystem.Utils;
 
 static class TreeExts
 {
+	// - removes all nodes matching predicate (and all their descendents)
+	// - flatten and return all the remaining nodes
+	// - the predicate does not apply to the root - the root is always returned
 	public static T[] GetNodesUntil<T>(this TNod<T> root, Func<T, bool> predicate)
 	{
 		var list = new List<T>();
 		void Rec(TNod<T> nod)
 		{
-			if (predicate(nod.V)) return;
+			if (nod != root && predicate(nod.V)) return;
 			list.Add(nod.V);
 			foreach (var kid in nod.Children)
 				Rec(kid);
 		}
 		Rec(root);
 		return list.ToArray();
+	}
+
+
+	public static TNod<T> FilterAfterRoot<T>(this TNod<T> root, Func<T, bool> predicate)
+	{
+		TNod<T> Rec(TNod<T> n) => Nod.Make(
+			n.V,
+			n.Children.WhereNot(e => predicate(e.V))
+		);
+		return Rec(root);
 	}
 
 

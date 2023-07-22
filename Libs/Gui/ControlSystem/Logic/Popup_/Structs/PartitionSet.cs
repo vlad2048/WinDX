@@ -1,9 +1,13 @@
-﻿using ControlSystem.Structs;
+﻿using System.Reactive;
+using ControlSystem.Structs;
 using ControlSystem.Utils;
 using LayoutSystem.Flex.Structs;
 using PowBasics.CollectionsExt;
 using PowBasics.Geom;
 using System.Windows.Forms;
+using PowBasics.ColorCode.Utils;
+using PowMaybe;
+using PowMaybeErr;
 using UserEvents;
 using UserEvents.Structs;
 
@@ -74,42 +78,61 @@ static class PartitionExt
 
 	public static PartitionSet VerifyInvariants(this PartitionSet set, int step)
 	{
-		VerifyPartition(
-			set.Root.GetAllNodeStates(),
-			set.Partitions.SelectMany(e => e.NodeStates).ToArray()
-		);
-		VerifyPartition(
-			set.Root.GetAllCtrls(),
-			set.Partitions.SelectMany(e => e.Ctrls).ToArray()
-		);
-		VerifyAreTheSameNotOrdered(
-			set.Root.GetAllNodeStates(),
-			set.RMap.Keys.ToArray()
-		);
+		var ok =
+			from _1 in VerifyPartition(
+				set.Root.GetAllNodeStates(),
+				set.Partitions.SelectMany(e => e.NodeStates).ToArray()
+			)
+			from _2 in VerifyPartition(
+				set.Root.GetAllCtrls(),
+				set.Partitions.SelectMany(e => e.Ctrls).ToArray()
+			)
+			from _3 in VerifyAreTheSameNotOrdered(
+				set.Root.GetAllNodeStates(),
+				set.RMap.Keys.ToArray()
+			)
+			select _3;
+
+		if (ok.IsNone(out _, out var err))
+		{
+			var txt = set.PrettyPrint();
+			txt.PrintToConsole();
+			//txt.RenderToHtml(@"C:\tmp\fmt\set.html", typeof(PartitionSetPrettyPrinter.C));
+			throw new ArgumentException(err);
+		}
+
 		return set;
 	}
 
-	private static void VerifyPartition<T>(T[] allItems, T[] subItems)
+
+	private static MaybeErr<Unit> VerifyPartition<T>(T[] allItems, T[] subItems)
 	{
 		var t = typeof(T).Name;
+
+		var allItemsUniq = allItems.Distinct().ToArray();
+		if (allItemsUniq.Length != allItems.Length) return MayErr.None<Unit>($"Invariant broken. {t} allItems are not distinct");
+
 		var subItemsUniq = subItems.Distinct().ToArray();
-		if (subItemsUniq.Length != subItems.Length) throw new ArgumentException($"Invariant broken. {t} do not form a partition (there is overlap)");
+		if (subItemsUniq.Length != subItems.Length) return MayErr.None<Unit>($"Invariant broken. {t} subItems are not distinct (there is overlap)");
+
 		var subOnly = subItems.WhereToArray(e => !allItems.Contains(e));
 		var allOnly = allItems.WhereToArray(e => !subItems.Contains(e));
-		if (subOnly.Length > 0) throw new ArgumentException($"Invariant broken. {t} do not form a partition (the whole is smaller than the parts)");
-		if (allOnly.Length > 0) throw new ArgumentException($"Invariant broken. {t} do not form a partition (the whole is bigger than the parts)");
-		if (subItems.Length != allItems.Length) throw new ArgumentException($"Invariant broken. {t} do not form a partition (length do not match)");
+		if (subOnly.Length > 0) return MayErr.None<Unit>($"Invariant broken. {t} do not form a partition (the whole is smaller than the parts)");
+		if (allOnly.Length > 0) return MayErr.None<Unit>($"Invariant broken. {t} do not form a partition (the whole is bigger than the parts)");
+		if (subItems.Length != allItems.Length) return MayErr.None<Unit>($"Invariant broken. {t} do not form a partition (length do not match)");
+		return MayErr.Some(Unit.Default);
 	}
 
-	private static void VerifyAreTheSameNotOrdered<T>(T[] us, T[] vs)
+	private static MaybeErr<Unit> VerifyAreTheSameNotOrdered<T>(T[] us, T[] vs)
 	{
 		var t = typeof(T).Name;
-		if (!AreDistinct(us)) throw new ArgumentException($"{t} are not distinct (1)");
-		if (!AreDistinct(vs)) throw new ArgumentException($"{t} are not distinct (2)");
+		if (!AreDistinct(us)) return MayErr.None<Unit>($"{t} are not distinct (1)");
+		if (!AreDistinct(vs)) return MayErr.None<Unit>($"{t} are not distinct (2)");
 		var usOnly = us.WhereNotToArray(vs.Contains);
 		var vsOnly = vs.WhereNotToArray(us.Contains);
-		if (usOnly.Length > 0) throw new ArgumentException($"{t} more us than vs");
-		if (vsOnly.Length > 0) throw new ArgumentException($"{t} more vs than us");
+		if (usOnly.Length > 0) return MayErr.None<Unit>($"{t} more us than vs");
+		if (vsOnly.Length > 0) return MayErr.None<Unit>($"{t} more vs than us");
+		return MayErr.Some(Unit.Default);
 	}
 
 	private static bool AreDistinct<T>(T[] arr) => arr.Distinct().ToArray().Length == arr.Length;

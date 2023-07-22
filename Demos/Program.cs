@@ -25,6 +25,7 @@ class Program
 		return d;
 	}
 
+	[STAThread]
 	static void Main()
 	{
 		//VarDbg.BreakpointOnDispAlloc(21);
@@ -60,6 +61,7 @@ class Program
 				new DemoNfo("Text", Wrap(() => new TextDemo())),
 				new DemoNfo("Scroll", Wrap(() => new ScrollDemo())),
 				new DemoNfo("ScrollNested", Wrap(() => new ScrollNestedDemo())),
+				new DemoNfo("PopScroll", Wrap(() => new PopScrollDemo())),
 
 				new DemoNfo("WinEvents", Wrap(() => new WinEventsDemo())),
 				new DemoNfo("UserEvents", Wrap(() => new UserEventsDemo())),

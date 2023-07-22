@@ -6,7 +6,6 @@ using PowBasics.Geom;
 using PowBasics.StringsExt;
 using RenderLib.Structs;
 using PowRxVar;
-using WinAPI.User32;
 
 namespace Demos.Categories.Layout;
 
@@ -23,16 +22,16 @@ sealed class ScrollNestedDemo : Win
 	{
 		var nodeRoot = new NodeState("nodeRoot").D(D);
 		var nodeTop = new NodeState("nodeTop").D(D);
-		var nodeMiddle = new NodeState("nodeMiddle").D(D);
+		//var nodeMiddle = new NodeState("nodeMiddle").D(D);
 		var nodeBottom = new NodeState("nodeBottom").D(D);
 		var nodeScroll = new NodeState("nodeScroll").D(D);
-		var nodesLines = Enumerable.Range(0, TextLines.Length).SelectToArray((_, i) => new NodeState($"nodeLines[{i}]").D(D));
+		var nodesLines = Enumerable.Range(0, Math.Min(2, TextLines.Length)).SelectToArray((_, i) => new NodeState($"nodeLines[{i}]").D(D));
 
-		var nodeScroll2 = new NodeState("nodeScroll2").D(D);
+		/*var nodeScroll2 = new NodeState("nodeScroll2").D(D);
 		var nodesLines2 = Enumerable.Range(0, 1).SelectToArray((_, i) => new NodeState($"nodeLines2[{i}]").D(D));
 
 		var nodeScroll3 = new NodeState("nodeScroll3").D(D);
-		var nodesLines3 = Enumerable.Range(0, 20).SelectToArray((_, i) => new NodeState($"nodeLines3[{i}]").D(D));
+		var nodesLines3 = Enumerable.Range(0, 20).SelectToArray((_, i) => new NodeState($"nodeLines3[{i}]").D(D));*/
 
 		WhenRender.Subscribe(r =>
 		{
@@ -45,7 +44,7 @@ sealed class ScrollNestedDemo : Win
 					r.FillR(Consts.InterBrush);
 				}
 
-				using (r[nodeScroll].StratStack(Dir.Vert).Pop().ScrollXY()/*.Dim(200, 300)*/.Marg(20).M)
+				using (r[nodeScroll].StratStack(Dir.Vert).Pop().ScrollXY().Dim(200, 300).Marg(20).M)
 				{
 					r.FillR(Consts.ScrollBrush);
 					for (var i = 0; i < nodesLines.Length; i++)

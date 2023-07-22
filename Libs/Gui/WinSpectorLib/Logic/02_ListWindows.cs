@@ -1,15 +1,9 @@
-﻿using System.Reactive.Linq;
-using ControlSystem;
+﻿using ControlSystem;
 using PowMaybe;
 using PowRxVar;
 using PowWinForms.ListBoxSourceListViewing;
 using ControlSystem.Logic.Popup_.Structs;
-using ControlSystem.Structs;
-using PowTrees.Algorithms;
-using UserEvents;
 using WinFormsTooling.Utils.Exts;
-using ControlSystem.Utils;
-using UserEvents.Utils;
 using WinSpectorLib.Controls;
 using WinSpectorLib.Utils;
 

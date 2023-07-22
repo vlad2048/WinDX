@@ -9,6 +9,7 @@ using ControlSystem.WinSpectorLogic;
 using ControlSystem.WinSpectorLogic.Utils;
 using DynamicData;
 using LayoutSystem.Flex.Structs;
+using PowBasics.ColorCode.Utils;
 using PowBasics.Geom;
 using PowMaybe;
 using PowRxVar;
@@ -137,14 +138,21 @@ public class Win : Ctrl, IMainWin
 
 			using var d = new Disp();
 			var gfx = rendererSwitcher.Renderer.GetGfx(false).D(d);
-			var mainPartition = partitionSet.V.Ensure().MainPartition;
+			var set = partitionSet.V.Ensure();
+			var shouldLog = SpectorDrawState.ShouldLogRender(this);
+			if (shouldLog)
+			{
+				var txt = set.PrettyPrint();
+				txt.PrintToConsole();
+				//txt.RenderToHtml(@"C:\tmp\fmt\set.html", typeof(PartitionSetPrettyPrinter.C));
+			}
 			RenderUtils.RenderTree(
-				mainPartition,
+				set.MainPartition,
 				gfx,
 				Pt.Empty,
-				SpectorDrawState.ShouldLogRender(this)
+				shouldLog
 			);
-			SpectorWinRenderUtils.Render(SpectorDrawState, mainPartition, gfx, Pt.Empty);
+			SpectorWinRenderUtils.Render(SpectorDrawState, set.MainPartition, gfx, Pt.Empty);
 
 			foreach (var popupWin in Wins.ItemsArr.Skip(1))
 				popupWin.SysInvalidate();

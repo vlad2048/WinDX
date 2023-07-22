@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using FlexBuilder.Logic;
 using FlexBuilder.Structs;
 using LayoutSystem.Flex.Structs;
@@ -8,11 +10,16 @@ using PowMaybe;
 using PowRxVar;
 using PowWinForms;
 using PowWinForms.Utils;
+using WinFormsTooling.Shortcuts;
 
 namespace FlexBuilder;
 
 sealed partial class MainWin : Form
 {
+	private readonly ISubject<ShortcutMsg> whenShortcut = null!;
+	private IObservable<ShortcutMsg> WhenShortcut => whenShortcut.AsObservable();
+
+	
 	public MainWin(Maybe<StartupFile> startupFile)
 	{
 		InitializeComponent();
@@ -38,7 +45,7 @@ sealed partial class MainWin : Form
 
 			Setup.InitConsole(userPrefs).D(d);
 			Setup.LoadSaveLayoutDef(ui, layoutDef, userPrefs, startupFile).D(d);
-			Setup.DisplayLayout(ui, layoutDef, layout, userPrefs, selNode, hovNode, WinSzMutator(layoutDef)).D(d);
+			Setup.DisplayLayout(ui, layoutDef, layout, userPrefs, selNode, hovNode, WinSzMutator(layoutDef), WhenShortcut).D(d);
 
 			Setup.EditTreeInit(ui, layout);
 			Setup.DetailsTreeInit(ui, layout);
@@ -67,4 +74,16 @@ sealed partial class MainWin : Form
 		if (layoutDef.V.IsNone(out var def)) return;
 		layoutDef.V = May.Some(def with { WinSize = freeSz });
 	};
+
+
+
+	protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+	{
+		var m = new ShortcutMsg(keyData);
+		whenShortcut.OnNext(m);
+		return m.Handled switch {
+			true => true,
+			false => base.ProcessCmdKey(ref msg, keyData)
+		};
+	}
 }

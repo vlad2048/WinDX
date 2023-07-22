@@ -11,7 +11,7 @@ static class RxExt
 			sel.Select(ma => ma.IsSome(out var a) switch
 			{
 				true => fun(a),
-				false => Obs.Never<Maybe<U>>(),
+				false => Obs.Never<Maybe<U>>().Prepend(May.None<U>()),
 			})
 				.Switch()
 		).D(sel);

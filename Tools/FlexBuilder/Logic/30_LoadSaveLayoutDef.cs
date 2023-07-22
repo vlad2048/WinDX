@@ -89,8 +89,8 @@ static partial class Setup
 			.ObserveOnWinFormsUIThread()
 			.Subscribe(_ =>
 			{
-				ui.saveToolStripMenuItem.Enabled = layout.V.IsSome() && isModified.V;
-				ui.saveAsToolStripMenuItem.Enabled = layout.V.IsSome();
+				ui.fileSaveItem.Enabled = layout.V.IsSome() && isModified.V;
+				ui.fileSaveAsItem.Enabled = layout.V.IsSome();
 				var titleSuffix = (layout.V.IsSome(), openedFilename.V.IsSome(out var name), isModified.V) switch
 				{
 					(false, _, _) => string.Empty,
@@ -102,14 +102,14 @@ static partial class Setup
 				ui.Text = $"Flex Builder{titleSuffix}";
 			}).D(d);
 
-		ui.newToolStripMenuItem.Events().Click.Subscribe(_ =>
+		ui.fileNewItem.Events().Click.Subscribe(_ =>
 		{
 			layout.V = May.Some(LayoutDef.Default);
 			openedFilename.V = May.None<string>();
 			isModified.V = true;
 		}).D(d);
 
-		ui.openToolStripMenuItem.Events().Click.Subscribe(_ =>
+		ui.fileOpenItem.Events().Click.Subscribe(_ =>
 		{
 			var dlg = new OpenFileDialog
 			{
@@ -123,14 +123,14 @@ static partial class Setup
 			}
 		}).D(d);
 
-		ui.saveToolStripMenuItem.Events().Click.Where(_ => openedFilename.V.IsSome()).Subscribe(_ =>
+		ui.fileSaveItem.Events().Click.Where(_ => openedFilename.V.IsSome()).Subscribe(_ =>
 		{
 			SaveCurrent();
 		}).D(d);
 
 		Obs.Merge(
-			ui.saveToolStripMenuItem.Events().Click.Where(_ => openedFilename.V.IsNone()),
-			ui.saveAsToolStripMenuItem.Events().Click
+			ui.fileSaveItem.Events().Click.Where(_ => openedFilename.V.IsNone()),
+			ui.fileSaveAsItem.Events().Click
 		)
 			.Subscribe(_ =>
 			{
@@ -145,6 +145,8 @@ static partial class Setup
 					SaveAs(dlg.FileName);
 				}
 			}).D(d);
+
+		ui.fileExitItem.Events().Click.Subscribe(_ => ui.Close()).D(d);
 
 		return d;
 	}

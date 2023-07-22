@@ -19,10 +19,10 @@ namespace ControlSystem.Logic.Popup_;
 sealed class PopupWin : Ctrl, IWin
 {
 	private readonly SysWin sysWin;
-	private readonly IRwVar<R> layoutR;
 	private readonly IRwTracker<NodeZ> rwNodes;
 	private readonly IRwTracker<ICtrl> rwCtrls;
-	private Partition subPartition;
+	private Partition subPartition = null!;
+	private readonly IRwVar<R> layoutR = null!;
 
 	// IWinUserEventsSupport
 	// =====================
@@ -41,7 +41,7 @@ sealed class PopupWin : Ctrl, IWin
 
 
 	public PopupWin(
-		Partition subPartition,
+		Partition subPartition_,
 		IWin mainWin,
 		nint winParentHandle,
 		SpectorWinDrawState spectorDrawState
@@ -51,7 +51,7 @@ sealed class PopupWin : Ctrl, IWin
 		rwCtrls = Tracker.Make<ICtrl>().D(D);
 
 		layoutR = Var.Make(R.Empty).D(D);
-		(this.subPartition, layoutR.V) = AssignLayout(subPartition);
+		SetLayout(subPartition_);
 		sysWin = PopupWinUtils.MakeWin(layoutR.V, mainWin, winParentHandle).D(D);
 		this.D(sysWin.D);
 
@@ -84,14 +84,11 @@ sealed class PopupWin : Ctrl, IWin
 		}).D(D);
 	}
 
-	public void SetLayout(Partition subPartition_) => (subPartition, layoutR.V) = AssignLayout(subPartition_);
-
-	private (Partition, R) AssignLayout(Partition subPartition_)
+	public void SetLayout(Partition subPartition_)
 	{
 		subPartition = subPartition_;
-		var r = subPartition.Set.RMap[subPartition.NodeStateId ?? throw new ArgumentException("Should not be null for a subpartition")];
+		layoutR.V = subPartition.Set.RMap[subPartition.NodeStateId ?? throw new ArgumentException("Should not be null for a subpartition")];
 		(rwNodes, rwCtrls).UpdateFromPartition(subPartition);
-		return (subPartition, r);
 	}
 }
 

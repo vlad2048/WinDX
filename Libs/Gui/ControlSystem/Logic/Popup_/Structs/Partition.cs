@@ -80,7 +80,6 @@ n1, n2, n3, n4, n5	are NonPopNodes
       - popup partition -> the closest Ctrl above the RootNode
   - CtrlsToRender = { RenderCtrl } ∪ Ctrls   (for the main partition, RenderCtrl ∊ Ctrls)
 
-
 */
 sealed class Partition : IEquatable<Partition>
 {
@@ -94,10 +93,16 @@ sealed class Partition : IEquatable<Partition>
 	// **********************
 	// * Derived Properties *
 	// **********************
+	public Pt Offset => NodeStateId switch
+	{
+		null => Pt.Empty,
+		not null => Set.RMap[NodeStateId].Pos
+	};
+
 	// Used for:
 	//   - dispatching events
 	//   - call invalidate when the node requires it
-	public NodeState[] NodeStates => RootNode.GetAllNodeStatesUntil(e => e != RootNode.V && e.IsPop());
+	public NodeState[] NodeStates => RootNode.GetAllNodeStatesUntil(e => e.IsPop());
 	public NodeZ[] NodeStatesZ => NodeStates.Select((e, i) => (e, i)).SelectToArray(t => new NodeZ(t.e, new ZOrder(ZOrderWin, false, t.i)));
 
 	// Used for:
@@ -114,7 +119,7 @@ sealed class Partition : IEquatable<Partition>
 		not null => Set.RMap[RootNode.GetNodeState()]
 	};
 
-	private MixNode RootNode => NodeStateId switch
+	public MixNode RootNode => NodeStateId switch
 	{
 		null => Set.Root,
 		not null => Set.Lookups.NodeState2Nod[NodeStateId]

@@ -96,9 +96,10 @@ static class RenderUtils
 		}).D(d);
 
 
-		r.WhenDraw.Subscribe(str =>
+		r.WhenDraw.Subscribe(t =>
 		{
-			lgr.Draw(str);
+			var (str, col) = t;
+			lgr.Draw(str, col);
 		}).D(d);
 
 

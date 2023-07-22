@@ -121,6 +121,8 @@ static class ScrollLogic
 		var enabled = flex.Flags.Scroll;
 		var view = set.RMap[state].Size;
 		var cont = nod
+			// remove scrollbars to avoid messing up the cont calculation
+			.FilterAfterRoot(e => e.IsCtrl() && e.GetCtrl() is ScrollBarCtrl or ScrollBarCornerCtrl)
 			.GetFirstChildrenWhere(e => e.IsNodeState())
 			.Select(e => set.RMap[((StFlexNode)e.V).State] + ((StFlexNode)e.V).Flex.Marg)
 			.Union()
