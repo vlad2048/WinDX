@@ -3,12 +3,11 @@
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<RootNamespace>UserEvents</RootNamespace>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="DynamicData" Version="7.14.2" />
-		<PackageReference Include="PowBasics" Version="0.0.34" />
+		<PackageReference Include="PowBasics" Version="0.0.35" />
 		<PackageReference Include="PowRxVar.Maybe" Version="0.0.47" />
 	</ItemGroup>
 

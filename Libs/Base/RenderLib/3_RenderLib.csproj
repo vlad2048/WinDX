@@ -4,12 +4,11 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
 		<RootNamespace>RenderLib</RootNamespace>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowBasics" Version="0.0.34" />
-		<PackageReference Include="PowBasics.Geom" Version="0.0.34" />
+		<PackageReference Include="PowBasics" Version="0.0.35" />
+		<PackageReference Include="PowBasics.Geom" Version="0.0.35" />
 		<PackageReference Include="PowRxVar" Version="0.0.47" />
 	</ItemGroup>
 

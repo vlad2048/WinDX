@@ -4,11 +4,10 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<RootNamespace>WinAPI</RootNamespace>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowBasics.Geom" Version="0.0.34" />
+		<PackageReference Include="PowBasics.Geom" Version="0.0.35" />
 		<PackageReference Include="PowRxVar" Version="0.0.47" />
 	</ItemGroup>
 

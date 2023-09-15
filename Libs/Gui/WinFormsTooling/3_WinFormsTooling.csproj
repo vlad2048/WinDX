@@ -4,11 +4,10 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<UseWindowsForms>true</UseWindowsForms>
 		<RootNamespace>WinFormsTooling</RootNamespace>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowWinForms" Version="0.0.65" />
+		<PackageReference Include="PowWinForms" Version="0.0.66" />
 	</ItemGroup>
 
 	<ItemGroup>
