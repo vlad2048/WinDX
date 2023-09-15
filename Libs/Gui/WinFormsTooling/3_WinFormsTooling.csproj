@@ -7,11 +7,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowWinForms" Version="0.0.59" />
+		<PackageReference Include="PowWinForms" Version="0.0.65" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Shortcuts\" />
+		<Folder Include="Shortcuts\" />
 	</ItemGroup>
 
 </Project>

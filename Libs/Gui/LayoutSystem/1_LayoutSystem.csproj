@@ -6,8 +6,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PowMaybeErr" Version="0.0.11" />
-		<PackageReference Include="PowTrees" Version="0.0.42" />
+		<PackageReference Include="PowMaybeErr" Version="0.0.12" />
+		<PackageReference Include="PowTrees" Version="0.0.46" />
 	</ItemGroup>
 
 	<ItemGroup>
