@@ -4,6 +4,7 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<RootNamespace>SysWinLib</RootNamespace>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<ItemGroup>

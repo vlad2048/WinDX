@@ -15,9 +15,12 @@
 		<PackageProjectUrl>https://github.com/vlad2048/WinDX</PackageProjectUrl>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<None Include="$(SolutionDir)\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
 	<PropertyGroup>
 		<NoWarn>CS1591</NoWarn>
-		<NoWarn>CS8524</NoWarn>
 	</PropertyGroup>
 
 </Project>
